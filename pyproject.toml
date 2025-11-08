@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "fpa-automation-monorepo"
+version = "0.1.0"
+description = "FP&A Automation Assistant - Monorepo with external dependencies"
+authors = ["FP&A Automation Team"]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+# External dependencies from cloned repos
+# Option 1: Install from PyPI (recommended for stability)
+gspread = "^6.1.2"
+# python-pptx = "^1.0.2"  # If we don't use slidio
+# py-money = "^0.5.0"  # Check if available on PyPI
+
+# Option 2: Install from local paths (for development/customization)
+# gspread = { path = "external/gspread", develop = true }
+# slidio = { path = "external/slidio", develop = true }
+# pyfpa = { path = "external/pyfpa", develop = true }
+# py-money = { path = "external/py-money", develop = true }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+black = "^23.12.1"
+mypy = "^1.7.1"
+ruff = "^0.1.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --cov=packages --cov-report=term-missing"

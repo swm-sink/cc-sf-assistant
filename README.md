@@ -1,8 +1,9 @@
-# FP&A Automation Assistant
+# FP&A Automation Assistant - Monorepo
 
-**Version:** 1.1-DRAFT
-**Status:** 🚧 Development Phase
-**Approach:** Spec-Driven Development with Agentic Workflows
+**Version:** 0.1.0-MONOREPO
+**Status:** 🏗️ Monorepo Setup Phase
+**Approach:** Spec-Driven Development with Proven External Libraries
+**Architecture:** Separation of Concerns with Cloned Dependencies
 
 ---
 
@@ -14,7 +15,78 @@ Intelligent automation assistant for Financial Planning & Analysis (FP&A) profes
 
 ---
 
-## Architecture (Anthropic Best Practices)
+## Monorepo Architecture
+
+This project uses a **monorepo structure** with clear separation between:
+- Our custom business logic (`packages/`)
+- External proven libraries (`external/`)
+- Shared configuration (`config/`, `.claude/`)
+
+### Directory Structure
+
+```
+cc-sf-assistant/
+├── spec.md                          # Business requirements (WHAT)
+├── plan.md                          # Technical planning (HOW)
+├── CLAUDE.md                        # AI behavioral rules
+├── MONOREPO_ARCHITECTURE.md        # Architecture details
+├── EXTERNAL_DEPENDENCIES.md         # Cloned repo documentation
+├── pyproject.toml                   # Root Poetry config
+│
+├── packages/                        # Our custom code
+│   ├── fpa-core/                   # Pure business logic (no I/O)
+│   ├── fpa-integrations/           # Google/Excel adapters
+│   ├── fpa-workflows/              # Human-in-loop orchestration
+│   └── fpa-cli/                    # Command-line interface
+│
+├── external/                        # Cloned GitHub repos
+│   ├── humanlayer/                 # Human-in-loop patterns
+│   ├── mcp-gdrive/                 # Google Drive MCP server
+│   ├── gspread/                    # Google Sheets Python API
+│   ├── slidio/                     # Google Slides templates
+│   ├── pyfpa/                      # FP&A domain functions
+│   └── py-money/                   # Decimal precision money
+│
+├── .claude/                        # Claude Code configuration
+│   ├── skills/financial-validator/ # Auto-invoked validation
+│   ├── commands/variance-analysis.md
+│   ├── agents/code-reviewer.md
+│   └── hooks/stop.sh
+│
+├── config/                         # Shared configuration
+├── tests/                          # Monorepo-wide tests
+└── docs/                           # Documentation
+```
+
+**See [MONOREPO_ARCHITECTURE.md](MONOREPO_ARCHITECTURE.md) for complete architecture details.**
+
+---
+
+## External Dependencies (Cloned)
+
+We've cloned 6 proven open-source libraries to leverage for this project:
+
+| Library | Purpose | Stars | License |
+|---------|---------|-------|---------|
+| **humanlayer** | Human-in-loop workflows, Claude Code patterns | 6,686+ ⭐ | Apache-2.0 |
+| **mcp-gdrive** | Google Sheets/Drive via MCP protocol | N/A | MIT |
+| **gspread** | Google Sheets Python API (most popular) | High | MIT |
+| **slidio** | Google Slides template engine | N/A | TBD |
+| **pyfpa** | FP&A-specific Python functions | N/A | TBD |
+| **py-money** | Decimal precision money handling | N/A | TBD |
+
+**See [EXTERNAL_DEPENDENCIES.md](EXTERNAL_DEPENDENCIES.md) for detailed documentation of each library.**
+
+### Why Clone Instead of Install?
+1. **Audit security** - Review code before using
+2. **Pin exact versions** - No surprise breaking changes
+3. **Customize if needed** - Can patch or extend
+4. **Learn patterns** - Study implementation approaches
+5. **Offline development** - No PyPI dependency
+
+---
+
+## Claude Code Architecture
 
 This project follows Anthropic's recommended separation of concerns:
 

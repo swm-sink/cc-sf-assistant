@@ -1,0 +1,18 @@
+[submodule "external/humanlayer"]
+	path = external/humanlayer
+	url = https://github.com/humanlayer/humanlayer.git
+[submodule "external/mcp-gdrive"]
+	path = external/mcp-gdrive
+	url = https://github.com/isaacphi/mcp-gdrive.git
+[submodule "external/gspread"]
+	path = external/gspread
+	url = https://github.com/burnash/gspread.git
+[submodule "external/slidio"]
+	path = external/slidio
+	url = https://github.com/mickaelandrieu/slidio.git
+[submodule "external/pyfpa"]
+	path = external/pyfpa
+	url = https://github.com/warrenpilot/pyfpa.git
+[submodule "external/py-money"]
+	path = external/py-money
+	url = https://github.com/vimeo/py-money.git
