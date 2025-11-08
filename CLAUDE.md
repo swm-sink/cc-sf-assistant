@@ -68,6 +68,25 @@ Step 4 Response: "No. Financial calculations require decimal precision. Floats i
 
 ---
 
+## Pre-Response Verification Checklist
+
+Before EVERY response containing claims/code/decisions, verify against quality gates:
+
+| Check | Pass Criteria | Fail Action |
+|-------|---------------|-------------|
+| **DRY** | No spec.md duplication | Reference instead |
+| **Source** | Has citation or [TO BE MEASURED] | Add marker |
+| **Precision** | Decimal for currency | Reject float |
+| **Audit** | Timestamp/source/user logged | Add logging |
+| **Critical** | ≥1 assumption challenged | Re-analyze |
+| **Concise** | ≤3 sentences (unless detail requested) | Trim response |
+
+**Auto-reject response if ANY check fails.**
+
+[Research: Quality gates block substandard code per Anthropic engineering best practices]
+
+---
+
 ## Response Format Requirements
 
 **Conciseness Levels:**
@@ -124,6 +143,12 @@ Step 4 Response: "No. Financial calculations require decimal precision. Floats i
 - Precision verification: Test decimal accuracy to 2+ decimal places
 - Integration tests with realistic data volumes (reference spec.md for typical dataset sizes)
 - Regression tests: Ensure calculation changes don't break existing accuracy
+
+**Edge Case Reference:**
+See `.claude/skills/financial-validator/` for comprehensive test suite including:
+- Float precision errors (0.1+0.2≠0.3)
+- Zero division, negative values, NULL/missing data
+- Concurrent transactions, multi-currency scenarios
 
 ---
 
@@ -195,8 +220,16 @@ Step 4 Response: "No. Financial calculations require decimal precision. Floats i
 **Key Files:**
 - `spec.md` - Business requirements (WHAT) - Single source of truth
 - `CLAUDE.md` - Behavioral rules (HOW) - This file
+- `.claude/skills/` - Auto-invoked capabilities (financial-validator, variance-calculator)
+- `.claude/commands/` - Manual slash commands (/variance-analysis, /consolidate-data)
+- `.claude/agents/` - Specialized subagents (code-reviewer, data-analyst)
 - `/src/core/` - Business logic implementations
 - `/tests/` - Verification test suite
+
+**Hierarchical Configuration:**
+- Root: `/CLAUDE.md` (general project behavior - this file)
+- Future: `/src/*/CLAUDE.md` (component-specific overrides)
+- Claude prioritizes most nested config when relevant
 
 **Success Metrics:**
 - Zero hallucinated claims (all marked [TO BE MEASURED] or cited)
