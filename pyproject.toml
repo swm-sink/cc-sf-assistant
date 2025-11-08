@@ -9,17 +9,32 @@ packages = []
 [tool.poetry.dependencies]
 python = "^3.11"
 
-# External dependencies from cloned repos
-# Option 1: Install from PyPI (recommended for stability)
-gspread = "^6.1.2"
-# python-pptx = "^1.0.2"  # If we don't use slidio
-# py-money = "^0.5.0"  # Check if available on PyPI
+# Workspace packages (our custom code)
+fpa-core = { path = "packages/fpa-core", develop = true }
+fpa-integrations = { path = "packages/fpa-integrations", develop = true }
+fpa-workflows = { path = "packages/fpa-workflows", develop = true }
+fpa-cli = { path = "packages/fpa-cli", develop = true }
 
-# Option 2: Install from local paths (for development/customization)
-# gspread = { path = "external/gspread", develop = true }
+# Common dependencies
+pandas = "^2.1.0"
+gspread = "^6.1.2"
+gspread-dataframe = "^4.0.0"
+openpyxl = "^3.1.2"
+xlsxwriter = "^3.1.9"
+click = "^8.1.7"
+rich = "^13.7.0"
+python-dotenv = "^1.0.0"
+loguru = "^0.7.2"
+tqdm = "^4.66.0"
+google-auth = "^2.23.0"
+google-auth-oauthlib = "^1.1.0"
+
+# External dependencies from cloned repos (future use)
+# Option: Install from local paths when needed
 # slidio = { path = "external/slidio", develop = true }
 # pyfpa = { path = "external/pyfpa", develop = true }
 # py-money = { path = "external/py-money", develop = true }
+# humanlayer = { path = "external/humanlayer", develop = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"

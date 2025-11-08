@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "fpa-workflows"
+version = "0.1.0"
+description = "Human-in-loop workflows - orchestration with approval gates"
+authors = ["FP&A Automation Team"]
+readme = "README.md"
+packages = [{include = "fpa_workflows", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+# Internal dependencies
+fpa-core = { path = "../fpa-core", develop = true }
+fpa-integrations = { path = "../fpa-integrations", develop = true }
+
+# Human-in-loop patterns (from external/)
+# humanlayer = { path = "../../external/humanlayer", develop = true }
+
+# Workflow orchestration
+# prefect = "^2.14.0"  # Optional: For complex workflows
+
+# Data processing
+pandas = "^2.1.0"
+
+# Logging and monitoring
+loguru = "^0.7.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+mypy = "^1.7.1"
+black = "^23.12.1"
+ruff = "^0.1.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --cov=src/fpa_workflows --cov-report=term-missing"
