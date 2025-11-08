@@ -1,0 +1,1047 @@
+# FP&A Automation Assistant - Technical Planning Document
+
+**Version:** 1.0-DRAFT
+**Last Updated:** 2025-11-08
+**Status:** 🚧 IN PLANNING
+**References:** spec.md (business requirements), CLAUDE.md (behavioral rules)
+
+**Key Principle:** spec.md defines WHAT to build. This document defines HOW to build it.
+
+---
+
+## Table of Contents
+
+1. [Technology Stack](#technology-stack)
+2. [Architecture Overview](#architecture-overview)
+3. [Implementation Strategy](#implementation-strategy)
+4. [Directory Structure](#directory-structure)
+5. [Code Quality Standards](#code-quality-standards)
+6. [Testing Strategy](#testing-strategy)
+7. [Deployment Approach](#deployment-approach)
+8. [Performance Considerations](#performance-considerations)
+9. [Security & Compliance](#security--compliance)
+10. [Development Workflow](#development-workflow)
+
+---
+
+## Technology Stack
+
+### Core Languages & Runtime
+
+**Python 3.11+**
+- Rationale: Industry standard for data processing, extensive library ecosystem
+- Decimal type built-in for financial precision
+- Type hints support for code quality
+- Async/await for potential concurrent operations
+
+### Required Dependencies
+
+```python
+# Core Data Processing
+pandas==2.2.0                    # DataFrame operations [VERIFIED: Latest stable]
+numpy==1.26.3                    # Numerical computations (NOT for currency)
+openpyxl==3.1.2                  # Excel read/write (.xlsx)
+xlrd==2.0.1                      # Legacy Excel (.xls) if needed
+
+# Google Workspace Integration
+gspread==6.1.2                   # Google Sheets API
+google-auth==2.35.0              # Authentication
+google-api-python-client==2.150.0  # Slides/Drive API
+
+# Presentation & Reporting
+python-pptx==1.0.2               # PowerPoint generation (if needed)
+matplotlib==3.9.2                # Static charts
+plotly==5.24.1                   # Interactive dashboards (optional)
+
+# Utilities
+python-dotenv==1.0.1             # Environment configuration
+pyyaml==6.0.1                    # Config file parsing
+typing-extensions==4.9.0         # Extended type hints
+
+# Development & Testing
+pytest==7.4.3                    # Testing framework
+pytest-cov==4.1.0                # Coverage reporting
+black==23.12.1                   # Code formatting
+mypy==1.7.1                      # Static type checking
+ruff==0.1.9                      # Fast linting
+```
+
+### Version Management
+
+**Tool:** `pyenv` for Python version management
+**Approach:** Pin all dependencies to exact versions in `requirements.txt`
+**Updates:** Review quarterly for security patches
+
+---
+
+## Architecture Overview
+
+### Separation of Concerns
+
+Following Anthropic best practices for Claude Code projects:
+
+```
+┌────────────────────────────────────────────────────────┐
+│                    Configuration Layer                  │
+│  - spec.md (WHAT to build)                             │
+│  - plan.md (HOW to build - this document)             │
+│  - CLAUDE.md (behavioral rules)                         │
+└────────────────────────────────────────────────────────┘
+                          │
+        ┌─────────────────┼─────────────────┐
+        ▼                 ▼                 ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│   Skills     │ │  Commands    │ │   Agents     │
+│ (Auto)       │ │  (Manual)    │ │ (Sub)        │
+└──────────────┘ └──────────────┘ └──────────────┘
+        │                 │                 │
+        └─────────────────┼─────────────────┘
+                          ▼
+┌────────────────────────────────────────────────────────┐
+│                 Implementation Layer                    │
+│  /src                                                   │
+│  ├── core/           (business logic)                  │
+│  ├── integrations/   (external APIs)                   │
+│  ├── reporting/      (output generation)               │
+│  └── utils/          (helpers)                         │
+└────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌────────────────────────────────────────────────────────┐
+│                    Data Layer                          │
+│  /data                                                  │
+│  ├── input/          (source files - git-ignored)      │
+│  ├── output/         (generated reports - git-ignored) │
+│  └── templates/      (report templates - versioned)    │
+└────────────────────────────────────────────────────────┘
+```
+
+### Key Architectural Patterns
+
+**1. Progressive Disclosure (Skills)**
+- Metadata loaded at startup
+- Full content loaded on-demand
+- Reduces token usage, improves performance
+
+**2. Human-in-Loop (Commands)**
+- Checkpoints at decision points
+- Prevents automated errors
+- Maintains user control
+
+**3. Context Isolation (Agents)**
+- Independent verification
+- Unbiased code review
+- Separate tool access
+
+**4. Quality Gates (Hooks)**
+- Automated enforcement
+- No reliance on model memory
+- Fail-fast on critical issues
+
+---
+
+## Implementation Strategy
+
+### Epic 1: Monthly Close Automation
+
+#### Story 1.1: Multi-Department Data Consolidation
+
+**Technical Approach:**
+
+1. **File Discovery**
+```python
+# src/core/file_discovery.py
+from pathlib import Path
+from typing import List, Dict
+
+def discover_excel_files(folder_path: str) -> List[Path]:
+    """
+    Discover all Excel files in folder.
+
+    Returns:
+        List of Path objects for .xlsx and .xls files
+    """
+    path = Path(folder_path)
+    excel_files = list(path.glob("*.xlsx")) + list(path.glob("*.xls"))
+    return sorted(excel_files)  # Deterministic order
+```
+
+2. **Structure Validation**
+```python
+# Uses financial-validator skill
+from decimal import Decimal
+import pandas as pd
+
+def validate_department_file(
+    file_path: Path,
+    required_columns: List[str]
+) -> Tuple[bool, List[str]]:
+    """
+    Validate department file structure.
+
+    Returns:
+        (is_valid, list_of_issues)
+    """
+    # Load file
+    df = pd.read_excel(file_path, engine='openpyxl')
+
+    issues = []
+
+    # Check required columns
+    missing = set(required_columns) - set(df.columns)
+    if missing:
+        issues.append(f"Missing columns: {missing}")
+
+    # Check data types
+    # Validate amounts are numeric
+    # Flag NULL values
+
+    return len(issues) == 0, issues
+```
+
+3. **Account Mapping**
+```python
+# config/account_mapping.yaml loaded via PyYAML
+# Maps department-specific codes to corporate chart of accounts
+
+def map_account_codes(
+    department_df: pd.DataFrame,
+    mapping_config: Dict[str, str]
+) -> pd.DataFrame:
+    """
+    Map department account codes to corporate codes.
+
+    Uses account_mapping.yaml configuration.
+    """
+    df = department_df.copy()
+    df['corporate_account'] = df['account_code'].map(mapping_config)
+
+    # Flag unmapped accounts
+    unmapped = df[df['corporate_account'].isna()]
+    if not unmapped.empty:
+        # Log warning, create reconciliation report
+        pass
+
+    return df
+```
+
+4. **Consolidation**
+```python
+def consolidate_departments(
+    files: List[Path],
+    mapping_config: Dict
+) -> Tuple[pd.DataFrame, Dict]:
+    """
+    Consolidate all department files.
+
+    Returns:
+        (consolidated_df, metadata)
+    """
+    all_data = []
+    metadata = {
+        'source_files': [],
+        'records_per_file': {},
+        'unmatched_accounts': [],
+        'timestamp': datetime.now(UTC).isoformat()
+    }
+
+    for file in files:
+        df = load_and_validate(file)
+        df = map_account_codes(df, mapping_config)
+        df['source_file'] = str(file)
+
+        all_data.append(df)
+        metadata['source_files'].append(str(file))
+        metadata['records_per_file'][str(file)] = len(df)
+
+    consolidated = pd.concat(all_data, ignore_index=True)
+
+    return consolidated, metadata
+```
+
+**Testing Approach:**
+- Unit tests for each function with edge cases
+- Integration test with sample department files
+- Reconciliation report validation
+
+---
+
+#### Story 2.1: Budget vs. Actual Variance Calculation
+
+**Technical Approach:**
+
+```python
+# src/core/variance_calculator.py
+from decimal import Decimal, ROUND_HALF_UP
+from typing import Tuple, Optional, Literal
+
+def calculate_variance(
+    actual: Decimal,
+    budget: Decimal,
+    account_type: Literal['revenue', 'expense', 'asset', 'liability']
+) -> Tuple[Decimal, Optional[Decimal], bool, str]:
+    """
+    Calculate financial variance with edge case handling.
+
+    Args:
+        actual: Actual amount (Decimal required)
+        budget: Budget amount (Decimal required)
+        account_type: Type for favorability logic
+
+    Returns:
+        (absolute_variance, percentage_variance, is_favorable, status)
+
+    Raises:
+        TypeError: If actual or budget are not Decimal
+        ValueError: If account_type invalid
+    """
+    # Type validation (enforced by financial-validator skill)
+    if not isinstance(actual, Decimal):
+        raise TypeError(f"actual must be Decimal, got {type(actual)}")
+    if not isinstance(budget, Decimal):
+        raise TypeError(f"budget must be Decimal, got {type(budget)}")
+
+    # Calculate absolute variance
+    absolute_variance = actual - budget
+
+    # Calculate percentage variance (handle zero division)
+    if budget == Decimal('0'):
+        if actual == Decimal('0'):
+            percentage_variance = Decimal('0')
+            status = "No Activity"
+        else:
+            percentage_variance = None  # Cannot calculate
+            status = "Zero Budget - Flag for Review"
+    else:
+        pct = (absolute_variance / budget) * Decimal('100')
+        percentage_variance = pct.quantize(
+            Decimal('0.01'),
+            rounding=ROUND_HALF_UP
+        )
+        status = "Normal"
+
+    # Determine favorability
+    if account_type == 'revenue':
+        is_favorable = (actual > budget)
+    elif account_type == 'expense':
+        is_favorable = (actual < budget)
+    elif account_type == 'asset':
+        is_favorable = (actual > budget)
+    elif account_type == 'liability':
+        is_favorable = (actual < budget)
+    else:
+        raise ValueError(f"Invalid account_type: {account_type}")
+
+    return absolute_variance, percentage_variance, is_favorable, status
+```
+
+**Testing Requirements:**
+- Edge cases from `.claude/skills/financial-validator/references/edge-cases.md`
+- All 10 categories must pass
+- Type enforcement validated
+- Decimal precision verified
+
+---
+
+### Epic 3: Management Reporting
+
+#### Story 3.1: Variance Report Generation
+
+**Technical Approach:**
+
+```python
+# src/reporting/excel_report_builder.py
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, numbers
+from typing import Dict
+
+def create_variance_report(
+    variance_data: pd.DataFrame,
+    output_path: str,
+    metadata: Dict
+) -> None:
+    """
+    Generate Excel workbook with variance analysis.
+
+    Sheets:
+    1. Executive Summary
+    2. Detailed Variance Analysis
+    3. Material Variances Only
+    4. Metadata/Audit Trail
+    """
+    wb = Workbook()
+
+    # Sheet 1: Executive Summary
+    ws_summary = wb.active
+    ws_summary.title = "Executive Summary"
+    create_summary_sheet(ws_summary, variance_data)
+
+    # Sheet 2: Detailed Analysis
+    ws_detail = wb.create_sheet("Detailed Analysis")
+    create_detail_sheet(ws_detail, variance_data)
+
+    # Sheet 3: Material Variances
+    ws_material = wb.create_sheet("Material Variances")
+    material_data = variance_data[variance_data['is_material'] == True]
+    create_material_sheet(ws_material, material_data)
+
+    # Sheet 4: Metadata
+    ws_meta = wb.create_sheet("Metadata")
+    create_metadata_sheet(ws_meta, metadata)
+
+    # Apply conditional formatting
+    apply_conditional_formatting(ws_detail)
+
+    # Save
+    wb.save(output_path)
+```
+
+**Conditional Formatting Rules:**
+- Green: Favorable & Material
+- Red: Unfavorable & Material
+- Yellow: Favorable but Immaterial
+- Gray: Unfavorable but Immaterial
+
+---
+
+## Directory Structure
+
+```
+fpa-automation-assistant/
+├── spec.md                      # WHAT to build (business requirements)
+├── plan.md                      # HOW to build (this document)
+├── CLAUDE.md                    # Behavioral configuration
+├── README.md                    # Project overview
+│
+├── .claude/                     # Claude Code configuration
+│   ├── skills/                  # Auto-invoked capabilities
+│   │   ├── financial-validator/
+│   │   │   ├── SKILL.md
+│   │   │   ├── references/edge-cases.md
+│   │   │   └── scripts/validate_precision.py
+│   │   ├── excel-extractor/
+│   │   └── variance-calculator/
+│   ├── commands/                # Manual slash commands
+│   │   ├── variance-analysis.md
+│   │   ├── consolidate-data.md
+│   │   └── update-slides.md
+│   ├── agents/                  # Subagents
+│   │   ├── code-reviewer.md
+│   │   ├── data-analyst.md
+│   │   └── research-specialist.md
+│   └── hooks/                   # Quality gates
+│       ├── stop.sh
+│       └── pre-commit.sh
+│
+├── src/                         # Implementation
+│   ├── __init__.py
+│   ├── core/                    # Business logic
+│   │   ├── __init__.py
+│   │   ├── variance_calculator.py
+│   │   ├── financial_metrics.py
+│   │   ├── data_validator.py
+│   │   └── account_mapper.py
+│   ├── integrations/            # External systems
+│   │   ├── __init__.py
+│   │   ├── excel_handler.py
+│   │   ├── google_sheets_client.py
+│   │   └── google_slides_client.py
+│   ├── reporting/               # Output generation
+│   │   ├── __init__.py
+│   │   ├── excel_report_builder.py
+│   │   └── chart_generator.py
+│   └── utils/                   # Helpers
+│       ├── __init__.py
+│       ├── config_loader.py
+│       ├── logger.py
+│       └── file_utils.py
+│
+├── config/                      # Configuration
+│   ├── fpa_config.yaml          # Business rules (thresholds, etc.)
+│   ├── account_mapping.yaml     # Chart of accounts mapping
+│   ├── .env.example             # Environment template
+│   └── credentials.json         # Google service account (git-ignored)
+│
+├── data/                        # Data files (git-ignored except templates)
+│   ├── input/                   # Source files
+│   ├── output/                  # Generated reports
+│   └── templates/               # Report templates (versioned)
+│       ├── variance_report_template.xlsx
+│       └── board_presentation_template.pptx
+│
+├── tests/                       # Test suite
+│   ├── __init__.py
+│   ├── unit/                    # Unit tests
+│   │   ├── test_variance_calculator.py
+│   │   ├── test_data_validator.py
+│   │   └── test_financial_metrics.py
+│   ├── integration/             # Integration tests
+│   │   ├── test_consolidation_workflow.py
+│   │   └── test_variance_analysis_e2e.py
+│   └── fixtures/                # Test data
+│       ├── sample_budget.xlsx
+│       └── sample_actuals.xlsx
+│
+├── logs/                        # Application logs (git-ignored)
+├── .gitignore
+├── requirements.txt             # Python dependencies
+├── requirements-dev.txt         # Development dependencies
+├── setup.py or pyproject.toml   # Package configuration
+└── Makefile                     # Common commands
+```
+
+---
+
+## Code Quality Standards
+
+### Type Hints (MANDATORY)
+
+```python
+from decimal import Decimal
+from typing import Dict, List, Optional, Tuple, Literal
+from datetime import datetime
+
+def calculate_variance(
+    actual: Decimal,
+    budget: Decimal,
+    account_type: Literal['revenue', 'expense', 'asset', 'liability']
+) -> Tuple[Decimal, Optional[Decimal], bool, str]:
+    """Full type hints on ALL functions."""
+    pass
+```
+
+### Docstring Format (Google Style)
+
+```python
+def consolidate_departments(
+    files: List[Path],
+    mapping_config: Dict[str, str]
+) -> Tuple[pd.DataFrame, Dict]:
+    """
+    Consolidate department Excel files into single DataFrame.
+
+    Args:
+        files: List of Path objects to Excel files
+        mapping_config: Dict mapping dept codes to corporate codes
+
+    Returns:
+        Tuple of (consolidated_dataframe, metadata_dict)
+
+    Raises:
+        FileNotFoundError: If file in list doesn't exist
+        ValueError: If file structure validation fails
+
+    Example:
+        >>> files = [Path("sales.xlsx"), Path("marketing.xlsx")]
+        >>> mapping = {"S001": "4000", "M001": "6000"}
+        >>> df, meta = consolidate_departments(files, mapping)
+    """
+    pass
+```
+
+### Error Handling Pattern
+
+```python
+import logging
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+class FinancialCalculationError(Exception):
+    """Base exception for financial calculation errors."""
+    pass
+
+class DivisionByZeroError(FinancialCalculationError):
+    """Raised when attempting to divide by zero budget."""
+    pass
+
+class InvalidAccountTypeError(FinancialCalculationError):
+    """Raised when account type is not recognized."""
+    pass
+
+def safe_calculation(actual: Decimal, budget: Decimal) -> Decimal:
+    """
+    Perform calculation with comprehensive error handling.
+    """
+    try:
+        if budget == Decimal('0'):
+            logger.warning(f"Zero budget detected: actual={actual}")
+            raise DivisionByZeroError(
+                f"Cannot calculate percentage with zero budget. "
+                f"Actual: {actual}, Budget: {budget}"
+            )
+
+        result = (actual / budget) * Decimal('100')
+
+        logger.info(f"Calculation successful: {result}%")
+        return result
+
+    except DivisionByZeroError:
+        # Re-raise custom exceptions
+        raise
+    except Exception as e:
+        # Catch unexpected errors, log with context
+        logger.error(
+            f"Unexpected error in calculation: {e}",
+            extra={'actual': str(actual), 'budget': str(budget)}
+        )
+        raise FinancialCalculationError(
+            f"Calculation failed: {e}"
+        ) from e
+```
+
+### Logging Standards
+
+```python
+import logging
+from datetime import datetime, UTC
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/fpa_assistant.log'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+# Usage
+logger.info(
+    "Variance calculated",
+    extra={
+        'account': account_code,
+        'absolute_variance': str(abs_var),
+        'percentage_variance': str(pct_var) if pct_var else 'N/A',
+        'is_favorable': is_favorable,
+        'timestamp': datetime.now(UTC).isoformat()
+    }
+)
+```
+
+---
+
+## Testing Strategy
+
+### Unit Testing
+
+**Coverage Target:** 80%+ for all modules
+
+```python
+# tests/unit/test_variance_calculator.py
+import pytest
+from decimal import Decimal
+from src.core.variance_calculator import calculate_variance
+
+class TestVarianceCalculator:
+    """Comprehensive unit tests for variance calculations."""
+
+    def test_normal_revenue_variance(self):
+        """Test standard revenue variance calculation."""
+        abs_var, pct_var, is_fav, status = calculate_variance(
+            Decimal('115000'),
+            Decimal('100000'),
+            'revenue'
+        )
+
+        assert abs_var == Decimal('15000')
+        assert pct_var == Decimal('15.00')
+        assert is_fav == True
+        assert status == "Normal"
+
+    def test_zero_budget_zero_actual(self):
+        """Test edge case: both values zero."""
+        abs_var, pct_var, is_fav, status = calculate_variance(
+            Decimal('0'),
+            Decimal('0'),
+            'expense'
+        )
+
+        assert abs_var == Decimal('0')
+        assert pct_var == Decimal('0')
+        assert status == "No Activity"
+
+    def test_float_rejection(self):
+        """Test that float types are rejected."""
+        with pytest.raises(TypeError, match="must be Decimal"):
+            calculate_variance(
+                115000.00,  # float - should fail
+                Decimal('100000'),
+                'revenue'
+            )
+
+    @pytest.mark.parametrize("account_type,actual,budget,expected_favorable", [
+        ('revenue', Decimal('110'), Decimal('100'), True),
+        ('revenue', Decimal('90'), Decimal('100'), False),
+        ('expense', Decimal('90'), Decimal('100'), True),
+        ('expense', Decimal('110'), Decimal('100'), False),
+        ('asset', Decimal('110'), Decimal('100'), True),
+        ('liability', Decimal('90'), Decimal('100'), True),
+    ])
+    def test_favorability_logic(
+        self, account_type, actual, budget, expected_favorable
+    ):
+        """Test favorability for all account types."""
+        _, _, is_fav, _ = calculate_variance(actual, budget, account_type)
+        assert is_fav == expected_favorable
+```
+
+### Integration Testing
+
+```python
+# tests/integration/test_variance_analysis_e2e.py
+import pytest
+from pathlib import Path
+from src.core.variance_analyzer import VarianceAnalyzer
+
+class TestVarianceAnalysisEndToEnd:
+    """End-to-end integration tests."""
+
+    @pytest.fixture
+    def sample_files(self, tmp_path):
+        """Create sample budget and actuals files."""
+        budget_file = tmp_path / "budget.xlsx"
+        actuals_file = tmp_path / "actuals.xlsx"
+
+        # Create sample files with test data
+        # ... (file creation logic)
+
+        return budget_file, actuals_file
+
+    def test_full_workflow(self, sample_files):
+        """Test complete variance analysis workflow."""
+        budget_file, actuals_file = sample_files
+        output_file = Path("tests/output/variance_report.xlsx")
+
+        analyzer = VarianceAnalyzer()
+        result = analyzer.analyze(
+            budget_file=str(budget_file),
+            actuals_file=str(actuals_file),
+            output_file=str(output_file)
+        )
+
+        assert result.success == True
+        assert output_file.exists()
+        assert result.material_variances_count > 0
+
+        # Verify output structure
+        # ... (detailed assertions)
+```
+
+### Edge Case Testing
+
+**All edge cases from `.claude/skills/financial-validator/references/edge-cases.md` MUST pass:**
+
+1. Float precision errors
+2. Division by zero (3 scenarios)
+3. Negative values
+4. NULL/missing data
+5. Concurrent transactions
+6. Multi-currency
+7. Rounding precision
+8. Boundary conditions
+9. Data type mismatches
+10. Large numbers/overflow
+
+**Validation Script:**
+Run before every commit:
+```bash
+python .claude/skills/financial-validator/scripts/validate_precision.py
+```
+
+---
+
+## Deployment Approach
+
+### Environment Setup
+
+**Development:**
+```bash
+# 1. Python environment
+pyenv install 3.11.7
+pyenv local 3.11.7
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# 2. Dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# 3. Configuration
+cp config/.env.example config/.env
+# Edit .env with appropriate values
+
+# 4. Verify setup
+python .claude/skills/financial-validator/scripts/validate_precision.py
+pytest tests/ -v
+```
+
+**Production:**
+[TO BE DETERMINED - depends on deployment target]
+- Option 1: Local installation per user
+- Option 2: Shared server deployment
+- Option 3: Cloud function (serverless)
+
+### Configuration Management
+
+**config/fpa_config.yaml:**
+```yaml
+# Business rules and thresholds
+variance_thresholds:
+  percentage: 0.10  # 10%
+  absolute: 50000   # $50,000
+
+favorability_rules:
+  revenue: "actual_gt_budget"
+  expense: "actual_lt_budget"
+  asset: "actual_gt_budget"
+  liability: "actual_lt_budget"
+
+output_settings:
+  excel_formats:
+    currency: "$#,##0.00"
+    percentage: "0.00%"
+  conditional_formatting:
+    favorable_material: "#00FF00"    # Green
+    unfavorable_material: "#FF0000"  # Red
+    favorable_immaterial: "#FFFF00"  # Yellow
+    unfavorable_immaterial: "#808080" # Gray
+```
+
+---
+
+## Performance Considerations
+
+### Data Volume Handling
+
+**Small Datasets (<1,000 rows):**
+- Load entire file into memory
+- Process in single pass
+- Expected time: <10 seconds
+
+**Medium Datasets (1,000-10,000 rows):**
+- Load into memory with chunking if needed
+- Process in batches of 5,000
+- Expected time: <60 seconds
+
+**Large Datasets (>10,000 rows):**
+- Use chunked reading: `pd.read_excel(chunksize=5000)`
+- Process incrementally
+- Write results progressively
+- Expected time: [TO BE MEASURED based on testing]
+
+### Optimization Strategy
+
+**Rule:** No premature optimization
+
+**Approach:**
+1. Implement with clarity and correctness first
+2. Profile with realistic data
+3. Optimize bottlenecks only
+4. Measure improvements
+5. Document performance characteristics
+
+**Profiling:**
+```python
+import cProfile
+import pstats
+
+def profile_variance_analysis():
+    """Profile variance analysis performance."""
+    profiler = cProfile.Profile()
+    profiler.enable()
+
+    # Run analysis
+    analyzer.analyze(budget_file, actuals_file, output_file)
+
+    profiler.disable()
+    stats = pstats.Stats(profiler)
+    stats.sort_stats('cumulative')
+    stats.print_stats(20)  # Top 20 functions
+```
+
+---
+
+## Security & Compliance
+
+### Data Protection
+
+**Sensitive Data (NEVER commit):**
+- `.env` files with credentials
+- `credentials.json` (Google service account)
+- Actual financial data in `/data/input/`
+- Generated reports in `/data/output/`
+- Log files with PII
+
+**Gitignore Rules:**
+```
+# Credentials
+.env
+credentials.json
+*.pem
+*.key
+
+# Data
+data/input/
+data/output/
+logs/
+
+# Environment
+venv/
+__pycache__/
+*.pyc
+```
+
+### Audit Trail Requirements
+
+**Every transformation must log:**
+```python
+audit_entry = {
+    'timestamp': datetime.now(UTC).isoformat(),
+    'user': os.getenv('USER', 'unknown'),
+    'operation': 'variance_calculation',
+    'source_files': [str(budget_file), str(actuals_file)],
+    'output_file': str(output_file),
+    'records_processed': len(df),
+    'thresholds': {
+        'percentage': config['percentage_threshold'],
+        'absolute': config['absolute_threshold']
+    },
+    'material_variances_count': material_count,
+    'errors': error_list
+}
+
+logger.info("Audit trail", extra=audit_entry)
+```
+
+### Access Control
+
+**File Permissions:**
+- Configuration files: Read-only after setup
+- Credentials: Restricted to application user
+- Output files: User-specific access
+
+**API Authentication:**
+- Google Workspace: Service account with minimal scopes
+- Read-only access where possible
+- Scope limitation per function
+
+---
+
+## Development Workflow
+
+### Git Branch Strategy
+
+**Branches:**
+- `main` - Production-ready code
+- `develop` - Integration branch
+- `feature/epic-1-story-1` - Feature branches
+- `bugfix/issue-123` - Bug fixes
+- `claude/session-id` - Claude Code branches
+
+**Workflow:**
+1. Create feature branch from `develop`
+2. Implement with tests
+3. Run quality gates (hooks)
+4. Create PR to `develop`
+5. Code review (@code-reviewer agent)
+6. Merge after approval
+7. Periodic merge `develop` → `main`
+
+### Commit Message Format
+
+```
+type(scope): short description
+
+Longer description if needed.
+
+- Bullet points for details
+- Reference issues: Closes #123
+- Reference specs: Implements spec.md Story 1.1
+```
+
+**Types:** feat, fix, docs, test, refactor, chore
+
+### Quality Gates (Automated)
+
+**Pre-commit (Local):**
+- Black formatting
+- Ruff linting
+- MyPy type checking
+- Basic test suite
+
+**Stop Hook (Claude Code):**
+- Float usage check (BLOCKING)
+- Type hints check (WARNING)
+- Financial validator tests
+- Python syntax validation
+
+**CI/CD (Future):**
+- Full test suite
+- Coverage report
+- Security scanning
+- Performance benchmarks
+
+---
+
+## Next Steps & Priorities
+
+### Phase 1: Foundation (Current)
+- [x] Architecture design
+- [x] CLAUDE.md behavioral configuration
+- [x] Financial validator skill
+- [x] Quality gates (hooks)
+- [ ] Core directory structure
+- [ ] Base classes and utilities
+
+### Phase 2: Epic 1 Implementation
+- [ ] Story 1.1: Multi-department consolidation
+- [ ] Story 1.2: GL account reconciliation
+- [ ] Unit tests for Epic 1
+- [ ] Integration tests
+- [ ] Documentation
+
+### Phase 3: Epic 2 Implementation
+- [ ] Story 2.1: Variance calculation
+- [ ] Story 2.2: Favorability assessment
+- [ ] Story 2.3: Materiality flagging
+- [ ] Comprehensive edge case testing
+- [ ] Independent verification
+
+### Phase 4: Epic 3 Implementation
+- [ ] Story 3.1: Excel report generation
+- [ ] Story 3.2: Google Slides integration
+- [ ] Template system
+- [ ] Chart generation
+
+### Phase 5: Production Readiness
+- [ ] Performance optimization
+- [ ] Security audit
+- [ ] User documentation
+- [ ] Deployment packaging
+- [ ] Training materials
+
+---
+
+## Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0-DRAFT | 2025-11-08 | Claude | Initial technical planning document |
+
+---
+
+## References
+
+- **spec.md** - Business requirements (WHAT to build)
+- **CLAUDE.md** - Behavioral configuration (HOW Claude operates)
+- **README.md** - Project overview and quick start
+- **.claude/** - Claude Code configuration (Skills, Commands, Agents, Hooks)
+
+---
+
+**END OF TECHNICAL PLANNING DOCUMENT**
+
+*This document defines HOW to build what spec.md describes. Implementation should follow this plan while adapting to discoveries made during development.*

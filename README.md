@@ -20,11 +20,10 @@ This project follows Anthropic's recommended separation of concerns:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     CLAUDE.md                               │
-│  Behavioral Rules & Quality Gates (245 lines)               │
-│  - Chain of Verification protocol                           │
-│  - Financial precision mandates                             │
-│  - Pre-response checklist                                   │
+│               Configuration Layer                            │
+│  - spec.md (WHAT to build)                                  │
+│  - plan.md (HOW to build)                                   │
+│  - CLAUDE.md (HOW Claude operates)                          │
 └─────────────────────────────────────────────────────────────┘
                             │
         ┌───────────────────┼───────────────────┐
@@ -153,6 +152,7 @@ This project follows Anthropic's recommended separation of concerns:
 
 ```
 ├── spec.md                    # WHAT to build (business requirements)
+├── plan.md                    # HOW to build (technical planning)
 ├── CLAUDE.md                  # HOW Claude operates (behavioral rules)
 │
 ├── .claude/

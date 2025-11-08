@@ -218,8 +218,9 @@ See `.claude/skills/financial-validator/` for comprehensive test suite including
 **When stuck:** Read spec.md → Verify claims → Challenge assumptions → Respond concisely
 
 **Key Files:**
-- `spec.md` - Business requirements (WHAT) - Single source of truth
-- `CLAUDE.md` - Behavioral rules (HOW) - This file
+- `spec.md` - Business requirements (WHAT to build) - Single source of truth
+- `plan.md` - Technical planning (HOW to build) - Implementation guide
+- `CLAUDE.md` - Behavioral rules (HOW Claude operates) - This file
 - `.claude/skills/` - Auto-invoked capabilities (financial-validator, variance-calculator)
 - `.claude/commands/` - Manual slash commands (/variance-analysis, /consolidate-data)
 - `.claude/agents/` - Specialized subagents (code-reviewer, data-analyst)
