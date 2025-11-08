@@ -9,13 +9,7 @@ packages = []
 [tool.poetry.dependencies]
 python = "^3.11"
 
-# Workspace packages (our custom code)
-fpa-core = { path = "packages/fpa-core", develop = true }
-fpa-integrations = { path = "packages/fpa-integrations", develop = true }
-fpa-workflows = { path = "packages/fpa-workflows", develop = true }
-fpa-cli = { path = "packages/fpa-cli", develop = true }
-
-# Common dependencies
+# Core dependencies for calculation scripts
 pandas = "^2.1.0"
 gspread = "^6.1.2"
 gspread-dataframe = "^4.0.0"
