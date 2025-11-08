@@ -1,0 +1,50 @@
+# FP&A Automation Assistant - Business Configuration
+# Defines thresholds, rules, and output formatting
+
+# Variance Analysis Thresholds
+variance_thresholds:
+  percentage: 0.10  # 10% - Material if |variance %| exceeds this
+  absolute: 50000   # $50,000 - Material if |variance $| exceeds this
+
+# Favorability Logic by Account Type
+# Determines if variance is favorable (good) or unfavorable (bad)
+favorability_rules:
+  revenue: "actual_gt_budget"      # More revenue = favorable
+  expense: "actual_lt_budget"      # Less expense = favorable
+  asset: "actual_gt_budget"        # More assets = favorable
+  liability: "actual_lt_budget"    # Less liability = favorable
+
+# Output Formatting Settings
+output_settings:
+  excel_formats:
+    currency: "$#,##0.00"
+    percentage: "0.00%"
+
+  # Conditional formatting colors (hex)
+  conditional_formatting:
+    favorable_material: "#00FF00"        # Green
+    unfavorable_material: "#FF0000"      # Red
+    favorable_immaterial: "#FFFF00"      # Yellow
+    unfavorable_immaterial: "#808080"    # Gray
+
+# Required columns for data validation
+required_columns:
+  budget:
+    - account_code
+    - account_name
+    - account_type
+    - budget_amount
+    - period
+
+  actuals:
+    - account_code
+    - account_name
+    - account_type
+    - actual_amount
+    - period
+
+# Logging configuration
+logging:
+  level: INFO
+  audit_trail_required: true
+  log_file: logs/fpa_assistant.log

@@ -1,0 +1,14 @@
+# FP&A Automation Assistant - Development Dependencies
+# Install after requirements.txt: pip install -r requirements-dev.txt
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+
+# Code Quality
+black==23.12.1
+mypy==1.7.1
+ruff==0.1.9
+
+# Include core dependencies
+-r requirements.txt
