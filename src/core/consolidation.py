@@ -8,6 +8,7 @@ into single unified dataset with audit trail.
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
 from datetime import datetime, UTC
+from decimal import Decimal
 import pandas as pd
 
 from src.utils.file_utils import discover_excel_files, validate_file_exists
@@ -20,6 +21,45 @@ from src.core.account_mapper import (
 )
 
 logger = setup_logger(__name__)
+
+
+def convert_amounts_to_decimal(
+    df: pd.DataFrame,
+    amount_columns: List[str] = None
+) -> pd.DataFrame:
+    """
+    Convert financial amount columns from pandas numeric types to Decimal.
+
+    Args:
+        df: DataFrame with financial data
+        amount_columns: List of column names containing amounts.
+                       If None, auto-detects columns with 'amount' in name.
+
+    Returns:
+        DataFrame with Decimal values in amount columns
+
+    Example:
+        >>> df = pd.DataFrame({'amount': [100.0, 200.5]})
+        >>> df_decimal = convert_amounts_to_decimal(df)
+        >>> assert isinstance(df_decimal.iloc[0]['amount'], Decimal)
+    """
+    df = df.copy()
+
+    # Auto-detect amount columns if not specified
+    if amount_columns is None:
+        amount_columns = [
+            col for col in df.columns
+            if 'amount' in col.lower() or 'balance' in col.lower()
+        ]
+
+    # Convert each amount column to Decimal
+    for col in amount_columns:
+        if col in df.columns:
+            df[col] = df[col].apply(
+                lambda x: Decimal(str(x)) if pd.notna(x) else None
+            )
+
+    return df
 
 
 class ConsolidationError(Exception):
@@ -109,16 +149,20 @@ def consolidate_departments(
             try:
                 df = pd.read_excel(file_path, engine='openpyxl')
 
+                # Convert financial amounts to Decimal for precision
+                df = convert_amounts_to_decimal(df)
+
                 metadata['source_files'].append(str(file_path))
                 metadata['records_per_file'][file_name] = len(df)
 
                 valid_dataframes.append((file_name, df))
 
                 logger.info(
-                    f"Loaded {file_name}: {len(df)} records"
+                    f"Loaded {file_name}: {len(df)} records, "
+                    f"amounts converted to Decimal"
                 )
 
-            except Exception as e:
+            except (pd.errors.ParserError, pd.errors.EmptyDataError, ValueError) as e:
                 logger.error(f"Failed to load {file_name}: {e}")
                 metadata['validation_issues'][file_name] = [str(e)]
                 continue
@@ -195,11 +239,20 @@ def consolidate_departments(
 
         return consolidated, metadata
 
-    except Exception as e:
+    except (FileNotFoundError, ConsolidationError) as e:
+        # Re-raise expected errors
         metadata['end_time'] = datetime.now(UTC).isoformat()
         metadata['error'] = str(e)
         metadata['success'] = False
 
         logger.error(f"Consolidation failed: {e}", extra=metadata)
+        raise
 
-        raise ConsolidationError(f"Consolidation failed: {e}") from e
+    except (pd.errors.ParserError, pd.errors.EmptyDataError, ValueError) as e:
+        # Pandas/data errors
+        metadata['end_time'] = datetime.now(UTC).isoformat()
+        metadata['error'] = str(e)
+        metadata['success'] = False
+
+        logger.error(f"Consolidation failed with data error: {e}", extra=metadata)
+        raise ConsolidationError(f"Data processing failed: {e}") from e

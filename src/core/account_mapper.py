@@ -176,14 +176,14 @@ def merge_department_data(
     consolidation_column: str = 'corporate_account'
 ) -> pd.DataFrame:
     """
-    Merge multiple department DataFrames by corporate account.
+    Merge multiple department DataFrames into single dataset.
 
     Args:
         mapped_dataframes: List of (filename, dataframe) tuples
-        consolidation_column: Column to group/sum by
+        consolidation_column: Column present in all dataframes (for reference)
 
     Returns:
-        Consolidated DataFrame with summed amounts
+        Consolidated DataFrame with all records from input files
 
     Example:
         >>> df1 = pd.DataFrame({

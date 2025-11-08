@@ -53,6 +53,8 @@ def validate_department_file(
 
     try:
         # Load Excel file
+        # Note: pandas reads numeric columns as approximate types by default
+        # Financial amounts will be converted to Decimal in processing layer
         df = pd.read_excel(file_path, engine='openpyxl')
 
         logger.info(
@@ -109,9 +111,13 @@ def validate_department_file(
 
         return is_valid, issues
 
-    except Exception as e:
+    except (pd.errors.ParserError, pd.errors.EmptyDataError) as e:
         raise DataValidationError(
-            f"Failed to validate {file_path}: {e}"
+            f"Failed to read Excel file {file_path}: {e}"
+        ) from e
+    except ValueError as e:
+        raise DataValidationError(
+            f"Invalid data in {file_path}: {e}"
         ) from e
 
 
@@ -235,7 +241,7 @@ def validate_date_column(
                 f"Column '{column_name}' contains {invalid_dates.sum()} "
                 f"invalid date values"
             )
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         issues.append(f"Failed to parse column '{column_name}' as dates: {e}")
 
     return issues

@@ -171,3 +171,96 @@ class TestValidateDateColumn:
 
         assert len(issues) == 1
         assert 'not found' in issues[0].lower()
+
+
+class TestFinancialEdgeCases:
+    """Test edge cases specific to financial data processing."""
+
+    def test_negative_amounts(self):
+        """Test negative amounts for liabilities and contra-accounts."""
+        df = pd.DataFrame({
+            'amount': [-1000.50, -500.25, -0.01]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=False)
+
+        # Should pass - negative amounts are valid
+        assert len(issues) == 0
+
+    def test_zero_amounts(self):
+        """Test zero amount handling."""
+        df = pd.DataFrame({
+            'amount': [0, 0.00, 0.0]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=False)
+
+        # Should pass - zero is valid
+        assert len(issues) == 0
+
+    def test_very_large_numbers(self):
+        """Test very large amounts (> 1 million)."""
+        df = pd.DataFrame({
+            'amount': [1_000_000, 5_000_000.50, 999_999_999.99]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=False)
+
+        # Should pass - large numbers are valid
+        assert len(issues) == 0
+
+    def test_small_decimal_precision(self):
+        """Test small decimal values maintain precision."""
+        df = pd.DataFrame({
+            'amount': [0.01, 0.02, 0.001]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=False)
+
+        # Should pass
+        assert len(issues) == 0
+
+    def test_null_amounts_with_allow_null_true(self):
+        """Test NULL amounts when explicitly allowed."""
+        df = pd.DataFrame({
+            'amount': [100, None, 200, None]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=True)
+
+        # Should pass - NULLs allowed
+        assert len(issues) == 0
+
+    def test_null_amounts_with_allow_null_false(self):
+        """Test NULL amounts when not allowed."""
+        df = pd.DataFrame({
+            'amount': [100, None, 200]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=False)
+
+        # Should fail - NULLs not allowed
+        assert len(issues) == 1
+        assert 'non-numeric' in issues[0].lower()
+
+    def test_mixed_positive_negative(self):
+        """Test mixed positive and negative amounts."""
+        df = pd.DataFrame({
+            'amount': [1000, -500, 250, -100, 0]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=False)
+
+        # Should pass - mixed signs are valid
+        assert len(issues) == 0
+
+    def test_boundary_values(self):
+        """Test boundary values near zero."""
+        df = pd.DataFrame({
+            'amount': [-0.01, 0, 0.01]
+        })
+
+        issues = validate_numeric_column(df, 'amount', allow_null=False)
+
+        # Should pass
+        assert len(issues) == 0
