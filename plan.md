@@ -1335,6 +1335,421 @@ cc-sf-assistant/
 - Training materials
 - Performance optimization
 - Security audit
+- Life360 branding customization (logo, colors, templates)
+
+---
+
+## Implementation Details for Operational Decisions
+
+### 1. Script Versioning (Git-Based)
+
+**Rule:** NEVER create files named `script_v2.py`, `script_v3.py`, `script-new.py`, etc.
+
+**Implementation:**
+```bash
+# When updating existing script
+git add scripts/core/variance.py
+git commit -m "feat: add QoQ variance calculation to variance.py"
+git push
+
+# To revert to old version
+git log scripts/core/variance.py  # Find commit hash
+git checkout <commit-hash> scripts/core/variance.py
+```
+
+**Enforced By:**
+- `.claude/hooks/stop.sh` checks for files matching `*_v[0-9]*.py`, `*-new.py`, `*-old.py` patterns
+- Blocks commit if versioned filenames detected
+
+**Benefits:**
+- Proper version control with diffs
+- Rollback to any previous state
+- Clear commit history
+- No file naming confusion
+
+---
+
+### 2. Centralized Audit Log
+
+**Structure:**
+```
+config/
+├── audit.log              # Actual audit entries (git ignored)
+├── .gitignore             # Ignores audit.log data file
+└── audit-schema.json      # Log structure (version controlled)
+```
+
+**Audit Entry Format (JSON):**
+```json
+{
+  "timestamp": "2025-11-08T14:32:15.123Z",
+  "user": "user@life360.com",
+  "script": "scripts/workflows/variance_report.py",
+  "operation": "variance_calculation",
+  "inputs": {
+    "budget_file": "budget_2025.xlsx",
+    "actual_file": "actuals_nov.xlsx"
+  },
+  "outputs": {
+    "variance_report": "variance_nov_2025.xlsx",
+    "material_variances_count": 3
+  },
+  "metadata": {
+    "execution_time_ms": 2341,
+    "rows_processed": 50,
+    "errors": []
+  }
+}
+```
+
+**Implementation in Scripts:**
+```python
+# scripts/utils/logger.py
+from loguru import logger
+import json
+from pathlib import Path
+from datetime import datetime
+
+AUDIT_LOG = Path("config/audit.log")
+
+def log_audit_entry(
+    script: str,
+    operation: str,
+    inputs: dict,
+    outputs: dict,
+    metadata: dict
+) -> None:
+    """Write structured audit entry to centralized log."""
+    entry = {
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "user": os.getenv("USER", "unknown"),
+        "script": script,
+        "operation": operation,
+        "inputs": inputs,
+        "outputs": outputs,
+        "metadata": metadata
+    }
+
+    with AUDIT_LOG.open("a") as f:
+        f.write(json.dumps(entry) + "\n")
+```
+
+**Querying Audit Log:**
+```python
+# Example: Find all variance calculations in November
+import json
+from pathlib import Path
+
+with Path("config/audit.log").open() as f:
+    for line in f:
+        entry = json.loads(line)
+        if entry["operation"] == "variance_calculation":
+            if "2025-11" in entry["timestamp"]:
+                print(entry)
+```
+
+**Skills/Agents Enforcing:**
+- `audit-trail-enforcer` skill checks all scripts import and use `log_audit_entry()`
+- `code-reviewer` agent verifies audit logging before approval
+
+---
+
+### 3. Data Validation Pre-Checks
+
+**Workflow Integration:**
+
+Every prod workflow starts with validation phase:
+
+```markdown
+## /prod:variance-analysis Workflow
+
+### Phase 1: Data Validation (Automatic)
+1. Invoke `data-validator` agent
+2. Check budget file:
+   - Required columns exist (Account, Department, Amount)
+   - Data types correct (Amount is numeric)
+   - No NULL values in required fields
+   - Amounts are positive decimals
+3. Check actual file (same checks)
+4. Generate validation report
+5. **HUMAN CHECKPOINT:** User reviews validation report and approves/rejects
+
+### Phase 2: Execution (After Approval)
+1. Execute variance calculation script
+2. Generate report
+3. **HUMAN CHECKPOINT:** User reviews variance results
+4. Export to Excel/Sheets
+5. Log audit entry
+```
+
+**Validation Report Format:**
+```
+📊 Data Validation Report
+
+Budget File: budget_2025.xlsx
+✅ File exists and is readable
+✅ Required columns present: Account, Department, Amount
+✅ Data types valid: Amount is numeric (50/50 rows)
+✅ No NULL values in required fields
+✅ All amounts are positive Decimals
+✅ 50 accounts found
+
+Actual File: actuals_nov.xlsx
+✅ File exists and is readable
+✅ Required columns present: Account, Department, Amount
+⚠️  WARNING: 2 NULL values found in Amount column (rows 23, 47)
+✅ Data types valid: Amount is numeric (48/50 rows)
+❌ ERROR: 2 amounts are negative (rows 15, 32)
+✅ 50 accounts found
+
+❌ VALIDATION FAILED - 1 error, 1 warning
+
+Proceed anyway? (y/n):
+```
+
+**Implementation:**
+```python
+# scripts/utils/validator.py
+from decimal import Decimal
+import pandas as pd
+from typing import NamedTuple
+
+class ValidationResult(NamedTuple):
+    passed: bool
+    errors: list[str]
+    warnings: list[str]
+    summary: str
+
+def validate_financial_file(
+    file_path: str,
+    required_columns: list[str],
+    amount_column: str = "Amount"
+) -> ValidationResult:
+    """Validate Excel file before processing."""
+    errors = []
+    warnings = []
+
+    # Check file exists
+    if not Path(file_path).exists():
+        errors.append(f"File not found: {file_path}")
+        return ValidationResult(False, errors, warnings, "")
+
+    # Load file
+    df = pd.read_excel(file_path)
+
+    # Check required columns
+    missing = [col for col in required_columns if col not in df.columns]
+    if missing:
+        errors.append(f"Missing columns: {missing}")
+
+    # Check for NULLs
+    null_counts = df[required_columns].isnull().sum()
+    for col, count in null_counts.items():
+        if count > 0:
+            warnings.append(f"{count} NULL values in {col}")
+
+    # Check amount is Decimal-compatible
+    try:
+        df[amount_column] = df[amount_column].apply(Decimal)
+    except:
+        errors.append(f"{amount_column} contains non-numeric values")
+
+    # Check for negative amounts (may be valid in some contexts)
+    negatives = (df[amount_column] < 0).sum()
+    if negatives > 0:
+        errors.append(f"{negatives} negative amounts found")
+
+    passed = len(errors) == 0
+    summary = f"{'✅ PASSED' if passed else '❌ FAILED'} - {len(errors)} errors, {len(warnings)} warnings"
+
+    return ValidationResult(passed, errors, warnings, summary)
+```
+
+**Skills/Agents:**
+- `data-validator` agent (prod) - Runs validation, generates report, waits for human approval
+- `decimal-precision-enforcer` skill (shared) - Ensures amounts are Decimal-compatible
+
+---
+
+### 4. Template Customization
+
+**Phase 1-5: Generic Templates**
+
+```
+templates/
+├── variance_report.xlsx         # Generic variance report
+├── board_deck.pptx              # Generic board presentation
+└── consolidated_report.xlsx     # Generic consolidation output
+```
+
+**Phase 6: Life360 Branding**
+
+User provides:
+- Life360 logo (PNG, SVG)
+- Brand colors (hex codes)
+- Font specifications
+- PowerPoint master template
+
+**Implementation:**
+```python
+# scripts/utils/branding.py
+BRAND_CONFIG = {
+    "company_name": "Life360",
+    "logo_path": "templates/assets/life360_logo.png",
+    "primary_color": "#5200FF",  # Life360 purple
+    "secondary_color": "#00D4AA",  # Life360 teal
+    "font_family": "Montserrat",
+}
+
+def apply_branding_to_pptx(prs: Presentation) -> Presentation:
+    """Apply Life360 branding to PowerPoint presentation."""
+    # Add logo to title slide
+    # Set color scheme
+    # Apply fonts
+    return prs
+```
+
+**Created During Phase 6:**
+```
+templates/
+├── life360/
+│   ├── variance_report.xlsx     # Branded variance report
+│   ├── board_deck.pptx          # Branded board deck
+│   ├── consolidated_report.xlsx # Branded consolidation
+│   └── assets/
+│       ├── life360_logo.png
+│       └── brand_colors.json
+└── generic/                      # Keep generic for reference
+    ├── variance_report.xlsx
+    └── board_deck.pptx
+```
+
+---
+
+### 5. Error Recovery & State Management
+
+**Workflow State Structure:**
+
+```
+config/
+└── workflow-state/
+    ├── monthly-close-2025-11.json       # State for Nov 2025 monthly close
+    ├── variance-analysis-2025-11.json   # State for Nov 2025 variance
+    └── .gitignore                        # Ignore state files
+```
+
+**State File Format:**
+```json
+{
+  "workflow": "monthly-close",
+  "period": "2025-11",
+  "started_at": "2025-11-08T10:00:00Z",
+  "last_updated": "2025-11-08T14:32:15Z",
+  "status": "in_progress",
+  "completed_steps": [
+    "validate_input_data",
+    "consolidate_departments",
+    "calculate_variances"
+  ],
+  "current_step": "generate_board_deck",
+  "remaining_steps": [
+    "export_to_google_sheets",
+    "send_notifications"
+  ],
+  "intermediate_outputs": {
+    "consolidated_file": "/tmp/consolidated_nov2025.xlsx",
+    "variance_file": "/tmp/variance_nov2025.xlsx"
+  },
+  "error": null
+}
+```
+
+**Resumption Workflow:**
+
+```python
+# scripts/workflows/monthly_close.py
+from pathlib import Path
+import json
+
+STATE_DIR = Path("config/workflow-state")
+
+def save_state(workflow: str, period: str, state: dict) -> None:
+    """Save workflow state for resumption."""
+    state_file = STATE_DIR / f"{workflow}-{period}.json"
+    state_file.write_text(json.dumps(state, indent=2))
+
+def load_state(workflow: str, period: str) -> dict | None:
+    """Load workflow state if exists."""
+    state_file = STATE_DIR / f"{workflow}-{period}.json"
+    if state_file.exists():
+        return json.loads(state_file.read_text())
+    return None
+
+def monthly_close_workflow(period: str, resume: bool = False):
+    """Run monthly close workflow with error recovery."""
+    state = load_state("monthly-close", period) if resume else None
+
+    if state:
+        print(f"Resuming from step: {state['current_step']}")
+        steps = state['remaining_steps']
+    else:
+        print("Starting new monthly close workflow")
+        steps = ["validate", "consolidate", "variance", "board_deck", "export"]
+
+    for step in steps:
+        try:
+            print(f"Executing step: {step}")
+            execute_step(step)
+
+            # Update state after each step
+            save_state("monthly-close", period, {
+                "current_step": step,
+                "completed_steps": [...],
+                "status": "in_progress"
+            })
+        except Exception as e:
+            # Save error state
+            save_state("monthly-close", period, {
+                "current_step": step,
+                "status": "failed",
+                "error": str(e)
+            })
+            print(f"❌ Workflow failed at step {step}. State saved. Resume with: /prod:monthly-close --resume")
+            raise
+
+    # Mark complete
+    save_state("monthly-close", period, {"status": "completed"})
+```
+
+**Command with Resume:**
+```markdown
+---
+name: monthly-close
+description: Monthly close workflow with error recovery
+---
+
+# Monthly Close Workflow
+
+## Usage
+`/prod:monthly-close november [--resume]`
+
+## Arguments
+- Period: Month name or YYYY-MM format
+- --resume: Resume from last saved state (optional)
+
+## Workflow
+1. Check for existing state file
+2. If --resume flag: Load state and continue from last step
+3. If new: Start from beginning
+4. Save state after each step
+5. On error: Save error state, inform user how to resume
+```
+
+**Benefits:**
+- Long workflows don't lose progress on transient failures
+- User can review intermediate outputs before continuing
+- Network/file issues are recoverable
+- Better user experience for multi-hour workflows
 
 ---
 

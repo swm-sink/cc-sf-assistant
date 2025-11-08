@@ -1082,6 +1082,44 @@ This specification is grounded in industry research conducted November 2024-2025
 - [TO BE MEASURED] Pass rate for validation suite (first attempt)
 - [TO BE MEASURED] Code review findings per script (lower is better)
 
+### Operational Decisions (Finalized 2025-11-08)
+
+**Script Versioning:**
+- **Decision:** Use git/GitHub for all versioning. NEVER create `script_v2.py`, `script_v3.py`, `script-new.py`, etc.
+- **Rationale:** Git provides proper version control, diffs, and rollback. Avoids file naming confusion.
+- **Implementation:** Archive old versions in git history. Users can revert to specific commits if needed.
+
+**Audit Log Strategy:**
+- **Decision:** Centralized audit log - all scripts write to single `audit.log` file with structured JSON entries.
+- **Rationale:**
+  - Easier compliance reporting (single source of truth)
+  - Chronological ordering of all financial operations
+  - Searchable by script, user, timestamp, operation type
+  - Simpler backup and security controls
+- **Location:** `config/audit.log` (version controlled structure, ignored data)
+
+**Data Validation Pre-Checks:**
+- **Decision:** Automatic validation before workflow execution with human approval of validation report.
+- **Rationale:**
+  - Fail fast - catch data issues before processing
+  - Better user experience - know problems upfront
+  - Prevents partial execution with corrupted data
+  - Aligns with human-in-loop approval workflow
+- **Implementation:** `data-validator` agent checks required columns, data types, non-null values, and presents findings for user approval before executing script.
+
+**Template Customization:**
+- **Decision:** Start with generic templates, add Life360 branding in Phase 6.
+- **Rationale:** Keep MVP simple, add customization later.
+- **Future:** User will provide Life360 logo, color scheme, brand guidelines towards end of development.
+
+**Error Recovery:**
+- **Decision:** Save progress on workflow failure, enable resumption.
+- **Rationale:**
+  - Long-running workflows (monthly close) shouldn't lose progress
+  - Network/file issues are recoverable
+  - Better user experience
+- **Implementation:** Workflows save state to `config/workflow-state/` directory. On failure, user can resume from last checkpoint.
+
 ---
 
 ## Approval Signatures
