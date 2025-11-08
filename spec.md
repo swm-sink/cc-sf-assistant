@@ -917,6 +917,173 @@ This specification is grounded in industry research conducted November 2024-2025
 
 ---
 
+## Addendum: Development Approach & Architecture (Added 2025-11-08)
+
+### Platform Choice: Claude Code-Native
+
+**Decision:** Build as Claude Code workflows (skills, commands, agents) rather than standalone Python package distribution.
+
+**Rationale:**
+- Target users are FP&A professionals, not Python developers
+- Conversational, human-in-loop workflows match FP&A approval processes
+- No installation/dependency management for end users
+- Iterative refinement by editing markdown files (non-technical)
+- Immediate availability in Claude Code environment
+
+**What This Means:**
+- Primary interface: Slash commands (e.g., `/prod:variance-analysis budget.xlsx actuals.xlsx`)
+- Pre-written Python scripts in `scripts/` directory (executed by Claude)
+- Skills auto-invoke for specific tasks (e.g., variance analysis, account mapping)
+- Agents provide independent verification (e.g., code-reviewer, data-validator)
+
+###  Environment Split: Dev vs Prod vs Shared
+
+**Structure:**
+```
+.claude/
+├── agents/
+│   ├── dev/          # Development agents (script-generator, script-validator, code-reviewer)
+│   ├── prod/         # Production agents (finance-reviewer, data-validator, reconciler)
+│   └── shared/       # Shared utilities (research-agent)
+├── commands/
+│   ├── dev/          # Development workflows (/dev:create-script, /dev:validate-script)
+│   ├── prod/         # Production workflows (/prod:monthly-close, /prod:variance-analysis)
+│   └── shared/       # Shared commands (/shared:help, /shared:config)
+└── skills/
+    ├── dev/          # Dev skills (python-best-practices, financial-script-generator)
+    ├── prod/         # Prod skills (variance-analyzer, account-mapper, report-generator)
+    └── shared/       # Shared skills (decimal-precision-enforcer, audit-trail-enforcer)
+```
+
+**Dev Workflows:** Generate new scripts when needed (spec → build → test → review → approve)
+**Prod Workflows:** Execute existing validated scripts for daily FP&A tasks
+
+### Data Integration Strategy
+
+**Phase 1: Excel-First (MVP)**
+- Focus on local Excel file processing (openpyxl, xlsxwriter)
+- No cloud dependencies required
+- Works offline
+- Faster initial development
+
+**Phase 2: Google Integration**
+- Google Sheets read/write (gspread)
+- Google Slides report generation (slidio patterns)
+- OAuth + Service Account authentication options
+- Skills to convert Excel workflows → Google workflows
+
+**Credentials:** `config/credentials/` directory (OAuth tokens, service account JSON)
+
+### Script Generation & Validation Requirements
+
+**Problem:** LLMs should not perform financial calculations directly (hallucination risk)
+**Solution:** Generate robust, tested Python scripts that perform calculations
+
+**All Scripts Must:**
+1. Use Decimal for all currency calculations (NEVER float)
+2. Include comprehensive type hints
+3. Have edge case tests (division by zero, negative values, NULL)
+4. Include audit trail logging (timestamp, user, source files, operation)
+5. Pass independent code review by separate agent
+6. Achieve >80% test coverage
+
+**Validation Pipeline (Enforced by Dev Skills):**
+1. `script-generator` agent writes code from spec
+2. `test-generator` agent creates comprehensive tests (TDD)
+3. `script-validator` agent runs: pytest, mypy, ruff, bandit, coverage
+4. `code-reviewer` agent performs independent review (separate context, read-only)
+5. Human approval required before script moves to `scripts/` directory
+
+**Anti-Patterns Blocked:**
+- ❌ Float usage for currency → Blocked by `decimal-precision-enforcer` skill
+- ❌ Missing type hints → Blocked by `python-best-practices` skill
+- ❌ No error handling → Blocked by `python-best-practices` skill
+- ❌ No audit logging → Blocked by `audit-trail-enforcer` skill
+
+### Workflow Templates
+
+**Templates Location:** `.claude/templates/`
+
+**Available Templates:**
+1. **SKILL_TEMPLATE.md** - For creating new skills with Progressive Disclosure pattern
+2. **COMMAND_TEMPLATE.md** - For creating slash commands with human checkpoints
+3. **AGENT_TEMPLATE.md** - For creating subagents with tool permissions
+4. **TDD_WORKFLOW.md** - Test-Driven Development cycle (RED-GREEN-REFACTOR-VALIDATE)
+5. **RESEARCH_PLAN_IMPLEMENT_VERIFY.md** - Structured feature development workflow
+
+**TDD Workflow (Mandatory for Financial Scripts):**
+1. **RED:** Write failing tests first (define expected behavior)
+2. **GREEN:** Write minimum code to pass tests (using Decimal)
+3. **REFACTOR:** Improve quality while tests stay green (add docstrings, error handling, logging)
+4. **VALIDATE:** Independent agent verification + human approval
+
+**RPIV Workflow (For New Features):**
+1. **RESEARCH:** Explore codebase, external libraries, document findings (no coding)
+2. **PLAN:** Generate formal specification, get human approval (no coding)
+3. **IMPLEMENT:** Follow TDD workflow with human checkpoints at each milestone
+4. **VERIFY:** Independent validation suite + code review + human final approval
+
+### External Libraries Integration
+
+**Cloned Repos (in `external/`):**
+- **humanlayer** - Study human-in-loop approval patterns (reference)
+- **mcp-gdrive** - Study Google Drive MCP protocol (reference)
+- **gspread** - Install via pip for Google Sheets integration
+- **slidio** - May install or adapt patterns for Google Slides
+- **pyfpa** - Study FP&A consolidation algorithms (may install if adaptable)
+- **py-money** - Reference Decimal precision patterns (use Python's built-in decimal)
+
+**Why Keep Cloned Repos:**
+- Audit security before using
+- Learn implementation patterns
+- Pin exact versions (git submodules)
+- Offline development capability
+- Customize if needed
+
+**Installation Strategy:**
+- Install via pip when library is stable and fits our needs
+- Study patterns and adapt when library needs customization
+- Use as reference when we build custom solution
+
+### Pre-written vs Generated Scripts
+
+**Pre-written Scripts (in `scripts/`):**
+- Core calculations (variance, consolidation, favorability, materiality)
+- Google/Excel integrations (readers, writers)
+- Workflow orchestration (monthly close, variance reports, board decks)
+- Shared utilities (logger, validator, config loader)
+
+**Generated Scripts (via Dev Workflows):**
+- User requests analysis not covered by existing scripts
+- Trigger: `/dev:create-script "Calculate YoY revenue growth by department"`
+- Process: Research → Plan (spec) → Implement (TDD) → Verify (validation + review) → Approve → Save to `scripts/`
+- New script becomes available for future prod workflows
+
+**Variation Handling:**
+- Simple variations: Pass parameters to existing script
+- Complex variations: Generate new script via dev workflow
+
+### Success Metrics (Updated)
+
+**For Script Generation Quality:**
+- ✅ 100% of scripts use Decimal for currency (enforced by hooks)
+- ✅ 100% of scripts have type hints (enforced by validation)
+- ✅ >80% test coverage on all scripts (enforced by validation)
+- ✅ Zero financial calculation errors in production (measured via audit logs)
+
+**For User Experience:**
+- [TO BE MEASURED] Time to complete monthly close (baseline vs automated)
+- [TO BE MEASURED] User satisfaction with conversational interface
+- [TO BE MEASURED] Number of scripts generated on-demand vs pre-written
+- [TO BE MEASURED] Accuracy of generated scripts (human review approval rate)
+
+**For Development Efficiency:**
+- [TO BE MEASURED] Time to generate new script via dev workflow
+- [TO BE MEASURED] Pass rate for validation suite (first attempt)
+- [TO BE MEASURED] Code review findings per script (lower is better)
+
+---
+
 ## Approval Signatures
 
 **Product Owner:** _________________________ Date: _________

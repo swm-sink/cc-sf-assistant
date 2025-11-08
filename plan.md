@@ -1025,6 +1025,319 @@ Longer description if needed.
 
 ---
 
+## Architecture Restructure (Added 2025-11-08)
+
+### Decision: Claude Code-Native Approach
+
+**Change:** Shifted from traditional Python package distribution (`packages/fpa-core`, etc.) to Claude Code-native architecture (`.claude/` skills, commands, agents).
+
+**Rationale:**
+- Target users are FP&A professionals, not developers
+- Conversational interface with human-in-loop matches FP&A approval workflows
+- No installation burden for end users
+- Iterative refinement via markdown editing (non-technical)
+
+### Directory Structure (Final)
+
+```
+cc-sf-assistant/
+├── .claude/
+│   ├── agents/
+│   │   ├── dev/                      # Development agents
+│   │   │   ├── script-generator.md
+│   │   │   ├── script-validator.md
+│   │   │   ├── test-generator.md
+│   │   │   └── code-reviewer.md
+│   │   ├── prod/                     # Production agents
+│   │   │   ├── finance-reviewer.md
+│   │   │   ├── data-validator.md
+│   │   │   └── reconciler.md
+│   │   └── shared/
+│   │       └── research-agent.md
+│   │
+│   ├── commands/
+│   │   ├── dev/                      # Development workflows
+│   │   │   ├── create-script.md      # /dev:create-script
+│   │   │   ├── validate-script.md    # /dev:validate-script
+│   │   │   └── review-code.md        # /dev:review-code
+│   │   ├── prod/                     # Production workflows
+│   │   │   ├── monthly-close.md      # /prod:monthly-close
+│   │   │   ├── variance-analysis.md  # /prod:variance-analysis
+│   │   │   ├── consolidate.md        # /prod:consolidate
+│   │   │   └── board-deck.md         # /prod:board-deck
+│   │   └── shared/
+│   │       ├── help.md
+│   │       └── config.md
+│   │
+│   ├── skills/
+│   │   ├── dev/                      # Dev skills (auto-invoked during dev)
+│   │   │   ├── python-best-practices/
+│   │   │   ├── financial-script-generator/
+│   │   │   └── test-suite-generator/
+│   │   ├── prod/                     # Prod skills (auto-invoked during prod)
+│   │   │   ├── variance-analyzer/
+│   │   │   ├── account-mapper/
+│   │   │   └── report-generator/
+│   │   └── shared/                   # Shared skills (always auto-invoked)
+│   │       ├── decimal-precision-enforcer/
+│   │       └── audit-trail-enforcer/
+│   │
+│   ├── templates/                    # Templates for creating skills/commands/agents
+│   │   ├── skills/SKILL_TEMPLATE.md
+│   │   ├── commands/COMMAND_TEMPLATE.md
+│   │   ├── agents/AGENT_TEMPLATE.md
+│   │   └── workflows/
+│   │       ├── TDD_WORKFLOW.md
+│   │       └── RESEARCH_PLAN_IMPLEMENT_VERIFY.md
+│   │
+│   └── hooks/
+│       └── stop.sh                   # Quality gate (runs after every response)
+│
+├── scripts/                          # Pre-written validated calculation scripts
+│   ├── core/
+│   │   ├── variance.py
+│   │   ├── consolidation.py
+│   │   ├── favorability.py
+│   │   └── materiality.py
+│   ├── integrations/
+│   │   ├── gsheet_reader.py
+│   │   ├── gsheet_writer.py
+│   │   ├── excel_reader.py
+│   │   ├── excel_writer.py
+│   │   └── gslides_generator.py
+│   ├── workflows/
+│   │   ├── monthly_close.py
+│   │   ├── variance_report.py
+│   │   └── board_deck.py
+│   └── utils/
+│       ├── logger.py
+│       ├── validator.py
+│       └── config_loader.py
+│
+├── external/                         # Cloned GitHub repos (git submodules)
+│   ├── humanlayer/
+│   ├── mcp-gdrive/
+│   ├── gspread/
+│   ├── slidio/
+│   ├── pyfpa/
+│   └── py-money/
+│
+├── templates/                        # Report templates
+│   ├── variance_report.xlsx
+│   ├── board_deck.pptx
+│   └── consolidated_report.xlsx
+│
+├── tests/                            # Comprehensive test suite
+│   ├── test_variance.py
+│   ├── test_consolidation.py
+│   ├── test_integrations.py
+│   └── test_edge_cases.py
+│
+├── config/
+│   ├── settings.yaml
+│   └── credentials/                  # OAuth + service account keys
+│
+├── docs/
+│   ├── COMPREHENSIVE_GITHUB_SOURCES.md
+│   ├── user-guides/
+│   └── workflows/
+│
+├── spec.md
+├── plan.md
+├── CLAUDE.md
+├── README.md
+├── EXTERNAL_DEPENDENCIES.md
+├── pyproject.toml
+└── .gitignore
+```
+
+### Workflow Separation: Dev vs Prod
+
+#### **Dev Workflows** (Script Generation)
+**Purpose:** Generate new financial calculation scripts when needed.
+
+**Trigger:** User requests analysis not covered by existing scripts.
+**Example:** `/dev:create-script "Calculate YoY revenue growth by department"`
+
+**Process:**
+1. Research existing patterns (no coding)
+2. Generate formal specification
+3. Get human approval on spec
+4. Follow TDD workflow:
+   - RED: Write failing tests
+   - GREEN: Implement with Decimal
+   - REFACTOR: Add docstrings, error handling, logging
+   - VALIDATE: Independent agent review
+5. Human approval on final script
+6. Save to `scripts/` directory
+7. Script now available for prod workflows
+
+**Skills Auto-Invoked:**
+- `python-best-practices` - Enforces Decimal, type hints, error handling
+- `financial-script-generator` - Uses variance/consolidation patterns
+- `test-suite-generator` - Generates edge case tests
+- `decimal-precision-enforcer` - Blocks float usage
+- `audit-trail-enforcer` - Ensures logging
+
+**Agents Used:**
+- `script-generator` - Writes Python code from spec
+- `test-generator` - Creates comprehensive tests
+- `script-validator` - Runs pytest, mypy, ruff, bandit, coverage
+- `code-reviewer` - Independent review (separate context, read-only)
+
+#### **Prod Workflows** (Script Execution)
+**Purpose:** Execute pre-written, validated scripts for daily FP&A tasks.
+
+**Trigger:** User requests common FP&A analysis.
+**Example:** `/prod:variance-analysis budget.xlsx actuals.xlsx`
+
+**Process:**
+1. Execute pre-written script from `scripts/`
+2. Human reviews results (e.g., flagged variances)
+3. Human approves report
+4. Export to Excel or Google Sheets
+5. Audit trail logged
+
+**Skills Auto-Invoked:**
+- `variance-analyzer` - Validates variance calculations
+- `account-mapper` - Handles unmapped accounts
+- `report-generator` - Formats output
+- `decimal-precision-enforcer` - Validates precision
+- `audit-trail-enforcer` - Logs transformations
+
+**Agents Used:**
+- `finance-reviewer` - Reviews financial outputs for accuracy
+- `data-validator` - Validates input data quality
+- `reconciler` - Reconciles unmapped accounts with human input
+
+### Data Integration Approach
+
+#### Phase 1: Excel-First (MVP)
+- Focus on local Excel file processing
+- Libraries: openpyxl (read), xlsxwriter (write with formatting)
+- No cloud dependencies
+- Works offline
+- Faster development
+
+#### Phase 2: Google Integration
+- Google Sheets: gspread + gspread-dataframe
+- Google Slides: slidio patterns (or custom implementation)
+- Authentication: OAuth + Service Account JSON
+- Credentials: `config/credentials/`
+- Skills to convert Excel → Google workflows
+
+### Script Generation Validation Requirements
+
+**Problem:** LLMs cannot be trusted to perform financial math directly (hallucination risk).
+**Solution:** Generate robust, tested Python scripts that perform deterministic calculations.
+
+**Validation Pipeline (Enforced):**
+1. Specification generated and human-approved
+2. TDD cycle: Write tests → Implement → Refactor
+3. Automated validation:
+   - pytest (test execution)
+   - mypy (type checking)
+   - ruff (linting)
+   - bandit (security)
+   - coverage (>80% required)
+4. Independent code review by separate agent (read-only context)
+5. Human final approval
+6. Script saved to `scripts/` directory
+
+**Anti-Patterns Blocked:**
+- ❌ Float for currency → `decimal-precision-enforcer` blocks
+- ❌ Missing type hints → `python-best-practices` requires
+- ❌ No error handling → `python-best-practices` requires
+- ❌ No audit logging → `audit-trail-enforcer` requires
+- ❌ Low test coverage → `script-validator` blocks (<80%)
+
+### External Library Integration Strategy
+
+**Installed via pip:**
+- pandas (data manipulation)
+- gspread + gspread-dataframe (Google Sheets)
+- openpyxl (Excel read)
+- xlsxwriter (Excel write with formatting)
+- google-auth (authentication)
+
+**Cloned for Reference/Adaptation:**
+- humanlayer - Study human-in-loop patterns
+- pyfpa - Study FP&A consolidation algorithms (may install if adaptable)
+- slidio - Study Google Slides patterns (may install or adapt)
+- py-money - Reference Decimal precision (use Python's built-in decimal)
+- mcp-gdrive - Study MCP protocol patterns
+
+**Why Keep Cloned Repos:**
+- Security audit before use
+- Learn implementation patterns
+- Pin exact versions (git submodules)
+- Offline development
+- Customize if needed
+
+### Workflow Templates (`.claude/templates/`)
+
+**Research Findings (10 Sources):**
+- GitHub: anthropics/skills (official templates)
+- GitHub: alirezarezvani/claude-code-skill-factory (skill factory)
+- GitHub: travisvn/awesome-claude-skills (community examples)
+- GitHub: Pimzino/claude-code-spec-workflow (RPIV workflow)
+- GitHub: nizos/tdd-guard (TDD enforcement)
+- Anthropic: Official skills best practices
+- Anthropic: Claude Code best practices
+- Anthropic: Subagents documentation
+- Claude Code TDD guides (multiple sources)
+- Community slash command examples
+
+**Created Templates:**
+1. **SKILL_TEMPLATE.md** - YAML frontmatter, Progressive Disclosure pattern
+2. **COMMAND_TEMPLATE.md** - $ARGUMENTS placeholder, human checkpoints
+3. **AGENT_TEMPLATE.md** - Tool permissions, role definition
+4. **TDD_WORKFLOW.md** - RED-GREEN-REFACTOR-VALIDATE cycle
+5. **RESEARCH_PLAN_IMPLEMENT_VERIFY.md** - Structured feature development
+
+### Implementation Priority
+
+**Phase 1: Infrastructure (Week 1-2)**
+- Create `.claude/` directory structure (dev/prod/shared)
+- Create templates for skills/commands/agents
+- Set up `scripts/` directory
+- Configure `pyproject.toml` dependencies
+- Set up `tests/` directory with pytest
+
+**Phase 2: Dev Workflows (Week 3-4)**
+- Build dev skills (python-best-practices, financial-script-generator, test-suite-generator)
+- Build dev agents (script-generator, script-validator, test-generator, code-reviewer)
+- Build dev commands (/dev:create-script, /dev:validate-script, /dev:review-code)
+- Test script generation pipeline
+
+**Phase 3: Core Scripts - Excel (Week 5-7)**
+- Pre-write core calculation scripts (variance, consolidation, favorability, materiality)
+- Excel integration scripts (reader, writer)
+- Comprehensive tests for all scripts
+- Validate with independent code review
+
+**Phase 4: Prod Workflows - Excel (Week 8-10)**
+- Build prod skills (variance-analyzer, account-mapper, report-generator)
+- Build prod agents (finance-reviewer, data-validator, reconciler)
+- Build prod commands (/prod:monthly-close, /prod:variance-analysis, /prod:consolidate)
+- End-to-end testing with sample data
+
+**Phase 5: Google Integration (Week 11-13)**
+- Google Sheets integration (gspread)
+- Google Slides integration (slidio patterns or custom)
+- OAuth + Service Account authentication
+- Excel → Google conversion skills
+- Integration testing
+
+**Phase 6: Polish & Documentation (Week 14-15)**
+- User documentation (non-technical guides)
+- Workflow documentation
+- Training materials
+- Performance optimization
+- Security audit
+
+---
+
 ## Document History
 
 | Version | Date | Author | Changes |
