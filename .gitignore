@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Poetry
+poetry.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Credentials (NEVER commit)
+config/credentials/*.json
+config/credentials/*.token
+config/credentials/*
+!config/credentials/.gitkeep
+!config/credentials/README.md
+
+# Audit logs (contain sensitive data)
+config/audit.log
+config/audit-*.log
+
+# Workflow state (may contain sensitive paths)
+config/workflow-state/*.json
+!config/workflow-state/.gitkeep
+
+# Test outputs
+/tmp/
+*.xlsx
+*.pptx
+*.docx
+!templates/*.xlsx
+!templates/*.pptx
+!data/samples/**/*.xlsx
+!docs/notebooks/data/*.xlsx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
