@@ -1120,6 +1120,46 @@ This specification is grounded in industry research conducted November 2024-2025
   - Better user experience
 - **Implementation:** Workflows save state to `config/workflow-state/` directory. On failure, user can resume from last checkpoint.
 
+**Testing & Quality Assurance:**
+- **Decision:** Version-controlled realistic sample data files for testing. Pre-commit hooks instead of CI/CD.
+- **Rationale:**
+  - Realistic test data ensures validation accuracy
+  - Pre-commit hooks catch issues before they're committed
+  - Simple setup without cloud CI/CD complexity
+- **Implementation:** `data/samples/` directory with fake budget/actuals. Git pre-commit hook runs pytest, mypy, ruff, bandit.
+
+**Deployment & Access:**
+- **Decision:** Single-user, local-only deployment using Python virtual environment.
+- **Rationale:**
+  - Keep setup simple (no Docker, no cloud infrastructure)
+  - Each FP&A professional downloads repo and configures for themselves
+  - No multi-user complexity, authentication, or role-based permissions
+- **Implementation:** Poetry manages virtual environment. Setup via `poetry install`.
+
+**Security:**
+- **Decision:** Simple credential storage (no encryption at rest).
+- **Rationale:**
+  - Keep MVP simple
+  - Credentials stored in `config/credentials/` (git ignored)
+  - User responsible for securing their local machine
+- **Implementation:** `.gitignore` includes `config/credentials/`. User adds OAuth tokens and service account JSON manually.
+
+**Documentation & Training:**
+- **Decision:** Jupyter notebooks for tutorials and guides (not video, not interactive CLI).
+- **Rationale:**
+  - Executable documentation with sample data
+  - Users can modify and experiment
+  - Version-controlled, easy to update
+- **Implementation:** `docs/notebooks/` directory with tutorials for common workflows (monthly close, variance analysis, board deck generation).
+
+**Monitoring & Notifications:**
+- **Decision:** No automated performance metrics or error notifications yet (future addition).
+- **Rationale:**
+  - Keep MVP simple
+  - Claude Code informs user of errors directly
+  - Add monitoring/alerting in later phases if needed
+- **Implementation:** Future consideration. For now, errors displayed in Claude Code interface and logged to `config/audit.log`.
+
 ---
 
 ## Approval Signatures

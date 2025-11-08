@@ -1,180 +1,260 @@
-# Quick Start - FP&A Automation Monorepo
+# Quick Start - FP&A Automation Assistant
 
 ## Prerequisites
 
-- Python 3.11+
-- Poetry 1.7+
-- Git
+- **Python 3.11+** - [Download](https://www.python.org/downloads/)
+- **Poetry 1.7+** - [Installation Guide](https://python-poetry.org/docs/#installation)
+- **Git** - [Download](https://git-scm.com/downloads)
 
 ## Installation
 
-### 1. Clone Repository
+### Step 1: Clone Repository
 
 ```bash
 git clone <repository-url>
 cd cc-sf-assistant
 ```
 
-### 2. Initialize Git Submodules (External Dependencies)
+### Step 2: Initialize Git Submodules
+
+This clones the external dependencies (humanlayer, gspread, slidio, pyfpa, py-money) that we reference:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-This clones the 6 external dependencies:
-- humanlayer (human-in-loop patterns)
-- mcp-gdrive (Google Drive MCP)
-- gspread (Google Sheets API)
-- slidio (Google Slides templates)
-- pyfpa (FP&A functions)
-- py-money (Decimal precision)
+Expected output:
+```
+Submodule 'external/humanlayer' registered for path 'external/humanlayer'
+Submodule 'external/gspread' registered for path 'external/gspread'
+...
+```
 
-### 3. Install Dependencies
+### Step 3: Install Dependencies
+
+Poetry creates a virtual environment and installs all dependencies:
 
 ```bash
-# Install all packages in development mode
 poetry install
 ```
 
 This installs:
-- All 4 workspace packages (fpa-core, fpa-integrations, fpa-workflows, fpa-cli)
-- All common dependencies (pandas, gspread, click, rich, etc.)
-- Development tools (pytest, black, mypy, ruff)
+- Python calculation scripts dependencies (pandas, gspread, openpyxl, xlsxwriter)
+- Claude Code interface libraries (click, rich, loguru)
+- Google integration (google-auth, google-auth-oauthlib)
+- Development tools (pytest, mypy, ruff, bandit)
 
-### 4. Verify Installation
-
-```bash
-# Activate Poetry virtual environment
-poetry shell
-
-# Verify packages are importable
-python -c "import fpa_core; import fpa_integrations; import fpa_workflows; import fpa_cli"
-
-# Should complete without errors
+Expected output:
+```
+Creating virtualenv cc-sf-assistant in ...
+Installing dependencies from lock file
+...
+Installing the current project: fpa-automation-monorepo (0.2.0)
 ```
 
-## Package Structure
+### Step 4: Install Pre-Commit Hooks
+
+This sets up quality gates that run before every git commit:
+
+```bash
+poetry run python scripts/utils/install_hooks.py
+```
+
+Expected output:
+```
+✅ Pre-commit hook installed
+```
+
+The hook will run pytest, mypy, ruff, and bandit automatically before each commit.
+
+### Step 5: Verify Installation
+
+Run the test suite to verify everything is set up correctly:
+
+```bash
+poetry run pytest
+```
+
+Expected output:
+```
+============================= test session starts ==============================
+collected X items
+
+tests/test_variance.py ..                                            [ XX%]
+tests/test_consolidation.py ..                                       [ XX%]
+tests/test_edge_cases.py ..                                          [100%]
+
+============================== X passed in X.XXs ===============================
+```
+
+### Step 6: Configure Credentials (Optional - For Google Integration)
+
+If you plan to use Google Sheets/Slides integration:
+
+```bash
+# Create credentials directory
+mkdir -p config/credentials
+
+# Add your Google service account JSON
+# (Obtain from Google Cloud Console)
+cp ~/Downloads/service-account.json config/credentials/
+
+# Or add OAuth token
+# (Obtain via Google OAuth flow)
+cp ~/Downloads/oauth-token.json config/credentials/
+```
+
+**Note:** Credentials are git-ignored and never committed.
+
+---
+
+## Verify Package Imports
+
+Activate the Poetry shell and verify imports:
+
+```bash
+# Enter virtual environment
+poetry shell
+
+# Verify imports work
+python -c "import pandas; import gspread; import openpyxl; print('✅ All imports successful')"
+```
+
+Expected output:
+```
+✅ All imports successful
+```
+
+---
+
+## Directory Structure After Installation
 
 ```
 cc-sf-assistant/
-├── packages/               # Our custom code
-│   ├── fpa-core/          # Pure business logic
-│   ├── fpa-integrations/  # Google/Excel adapters
-│   ├── fpa-workflows/     # Human-in-loop orchestration
-│   └── fpa-cli/           # User interface
-│
-├── external/              # Cloned dependencies (git submodules)
+├── .venv/                   # Poetry virtual environment (auto-created)
+├── .git/
+│   └── hooks/
+│       └── pre-commit       # Installed quality gate
+├── external/                # Cloned submodules
 │   ├── humanlayer/
-│   ├── mcp-gdrive/
 │   ├── gspread/
 │   ├── slidio/
 │   ├── pyfpa/
 │   └── py-money/
-│
-└── .claude/               # Claude Code configuration
-    ├── skills/
-    ├── commands/
-    ├── agents/
-    └── hooks/
+├── config/
+│   └── credentials/         # Your Google credentials (not in git)
+│       ├── service-account.json
+│       └── oauth-token.json
+└── ... (other project files)
 ```
+
+---
+
+## Using Claude Code
+
+### Production Workflows
+
+Execute pre-written, validated scripts:
+
+```bash
+# Variance analysis
+/prod:variance-analysis budget_2025.xlsx actuals_nov.xlsx
+
+# Monthly close
+/prod:monthly-close november
+
+# Consolidate department data
+/prod:consolidate data/departments/
+```
+
+### Development Workflows
+
+Generate new scripts when needed:
+
+```bash
+# Create new analysis script
+/dev:create-script "Calculate YoY revenue growth by department"
+
+# Validate existing script
+/dev:validate-script scripts/core/yoy_growth.py
+
+# Review code
+/dev:review-code scripts/core/variance.py
+```
+
+### Shared Utilities
+
+```bash
+# Get help
+/shared:help
+
+# Validate documentation consistency
+/shared:sync-docs
+```
+
+---
 
 ## Development Workflow
 
 ### Running Tests
 
 ```bash
-# Run all tests across monorepo
-poetry run pytest
+# Activate virtual environment (if not already in it)
+poetry shell
 
-# Run tests for specific package
-cd packages/fpa-core
-poetry run pytest
+# Run all tests
+pytest
+
+# Run specific test file
+pytest tests/test_variance.py
+
+# Run with coverage report
+pytest --cov=scripts --cov-report=term-missing
+
+# Type checking
+mypy scripts/
+
+# Linting
+ruff check scripts/
+
+# Security scanning
+bandit -r scripts/
 ```
 
-### Code Quality
+### Git Workflow with Quality Gates
 
 ```bash
-# Format code
-poetry run black packages/
+# Make changes to scripts
+vim scripts/core/variance.py
 
-# Lint code
-poetry run ruff check packages/
+# Stage changes
+git add scripts/core/variance.py
 
-# Type check
-poetry run mypy packages/
+# Commit (pre-commit hook runs automatically)
+git commit -m "feat: add QoQ variance calculation"
+
+# Pre-commit hook output:
+# Running pre-commit quality checks...
+# ✓ Running tests...
+# ✓ Running type checks...
+# ✓ Running linter...
+# ✓ Running security checks...
+# ✓ Checking for versioned filenames...
+# ✅ All quality checks passed
+
+# Push to remote
+git push
 ```
 
-### Working on a Package
-
-```bash
-# Example: Adding to fpa-core
-cd packages/fpa-core
-
-# Create new module
-mkdir src/fpa_core/variance
-touch src/fpa_core/variance/__init__.py
-
-# Write code (after spec approval!)
-# ...
-
-# Run package-specific tests
-poetry run pytest
-
-# Type check
-poetry run mypy src/
-```
-
-## Claude Code Usage
-
-### Slash Commands
-
-```bash
-# Run variance analysis (human-in-loop workflow)
-/variance-analysis budget.xlsx actuals.xlsx output.xlsx
-```
-
-### Skills (Auto-Invoked)
-
-The `financial-validator` skill automatically activates when working with:
-- Excel files
-- Variance calculations
-- Financial data structures
-
-It provides:
-- Edge case test suites
-- Decimal precision validation
-- Audit compliance checks
-
-### Agents (Independent Review)
-
-```bash
-# Request code review from independent agent
-@code-reviewer Please verify variance calculation in packages/fpa-core/
-```
-
-## Next Steps
-
-**IMPORTANT:** Implementation code should NOT be written until spec.md is reviewed and approved.
-
-Current status:
-- ✅ Monorepo structure setup
-- ✅ Package skeletons created
-- ✅ External dependencies cloned
-- ✅ Comprehensive research completed
-- ⏳ Spec review pending
-- ⏳ Implementation pending approval
-
-### Once Spec Approved:
-
-1. **Review spec.md** - Understand business requirements
-2. **Review plan.md** - Understand technical approach
-3. **Review docs/COMPREHENSIVE_GITHUB_SOURCES.md** - See available libraries
-4. **Start implementation** - Follow Research → Plan → Implement → Verify workflow
+---
 
 ## Troubleshooting
 
 ### Poetry Install Fails
 
+**Issue:** `poetry install` fails with dependency resolution errors
+
+**Solution:**
 ```bash
 # Clear Poetry cache
 poetry cache clear --all pypi
@@ -186,35 +266,92 @@ poetry install
 
 ### Import Errors
 
+**Issue:** `ModuleNotFoundError: No module named 'pandas'`
+
+**Solution:**
 ```bash
 # Ensure you're in Poetry shell
 poetry shell
 
-# Reinstall packages in development mode
+# Reinstall packages
 poetry install
 ```
 
 ### Git Submodule Issues
 
+**Issue:** External dependencies not found
+
+**Solution:**
 ```bash
 # Reinitialize submodules
 git submodule deinit -f external/
 git submodule update --init --recursive
 ```
 
-## Documentation
+### Pre-Commit Hook Not Running
 
-- **spec.md** - Business requirements (WHAT to build)
-- **plan.md** - Technical planning (HOW to build)
-- **CLAUDE.md** - AI behavioral rules
-- **MONOREPO_ARCHITECTURE.md** - Architecture details
-- **EXTERNAL_DEPENDENCIES.md** - Cloned repo documentation
-- **docs/COMPREHENSIVE_GITHUB_SOURCES.md** - Research results (200+ repos)
+**Issue:** Commits succeed without quality checks
+
+**Solution:**
+```bash
+# Reinstall hook
+poetry run python scripts/utils/install_hooks.py
+
+# Verify hook exists
+ls -la .git/hooks/pre-commit
+
+# Verify hook is executable
+chmod +x .git/hooks/pre-commit
+```
+
+### Google Authentication Errors
+
+**Issue:** `google.auth.exceptions.DefaultCredentialsError`
+
+**Solution:**
+```bash
+# Verify credentials file exists
+ls -la config/credentials/
+
+# Check file permissions
+chmod 600 config/credentials/service-account.json
+
+# Verify JSON format is valid
+python -c "import json; json.load(open('config/credentials/service-account.json'))"
+```
+
+---
+
+## Next Steps
+
+1. **Explore Jupyter Notebooks:** `docs/notebooks/01_getting_started.ipynb`
+2. **Review Sample Data:** `data/samples/budget_2025.xlsx`
+3. **Read Documentation:** `spec.md` (business requirements), `plan.md` (technical details)
+4. **Try a Prod Workflow:** `/prod:variance-analysis` with sample data
+5. **Generate a Custom Script:** `/dev:create-script "Your analysis idea"`
+
+---
+
+## Documentation Resources
+
+| Document | Purpose |
+|----------|---------|
+| **README.md** | Project overview and key features |
+| **spec.md** | Business requirements (WHAT we're building) |
+| **plan.md** | Technical planning (HOW to build) |
+| **CLAUDE.md** | AI behavioral rules |
+| **EXTERNAL_DEPENDENCIES.md** | Cloned repository documentation |
+| **docs/COMPREHENSIVE_GITHUB_SOURCES.md** | Research results (200+ repos) |
+| **docs/notebooks/** | Interactive tutorials (7 notebooks) |
+
+---
 
 ## Support
 
-See `.claude/` directory for:
-- Skills: Auto-invoked capabilities
-- Commands: Manual slash commands
-- Agents: Independent subagents
-- Hooks: Quality gates
+- **Troubleshooting:** `docs/user-guides/troubleshooting.md`
+- **FAQ:** `docs/user-guides/faq.md`
+- **Best Practices:** `docs/user-guides/best-practices.md`
+
+---
+
+**Last Updated:** 2025-11-08

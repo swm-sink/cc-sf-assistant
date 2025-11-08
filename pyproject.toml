@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fpa-automation-monorepo"
-version = "0.1.0"
+version = "0.2.0"
 description = "FP&A Automation Assistant - Monorepo with external dependencies"
 authors = ["FP&A Automation Team"]
 readme = "README.md"

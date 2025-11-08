@@ -1,431 +1,336 @@
-# FP&A Automation Assistant - Monorepo
+# FP&A Automation Assistant
 
-**Version:** 0.1.0-MONOREPO
-**Status:** 🏗️ Monorepo Setup Phase
-**Approach:** Spec-Driven Development with Proven External Libraries
-**Architecture:** Separation of Concerns with Cloned Dependencies
+**Version:** 0.2.0-DEV
+**Status:** 🏗️ Development Phase - Documentation Complete
+**Platform:** Claude Code-Native Architecture
+**Deployment:** Single-User, Local Setup
 
 ---
 
 ## Project Overview
 
-Intelligent automation assistant for Financial Planning & Analysis (FP&A) professionals. Eliminates repetitive data collection/consolidation tasks, enabling strategic analysis capacity.
+Claude Code-based automation assistant for Financial Planning & Analysis (FP&A) professionals. Automates repetitive data consolidation, variance analysis, and reporting workflows through conversational commands and Python scripts.
 
-**Research Context:** FP&A professionals spend only 35% of time on high-value tasks. This project automates the 60%+ of activities that can be automated. [Source: FP&A Trends Survey 2024, spec.md]
+**Key Insight:** FP&A professionals spend 60%+ of time on manual data tasks. This project automates those tasks, enabling focus on strategic analysis.
+
+**Source:** FP&A Trends Survey 2024 (referenced in spec.md)
 
 ---
 
-## Monorepo Architecture
+## Architecture
 
-This project uses a **monorepo structure** with clear separation between:
-- Our custom business logic (`packages/`)
-- External proven libraries (`external/`)
-- Shared configuration (`config/`, `.claude/`)
+**Claude Code-Native:** Built as skills, commands, and agents for Claude Code - not traditional Python packages.
+
+**Environment Split:**
+- **Dev workflows** - Generate new scripts when needed (`/dev:create-script`)
+- **Prod workflows** - Execute pre-written validated scripts (`/prod:variance-analysis`)
+- **Shared utilities** - Quality enforcement (Decimal precision, audit trails)
 
 ### Directory Structure
 
 ```
 cc-sf-assistant/
-├── spec.md                          # Business requirements (WHAT)
-├── plan.md                          # Technical planning (HOW)
-├── CLAUDE.md                        # AI behavioral rules
-├── MONOREPO_ARCHITECTURE.md        # Architecture details
-├── EXTERNAL_DEPENDENCIES.md         # Cloned repo documentation
-├── pyproject.toml                   # Root Poetry config
+├── spec.md                  # Business requirements (WHAT to build)
+├── plan.md                  # Technical planning (HOW to build)
+├── CLAUDE.md                # AI behavioral rules
+├── README.md                # This file
+├── pyproject.toml           # Python dependencies
 │
-├── packages/                        # Our custom code
-│   ├── fpa-core/                   # Pure business logic (no I/O)
-│   ├── fpa-integrations/           # Google/Excel adapters
-│   ├── fpa-workflows/              # Human-in-loop orchestration
-│   └── fpa-cli/                    # Command-line interface
-│
-├── external/                        # Cloned GitHub repos
-│   ├── humanlayer/                 # Human-in-loop patterns
-│   ├── mcp-gdrive/                 # Google Drive MCP server
-│   ├── gspread/                    # Google Sheets Python API
-│   ├── slidio/                     # Google Slides templates
-│   ├── pyfpa/                      # FP&A domain functions
-│   └── py-money/                   # Decimal precision money
-│
-├── .claude/                        # Claude Code configuration
-│   ├── skills/financial-validator/ # Auto-invoked validation
-│   ├── commands/variance-analysis.md
-│   ├── agents/code-reviewer.md
-│   └── hooks/stop.sh
-│
-├── config/                         # Shared configuration
-├── tests/                          # Monorepo-wide tests
-└── docs/                           # Documentation
-```
-
-**See [MONOREPO_ARCHITECTURE.md](MONOREPO_ARCHITECTURE.md) for complete architecture details.**
-
----
-
-## External Dependencies (Cloned)
-
-We've cloned 6 proven open-source libraries to leverage for this project:
-
-| Library | Purpose | Stars | License |
-|---------|---------|-------|---------|
-| **humanlayer** | Human-in-loop workflows, Claude Code patterns | 6,686+ ⭐ | Apache-2.0 |
-| **mcp-gdrive** | Google Sheets/Drive via MCP protocol | N/A | MIT |
-| **gspread** | Google Sheets Python API (most popular) | High | MIT |
-| **slidio** | Google Slides template engine | N/A | TBD |
-| **pyfpa** | FP&A-specific Python functions | N/A | TBD |
-| **py-money** | Decimal precision money handling | N/A | TBD |
-
-**See [EXTERNAL_DEPENDENCIES.md](EXTERNAL_DEPENDENCIES.md) for detailed documentation of each library.**
-
-### Why Clone Instead of Install?
-1. **Audit security** - Review code before using
-2. **Pin exact versions** - No surprise breaking changes
-3. **Customize if needed** - Can patch or extend
-4. **Learn patterns** - Study implementation approaches
-5. **Offline development** - No PyPI dependency
-
----
-
-## Claude Code Architecture
-
-This project follows Anthropic's recommended separation of concerns:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│               Configuration Layer                            │
-│  - spec.md (WHAT to build)                                  │
-│  - plan.md (HOW to build)                                   │
-│  - CLAUDE.md (HOW Claude operates)                          │
-└─────────────────────────────────────────────────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-│   Skills     │   │  Commands    │   │   Agents     │
-│ (Auto-invoke)│   │  (Manual)    │   │ (Subagents)  │
-└──────────────┘   └──────────────┘   └──────────────┘
-        │                   │                   │
-        │                   │                   │
-        ▼                   ▼                   ▼
-┌──────────────────────────────────────────────────────┐
-│              Hooks (Quality Gates)                   │
-│  Run at end-of-turn, enforce standards              │
-└──────────────────────────────────────────────────────┘
-```
-
----
-
-## Component Responsibilities
-
-### 1. CLAUDE.md (Behavioral Configuration)
-
-**Purpose:** Define HOW Claude operates (not WHAT to build)
-
-**Contains:**
-- DRY principle enforcement
-- Chain of Verification protocol (4-step anti-hallucination)
-- Critical thinking mandate (skeptical analyst vs yes-man)
-- Financial precision requirements (Decimal only, audit trails)
-- Pre-response quality gate checklist
-- Extreme conciseness defaults
-
-**Does NOT contain:**
-- Business requirements (→ spec.md)
-- Comprehensive test suites (→ Skills)
-- Implementation workflows (→ Commands)
-
-**Line count:** 245 lines (target: <250 per Anthropic guidance)
-
----
-
-### 2. Skills (.claude/skills/)
-
-**Purpose:** Auto-invoked capabilities based on description matching
-
-**Progressive Disclosure Pattern:**
-1. Name + description loaded at startup
-2. SKILL.md loaded when needed
-3. References loaded on-demand
-
-**Current Skills:**
-
-#### financial-validator/
-- **Triggers:** Excel files, variance calculations, data validation
-- **Provides:** Edge case tests, precision validation, audit compliance
-- **Structure:**
-  - `SKILL.md` - Core validation guidance
-  - `references/edge-cases.md` - Comprehensive test suite (10 categories)
-  - `scripts/validate_precision.py` - Executable validation
-
-**Benefit:** Keeps CLAUDE.md concise while providing deep domain expertise when triggered.
-
----
-
-### 3. Commands (.claude/commands/)
-
-**Purpose:** Manual slash commands for human-in-loop workflows
-
-**Current Commands:**
-
-#### /variance-analysis
-- **Usage:** `/variance-analysis <budget> <actual> [output]`
-- **Workflow:** Research → Plan → Implement → Verify (with checkpoints)
-- **Human Checkpoints:**
-  1. After research findings
-  2. After plan approval
-  3. During implementation phases
-  4. After verification results
-- **Enforces:** Spec-driven development, no shortcuts
-
-**Benefit:** Structured workflows with human oversight at critical decision points.
-
----
-
-### 4. Agents (.claude/agents/)
-
-**Purpose:** Specialized subagents with separate context windows
-
-**Current Agents:**
-
-#### code-reviewer
-- **Tools:** Read-only (Read, Grep, Glob)
-- **Mission:** Independent verification, find bugs before merge
-- **Specialty:** Financial precision, edge cases, Decimal validation
-- **Mindset:** Skeptical senior engineer (assume bugs until proven otherwise)
-
-**Benefit:** Context isolation prevents bias, enables ruthlessly honest review.
-
----
-
-### 5. Hooks (.claude/hooks/)
-
-**Purpose:** Automated quality gates that run without model memory
-
-**Current Hooks:**
-
-#### stop.sh (End-of-Turn)
-- **Triggers:** After each Claude Code response
-- **Checks:**
-  - Float usage in financial code (BLOCKING)
-  - Type hints on functions (WARNING)
-  - Financial validator tests (if available)
-  - Python syntax (BLOCKING)
-  - CLAUDE.md line count (WARNING)
-- **Exit Codes:**
-  - 0 = Pass
-  - 2 = Blocking error (Claude must fix)
-
-**Benefit:** Enforces standards automatically, catches issues before commit.
-
----
-
-## Key Files & Single Source of Truth
-
-```
-├── spec.md                    # WHAT to build (business requirements)
-├── plan.md                    # HOW to build (technical planning)
-├── CLAUDE.md                  # HOW Claude operates (behavioral rules)
-│
-├── .claude/
-│   ├── skills/
-│   │   └── financial-validator/
-│   │       ├── SKILL.md
-│   │       ├── references/edge-cases.md
-│   │       └── scripts/validate_precision.py
-│   ├── commands/
-│   │   └── variance-analysis.md
+├── .claude/                 # Claude Code configuration
 │   ├── agents/
-│   │   └── code-reviewer.md
-│   └── hooks/
-│       └── stop.sh
+│   │   ├── dev/            # script-generator, script-validator, code-reviewer
+│   │   ├── prod/           # finance-reviewer, data-validator, reconciler
+│   │   └── shared/         # research-agent
+│   ├── commands/
+│   │   ├── dev/            # /dev:create-script, /dev:validate-script
+│   │   ├── prod/           # /prod:monthly-close, /prod:variance-analysis
+│   │   └── shared/         # /shared:help, /shared:sync-docs
+│   ├── skills/
+│   │   ├── dev/            # python-best-practices, financial-script-generator
+│   │   ├── prod/           # variance-analyzer, account-mapper, report-generator
+│   │   └── shared/         # decimal-precision-enforcer, audit-trail-enforcer
+│   ├── templates/          # Templates for creating skills/commands/agents
+│   └── hooks/              # Quality gates (pre-commit, stop.sh)
 │
-├── src/                       # Implementation (future)
-├── tests/                     # Test suite (future)
-└── README.md                  # This file
+├── scripts/                # Pre-written validated calculation scripts
+│   ├── core/              # variance.py, consolidation.py, favorability.py
+│   ├── integrations/      # gsheet_reader.py, excel_writer.py
+│   ├── workflows/         # monthly_close.py, variance_report.py
+│   └── utils/             # logger.py, validator.py, config_loader.py
+│
+├── external/              # Cloned GitHub repos (git submodules)
+│   ├── humanlayer/        # Human-in-loop patterns (reference)
+│   ├── gspread/           # Google Sheets API (install via pip)
+│   ├── slidio/            # Google Slides patterns (reference)
+│   ├── pyfpa/             # FP&A algorithms (reference)
+│   └── py-money/          # Decimal precision (reference)
+│
+├── data/                  # Sample data for testing
+│   └── samples/           # Realistic budget/actuals files (version controlled)
+│
+├── templates/             # Report templates
+│   ├── variance_report.xlsx
+│   ├── board_deck.pptx
+│   └── life360/           # Life360-branded templates (Phase 6)
+│
+├── docs/                  # Documentation
+│   ├── notebooks/         # Jupyter notebook tutorials
+│   ├── user-guides/       # Markdown guides
+│   └── COMPREHENSIVE_GITHUB_SOURCES.md  # Research results
+│
+├── config/                # Configuration
+│   ├── settings.yaml      # Non-sensitive settings (version controlled)
+│   ├── credentials/       # Google credentials (git ignored)
+│   ├── audit.log          # Centralized audit log (git ignored)
+│   └── workflow-state/    # Saved workflow progress (git ignored)
+│
+└── tests/                 # Comprehensive test suite
+    ├── test_variance.py
+    ├── test_consolidation.py
+    └── test_edge_cases.py
 ```
-
-**Hierarchy:** Claude prioritizes most nested config when multiple CLAUDE.md files exist.
-
----
-
-## Development Workflow
-
-### Research → Plan → Implement → Verify
-
-Following Anthropic's agentic pattern:
-
-**1. Research Phase (No Coding)**
-- Use subagents for investigation
-- Read files, understand context
-- Document findings before proceeding
-
-**2. Plan Phase (Specification)**
-- Generate formal spec document
-- Define inputs, outputs, validation
-- Get human approval before implementation
-- Specs are source of truth, code is derived
-
-**3. Implement Phase (Checkpoints)**
-- Break into logical tasks
-- Progress tracker table
-- Human approval at each checkpoint
-- Update tracker after each task
-
-**4. Verify Phase (Independent)**
-- Run tests against specification
-- Use subagents for verification
-- Ensure no overfitting
-- Human final review before commit
-
----
-
-## Quality Gates (Enforced)
-
-**Pre-Response Checklist (Every Response):**
-
-| Check | Criteria | Action if Fail |
-|-------|----------|----------------|
-| DRY | No spec.md duplication | Reference instead |
-| Source | Has citation or [TO BE MEASURED] | Add marker |
-| Precision | Decimal for currency | Reject float |
-| Audit | Logged transformation | Add logging |
-| Critical | Assumption challenged | Re-analyze |
-| Concise | ≤3 sentences default | Trim |
-
-**Auto-reject response if ANY check fails.**
-
-**End-of-Turn Hook (Automated):**
-- Float usage in src/ → BLOCKING ERROR
-- Missing type hints → WARNING
-- Syntax errors → BLOCKING ERROR
-- CLAUDE.md >300 lines → WARNING
-
----
-
-## Financial Domain Mandates
-
-### Decimal Precision (NON-NEGOTIABLE)
-
-```python
-# ✅ CORRECT
-from decimal import Decimal
-budget = Decimal('100000.00')
-actual = Decimal('115000.00')
-variance = actual - budget  # Exact: Decimal('15000.00')
-
-# ❌ INCORRECT - WILL BE REJECTED BY HOOKS
-budget = 100000.00  # float
-variance = 0.1 + 0.2  # 0.30000000000000004 (precision error)
-```
-
-### Audit Trail (REQUIRED)
-
-Every transformation must log:
-- Timestamp (ISO 8601)
-- User/process
-- Source file(s)
-- Operation performed
-- Generation metadata
-
-### Edge Cases (COMPREHENSIVE)
-
-See `.claude/skills/financial-validator/references/edge-cases.md` for:
-1. Float precision errors
-2. Division by zero
-3. Negative values
-4. NULL/missing data
-5. Concurrent transactions
-6. Multi-currency
-7. Rounding precision
-8. Boundary conditions
-9. Data type mismatches
-10. Large numbers/overflow
 
 ---
 
 ## Quick Start
 
-**See [QUICK_START.md](QUICK_START.md) for complete installation and setup instructions.**
+**See [QUICK_START.md](QUICK_START.md) for complete installation instructions.**
 
 ### Installation (Brief)
 
 ```bash
-# Clone and setup
+# 1. Clone repository
 git clone <repository-url>
 cd cc-sf-assistant
+
+# 2. Initialize git submodules
 git submodule update --init --recursive
 
-# Install with Poetry
+# 3. Install dependencies with Poetry
 poetry install
 
-# Verify
-poetry shell
-python -c "import fpa_core; import fpa_integrations; import fpa_workflows; import fpa_cli"
+# 4. Install pre-commit hooks
+poetry run python scripts/utils/install_hooks.py
+
+# 5. Verify setup
+poetry run pytest
 ```
 
 ### Using Claude Code
 
 ```bash
-# Run variance analysis (human-in-loop)
-/variance-analysis budget.xlsx actuals.xlsx output.xlsx
+# Production workflows (execute pre-written scripts)
+/prod:variance-analysis budget.xlsx actuals.xlsx
+/prod:monthly-close november
+/prod:consolidate data/departments/
 
-# Validate precision (auto-invoked when working with financials)
-# financial-validator skill activates automatically
+# Development workflows (generate new scripts)
+/dev:create-script "Calculate YoY revenue growth by department"
+/dev:validate-script scripts/core/yoy_growth.py
 
-# Request code review (independent verification)
-@code-reviewer Please verify variance calculation in packages/fpa-core/
+# Shared utilities
+/shared:help
+/shared:sync-docs  # Validate documentation consistency
+```
+
+---
+
+## Key Features
+
+### 1. Dev/Prod Workflow Separation
+
+**Dev Workflows:** Generate robust, tested Python scripts on-demand
+- Research → Plan (spec) → Implement (TDD) → Verify (independent review) → Approve
+- ALL scripts use Decimal for currency (enforced by skills)
+- >80% test coverage required (enforced by validation)
+- Independent code review by separate agent
+
+**Prod Workflows:** Execute pre-written scripts for daily FP&A tasks
+- Data validation pre-checks (human approval)
+- Variance analysis, consolidation, board decks
+- Error recovery (save state, resume on failure)
+- Centralized audit logging
+
+### 2. Financial Precision Guarantees
+
+- **Decimal-only:** Float usage for currency blocked by skills
+- **Type safety:** All functions have type hints (enforced by mypy)
+- **Audit trails:** Every operation logged with timestamp, user, inputs, outputs
+- **Edge cases:** Comprehensive tests for division by zero, negative values, NULL handling
+
+### 3. Human-in-Loop Approval
+
+- Data validation: Review validation report before execution
+- Variance review: Approve material variances before export
+- Script generation: Approve spec, approve final code
+- Workflow resumption: Choose to resume or restart after failures
+
+### 4. Simple Local Setup
+
+- **No Docker:** Python virtual environment via Poetry
+- **No cloud:** All processing happens locally
+- **Single-user:** Each FP&A professional has independent setup
+- **No multi-user complexity:** No authentication, no role-based permissions
+
+### 5. Jupyter Notebook Tutorials
+
+- Executable documentation with sample data
+- 7 notebooks covering all workflows
+- Users can modify and experiment
+- Version-controlled, easy to update
+
+---
+
+## External Dependencies
+
+### Installed via pip:
+- **pandas** - Data manipulation
+- **gspread + gspread-dataframe** - Google Sheets integration
+- **openpyxl** - Read Excel files
+- **xlsxwriter** - Write Excel files with formatting
+- **loguru** - Audit logging
+- **click + rich** - CLI interface
+
+### Cloned for Reference:
+- **humanlayer** - Study human-in-loop approval patterns
+- **pyfpa** - Study FP&A consolidation algorithms
+- **slidio** - Study Google Slides template patterns
+- **py-money** - Reference Decimal precision implementation
+- **gspread** - Also cloned for security audit before use
+
+---
+
+## Documentation
+
+- **spec.md** - Business requirements (WHAT we're building, WHY)
+- **plan.md** - Technical planning (HOW to build, implementation details)
+- **CLAUDE.md** - AI behavioral rules (verification protocols, conciseness)
+- **QUICK_START.md** - Setup and installation guide
+- **EXTERNAL_DEPENDENCIES.md** - Cloned repository documentation
+- **docs/COMPREHENSIVE_GITHUB_SOURCES.md** - Research results (200+ repos)
+- **docs/notebooks/** - Jupyter notebook tutorials (7 notebooks)
+
+---
+
+## Development Workflow
+
+### Creating a New Script via Dev Workflow
+
+```bash
+# 1. Request new analysis
+/dev:create-script "Calculate QoQ revenue growth with seasonality adjustment"
+
+# 2. Claude researches existing patterns
+# 3. Claude generates formal specification
+# 4. Human approves spec
+
+# 5. Claude follows TDD workflow:
+#    - RED: Write failing tests
+#    - GREEN: Implement using Decimal
+#    - REFACTOR: Add docstrings, error handling, logging
+#    - VALIDATE: Independent agent review
+
+# 6. Human approves final script
+# 7. Script saved to scripts/core/qoq_growth.py
+# 8. Script now available for prod workflows
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+poetry run pytest
+
+# Run tests for specific module
+poetry run pytest tests/test_variance.py
+
+# Run with coverage
+poetry run pytest --cov=scripts
+
+# Type check
+poetry run mypy scripts/
+
+# Lint
+poetry run ruff check scripts/
+
+# Security check
+poetry run bandit -r scripts/
+```
+
+### Git Workflow
+
+```bash
+# All quality checks run automatically before commit (pre-commit hook)
+git add scripts/core/variance.py
+git commit -m "feat: add QoQ variance to variance.py"
+
+# Pre-commit hook runs:
+# ✓ pytest
+# ✓ mypy
+# ✓ ruff
+# ✓ bandit
+# ✓ Check for versioned filenames (blocks *_v2.py, etc.)
+
+# Push to remote
+git push
 ```
 
 ---
 
 ## Success Metrics
 
-**For Claude's Performance:**
-- ✅ Zero hallucinated claims (all cited or marked [TO BE MEASURED])
-- ✅ Zero float usage in currency calculations
-- ✅ Every response passes pre-response checklist
-- ✅ Concise by default, detailed on request
-- ✅ Critical thinking demonstrated
+**For Script Generation Quality:**
+- ✅ 100% of scripts use Decimal for currency (enforced by hooks)
+- ✅ 100% of scripts have type hints (enforced by mypy)
+- ✅ >80% test coverage on all scripts (enforced by validation)
+- ✅ Zero financial calculation errors in production (measured via audit logs)
 
-**For Project Outcomes:**
-- [TO BE MEASURED] Baseline time for manual processes
-- [TO BE MEASURED] Time reduction with automation
-- [TO BE MEASURED] Error reduction vs manual workflows
-- Expected: 20-30% less time on data processing [Source: McKinsey AI research, spec.md]
-
----
-
-## Research Basis
-
-This architecture implements:
-- **Chain of Verification** (Meta AI Research 2023) - Anti-hallucination
-- **Self-Consistency** principles - Multiple reasoning paths
-- **Critical Thinking** frameworks - Avoid sycophancy
-- **Financial Testing Standards** (2024-2025) - Precision requirements
-- **Anthropic Best Practices** (2025) - Claude Code architecture patterns
-
-See `spec.md` appendix for comprehensive research sources.
+**For User Experience:**
+- [TO BE MEASURED] Time to complete monthly close (baseline vs automated)
+- [TO BE MEASURED] User satisfaction with conversational interface
+- [TO BE MEASURED] Number of scripts generated on-demand vs pre-written
+- [TO BE MEASURED] Accuracy of generated scripts (human review approval rate)
 
 ---
 
-## Document History
+## Deployment Model
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2025-11-08 | Initial repository setup with architecture |
+**Single-User, Local Setup:**
+1. User clones repository
+2. Follows QUICK_START.md instructions
+3. Configures Google credentials manually
+4. Customizes for their company (Life360 branding in Phase 6)
+5. Independent setup - no shared infrastructure
+
+**Why This Approach:**
+- Simple for non-technical FP&A users
+- No cloud costs, no authentication complexity
+- Each user owns their data and configuration
+- Easy to customize and extend
 
 ---
 
-## Next Steps
+## Phase Status
 
-1. Review and approve spec.md (resolve [NEEDS CLARIFICATION] items)
-2. Implement Priority Epic 1: Monthly Close Automation
-3. Create unit tests following TDD approach
-4. Build CI/CD pipeline with quality gates
+- ✅ **Phase 0:** Spec & Planning Complete
+- 🏗️ **Phase 1:** Infrastructure Setup (In Progress)
+- ⏳ **Phase 2:** Dev Workflows
+- ⏳ **Phase 3:** Core Scripts - Excel
+- ⏳ **Phase 4:** Prod Workflows - Excel
+- ⏳ **Phase 5:** Google Integration
+- ⏳ **Phase 6:** Life360 Branding & Polish
+
+---
+
+## License
+
+[TO BE DETERMINED]
+
+## Contact
+
+[TO BE ADDED]
 
 ---
 
 **Maintained by:** Claude Code with human oversight
-**License:** [TO BE DETERMINED]
-**Contact:** [TO BE ADDED]
+**Last Updated:** 2025-11-08

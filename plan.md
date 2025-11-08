@@ -1753,6 +1753,303 @@ description: Monthly close workflow with error recovery
 
 ---
 
+### 6. Testing & Quality Assurance
+
+**Sample Data Structure:**
+
+```
+data/
+├── samples/                      # Realistic sample data (version controlled)
+│   ├── budget_2025.xlsx         # Sample budget with 50 accounts
+│   ├── actuals_nov_2025.xlsx    # Sample actuals for November
+│   ├── actuals_dec_2025.xlsx    # Sample actuals for December
+│   ├── departments/             # Multi-department data for consolidation
+│   │   ├── finance_budget.xlsx
+│   │   ├── marketing_budget.xlsx
+│   │   ├── operations_budget.xlsx
+│   │   ├── finance_actuals.xlsx
+│   │   ├── marketing_actuals.xlsx
+│   │   └── operations_actuals.xlsx
+│   └── README.md                # Documentation of sample data structure
+└── .gitkeep
+```
+
+**Sample Data Characteristics:**
+- Realistic account names (Revenue, COGS, Salaries, Marketing, etc.)
+- Mix of revenue and expense accounts
+- Realistic dollar amounts ($10k-$500k range)
+- Intentional edge cases:
+  - 1-2 accounts with zero budget (division by zero test)
+  - 1-2 negative actuals (error handling test)
+  - 1-2 NULL values (validation test)
+  - Material variances (>10% and >$50k)
+  - Immaterial variances (<10% or <$50k)
+
+**Pre-Commit Hook Implementation:**
+
+```bash
+# .git/hooks/pre-commit (created automatically)
+#!/bin/bash
+
+echo "Running pre-commit quality checks..."
+
+# Run pytest
+echo "✓ Running tests..."
+poetry run pytest || { echo "❌ Tests failed"; exit 1; }
+
+# Run mypy
+echo "✓ Running type checks..."
+poetry run mypy scripts/ || { echo "❌ Type check failed"; exit 1; }
+
+# Run ruff
+echo "✓ Running linter..."
+poetry run ruff check scripts/ || { echo "❌ Linting failed"; exit 1; }
+
+# Run bandit (security)
+echo "✓ Running security checks..."
+poetry run bandit -r scripts/ || { echo "❌ Security check failed"; exit 1; }
+
+# Check for versioned filenames
+echo "✓ Checking for versioned filenames..."
+if git diff --cached --name-only | grep -E "_v[0-9]+\.py|_new\.py|_old\.py"; then
+    echo "❌ Versioned filenames detected (use git for versioning)"
+    exit 1
+fi
+
+echo "✅ All quality checks passed"
+exit 0
+```
+
+**Installation:**
+```bash
+# scripts/utils/install_hooks.py
+from pathlib import Path
+import shutil
+
+def install_pre_commit_hook():
+    """Install pre-commit hook for quality gates."""
+    hook_source = Path(".claude/hooks/pre-commit")
+    hook_dest = Path(".git/hooks/pre-commit")
+
+    if hook_source.exists():
+        shutil.copy(hook_source, hook_dest)
+        hook_dest.chmod(0o755)
+        print("✅ Pre-commit hook installed")
+    else:
+        print("⚠️  Hook source not found")
+```
+
+**Skills/Commands:**
+- `/shared:setup` command runs `install_pre_commit_hook()` during initial setup
+- `python-best-practices` skill references sample data for test generation
+
+---
+
+### 7. Deployment & Setup (Single-User, Local)
+
+**Setup Process:**
+
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd cc-sf-assistant
+
+# 2. Initialize submodules (external dependencies)
+git submodule update --init --recursive
+
+# 3. Create virtual environment with Poetry
+poetry install
+
+# 4. Install pre-commit hooks
+poetry run python scripts/utils/install_hooks.py
+
+# 5. Configure credentials (manual)
+mkdir -p config/credentials
+# User adds service-account.json, oauth-token.json manually
+
+# 6. Verify setup
+poetry run pytest
+```
+
+**No Docker, No Cloud:**
+- Simple Python virtual environment managed by Poetry
+- All processing happens locally
+- No shared infrastructure, no authentication layer
+- Each user has independent setup
+
+**Distribution Model:**
+- Users download/clone repository
+- Follow QUICK_START.md instructions
+- Configure credentials for their Google account
+- Customize for their company (Life360 for this user)
+
+---
+
+### 8. Security (Simple Approach)
+
+**Credential Management:**
+
+```
+config/
+├── credentials/
+│   ├── .gitignore              # Ignore all credentials
+│   ├── service-account.json    # Google service account (user adds)
+│   ├── oauth-token.json        # OAuth token (user adds)
+│   └── README.md               # Instructions for obtaining credentials
+└── settings.yaml               # Non-sensitive settings (version controlled)
+```
+
+**.gitignore:**
+```
+# Credentials (never commit)
+config/credentials/*.json
+config/credentials/*.token
+
+# Audit logs (contain sensitive data)
+config/audit.log
+
+# Workflow state (may contain sensitive paths)
+config/workflow-state/*.json
+
+# Test outputs
+/tmp/
+*.xlsx
+*.pptx
+```
+
+**Security Principles:**
+- User responsible for securing their local machine
+- No encryption at rest (keeps setup simple)
+- Credentials never committed to git
+- Clear documentation on credential setup
+
+**Future Consideration:**
+- Add encryption at rest in Phase 7+ if needed
+- Use system keychain (macOS Keychain, Windows Credential Manager)
+- For now: simple file-based storage with .gitignore
+
+---
+
+### 9. Documentation & Training (Jupyter Notebooks)
+
+**Notebook Structure:**
+
+```
+docs/
+├── notebooks/
+│   ├── 01_getting_started.ipynb        # Setup, verify installation
+│   ├── 02_variance_analysis.ipynb     # Monthly variance workflow
+│   ├── 03_monthly_close.ipynb         # Full monthly close process
+│   ├── 04_board_deck.ipynb            # Generate board presentation
+│   ├── 05_consolidation.ipynb         # Multi-department consolidation
+│   ├── 06_custom_analysis.ipynb       # Creating custom scripts via dev workflow
+│   ├── 07_google_integration.ipynb    # Google Sheets/Slides integration
+│   └── data/                           # Notebook-specific sample data
+│       ├── sample_budget.xlsx
+│       └── sample_actuals.xlsx
+└── user-guides/                        # Markdown guides (non-executable)
+    ├── troubleshooting.md
+    ├── faq.md
+    └── best-practices.md
+```
+
+**Notebook Features:**
+- Executable cells with actual code
+- Sample data embedded or referenced
+- Expected outputs shown
+- Users can modify and experiment
+- Version-controlled (`.ipynb` files)
+
+**Example Notebook (variance_analysis):**
+```python
+# Cell 1: Setup
+import pandas as pd
+from decimal import Decimal
+from scripts.core.variance import calculate_variance
+
+# Cell 2: Load sample data
+budget = pd.read_excel("../data/samples/budget_2025.xlsx")
+actuals = pd.read_excel("../data/samples/actuals_nov_2025.xlsx")
+
+# Cell 3: Run variance analysis
+variance_results = calculate_variance(budget, actuals, account_type="revenue")
+
+# Cell 4: Display results
+print(variance_results)
+
+# Cell 5: Visualize material variances
+import matplotlib.pyplot as plt
+material = variance_results[variance_results['material'] == True]
+material.plot(kind='bar', x='account', y='variance_pct')
+plt.title("Material Variances (>10%)")
+plt.show()
+```
+
+**Why Notebooks:**
+- Executable documentation (users can run it)
+- Interactive learning (modify and see results)
+- Version-controlled (track changes)
+- No video maintenance burden
+- Users can copy code for their own analyses
+
+**No Interactive CLI Help:**
+- `/shared:help` provides simple text help
+- References notebooks for tutorials
+- No step-by-step interactive walkthroughs in CLI
+
+---
+
+### 10. Monitoring & Notifications (Future)
+
+**Current State (MVP):**
+- No automated performance metrics tracking
+- No error notifications (email, Slack, etc.)
+- Errors displayed in Claude Code interface
+- Errors logged to `config/audit.log`
+
+**Future Additions (Post-MVP):**
+
+**Performance Metrics (Phase 7+):**
+```python
+# Future: scripts/utils/metrics.py
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass
+class PerformanceMetrics:
+    script: str
+    execution_time_ms: int
+    memory_usage_mb: float
+    rows_processed: int
+    timestamp: datetime
+
+def log_metrics(metrics: PerformanceMetrics) -> None:
+    """Log performance metrics for analysis."""
+    # Future implementation
+    pass
+```
+
+**Error Notifications (Phase 7+):**
+```python
+# Future: scripts/utils/notifications.py
+def send_error_notification(
+    error: Exception,
+    workflow: str,
+    context: dict
+) -> None:
+    """Send error notification via email/Slack."""
+    # Future implementation
+    pass
+```
+
+**Why Not Now:**
+- Keeps MVP simple
+- Claude Code already informs user of errors
+- Can add monitoring later if bottlenecks identified
+- Focus on core functionality first
+
+---
+
 ## Document History
 
 | Version | Date | Author | Changes |
