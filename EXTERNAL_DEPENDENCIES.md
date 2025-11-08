@@ -208,46 +208,59 @@ Financial calculations require exact decimal math. Floats cause rounding errors 
 
 ## Integration Strategy
 
-### How External Repos Fit Into Our Monorepo
+### How External Repos Fit Into Claude Code-Native Architecture
+
+**Architecture Change:** Project now uses Claude Code-native architecture (skills, commands, agents) instead of traditional Python packages.
 
 ```
 cc-sf-assistant/
-├── external/                    # Cloned repos (read-only reference)
-│   ├── humanlayer/             # Patterns and architecture reference
-│   ├── mcp-gdrive/             # MCP protocol implementation
-│   ├── gspread/                # Direct dependency
-│   ├── slidio/                 # Direct dependency
-│   ├── pyfpa/                  # Direct dependency
-│   └── py-money/               # Direct dependency
+├── external/                    # Cloned repos (reference only)
+│   ├── humanlayer/             # Human-in-loop patterns (REFERENCE)
+│   ├── mcp-gdrive/             # MCP protocol patterns (FUTURE)
+│   ├── gspread/                # INSTALL via pip (security audit)
+│   ├── slidio/                 # REFERENCE for patterns
+│   ├── pyfpa/                  # REFERENCE for algorithms
+│   └── py-money/               # REFERENCE for Decimal patterns
 │
-└── packages/                    # Our custom code
-    ├── fpa-core/               # Uses: py-money, pyfpa patterns
-    ├── fpa-integrations/       # Uses: gspread, slidio, mcp-gdrive
-    ├── fpa-workflows/          # Uses: humanlayer patterns
-    └── fpa-cli/                # Orchestrates all packages
+├── .claude/                     # Claude Code configuration
+│   ├── skills/                 # Uses patterns from pyfpa, humanlayer
+│   ├── commands/               # Orchestrates workflows
+│   └── agents/                 # Independent review/validation
+│
+└── scripts/                     # Python scripts executed by Claude
+    ├── core/                   # Uses Decimal (py-money patterns)
+    ├── integrations/           # Uses gspread (via pip)
+    ├── workflows/              # Uses humanlayer approval patterns
+    └── utils/                  # Helper functions
 ```
 
-### Dependency Model
+### Dependency Model (Claude Code-Native)
 
-**Option 1: Direct Path Dependencies (Current)**
-```toml
-# packages/fpa-integrations/pyproject.toml
-[tool.poetry.dependencies]
-gspread = { path = "../../external/gspread", develop = true }
-slidio = { path = "../../external/slidio", develop = true }
-```
-
-**Option 2: Install from PyPI (Simpler)**
+**Installed via pip (pyproject.toml):**
 ```toml
 [tool.poetry.dependencies]
-gspread = "^6.1.2"  # Install from PyPI
+python = "^3.11"
+pandas = "^2.1.0"
+gspread = "^6.1.2"              # INSTALL (most mature)
+gspread-dataframe = "^4.0.0"    # Pandas integration
+openpyxl = "^3.1.2"             # Excel reading
+xlsxwriter = "^3.1.9"           # Excel writing
+loguru = "^0.7.2"               # Audit logging
+click = "^8.1.7"                # CLI interface
+rich = "^13.7.0"                # Terminal UI
 ```
 
-**Recommendation:** Start with PyPI installs (simpler). Clone repos for:
-1. Reference implementation patterns
-2. Reading source code for deep understanding
-3. Future customization if needed
-4. Audit security before production use
+**Cloned for reference only (NOT installed as dependencies):**
+- **humanlayer:** Study approval workflow patterns → apply to .claude/commands/
+- **slidio:** Study Google Slides patterns → implement in scripts/integrations/gslides_generator.py
+- **pyfpa:** Study consolidation algorithms → implement in scripts/core/consolidation.py
+- **py-money:** Study Decimal precision patterns → use Python's `decimal.Decimal` directly
+- **mcp-gdrive:** Future MCP integration (not Phase 0-1)
+
+**Rationale:**
+1. **gspread:** Production-ready, widely used, install via pip for stability
+2. **Others:** Reference implementations, audit patterns, implement custom versions
+3. **No path dependencies:** Simpler dependency management, easier to maintain
 
 ---
 

@@ -625,9 +625,26 @@ logger.info(
 
 ## Testing Strategy
 
+**CRITICAL REQUIREMENT:** 95%+ test coverage enforced by pre-commit hooks. TDD (Test-Driven Development) is MANDATORY for all financial calculation scripts.
+
+### Test-Driven Development (TDD) Workflow
+
+**Reference:** [.claude/templates/workflows/TDD_WORKFLOW.md](.claude/templates/workflows/TDD_WORKFLOW.md)
+
+**Phases:**
+1. **RED** - Write failing tests first
+2. **GREEN** - Implement minimal code to pass tests
+3. **REFACTOR** - Add type hints, docstrings, error handling, audit logging
+4. **VALIDATE** - Independent code-reviewer agent verifies implementation
+
+**Enforcement:**
+- Pre-commit hook blocks commits with <95% coverage
+- TDD workflow template enforced by skills
+- Code generated without TDD is rejected
+
 ### Unit Testing
 
-**Coverage Target:** 80%+ for all modules
+**Coverage Target:** 95%+ for all modules (ENFORCED)
 
 ```python
 # tests/unit/test_variance_calculator.py
@@ -1239,7 +1256,7 @@ cc-sf-assistant/
    - mypy (type checking)
    - ruff (linting)
    - bandit (security)
-   - coverage (>80% required)
+   - coverage (>95% required - ENFORCED by pre-commit hook)
 4. Independent code review by separate agent (read-only context)
 5. Human final approval
 6. Script saved to `scripts/` directory
@@ -1249,7 +1266,7 @@ cc-sf-assistant/
 - ❌ Missing type hints → `python-best-practices` requires
 - ❌ No error handling → `python-best-practices` requires
 - ❌ No audit logging → `audit-trail-enforcer` requires
-- ❌ Low test coverage → `script-validator` blocks (<80%)
+- ❌ Low test coverage → `script-validator` blocks (<95%)
 
 ### External Library Integration Strategy
 
@@ -1793,9 +1810,9 @@ data/
 
 echo "Running pre-commit quality checks..."
 
-# Run pytest
+# Run pytest with 95% coverage requirement
 echo "✓ Running tests..."
-poetry run pytest || { echo "❌ Tests failed"; exit 1; }
+poetry run pytest --cov=scripts --cov-fail-under=95 || { echo "❌ Tests failed or coverage <95%"; exit 1; }
 
 # Run mypy
 echo "✓ Running type checks..."

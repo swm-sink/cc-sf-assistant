@@ -96,56 +96,82 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 
 ## User Stories & Acceptance Criteria
 
-### Epic 1: Monthly Close Automation
+**Phase Validation:** See [specs/PHASE_VALIDATION_CHECKLIST.md](specs/PHASE_VALIDATION_CHECKLIST.md) for exit criteria for each implementation phase.
 
-#### Story 1.1: Multi-Department Data Consolidation
+### Epic 1: Post-Close Variance Analysis
 
-**As an** FP&A Analyst
-**I want to** automatically consolidate actuals from multiple department Excel files
-**So that** I can eliminate hours of manual data copying each month
+**Scope Change:** Focus on POST-CLOSE processes, not month-end close itself. Month-end close happens in separate systems (Adaptive Insights, Databricks). This epic focuses on extracting closed data, analyzing variances, stakeholder review, adjustments, and finalizing reports.
 
-**Acceptance Criteria:**
-- [ ] System accepts folder path containing department Excel files as input
-- [ ] All files with compatible structure are identified automatically
-- [ ] Account codes from department files are mapped to corporate chart of accounts
-- [ ] Data from all departments is merged into single consolidated file
-- [ ] Unmatched accounts are flagged for review (not silently dropped)
-- [ ] Output file includes audit trail showing source of each value
-- [ ] Process completes quickly for typical datasets (performance requirements to be defined based on user testing)
-- [ ] Clear error messages if files have structural issues
+**Workflow:**
+1. **Close** (External) - Month closed in Adaptive/Databricks
+2. **Extract** - Pull actuals from Databricks, budget from Adaptive
+3. **Analyze** - Calculate variances, flag material items
+4. **Review** - Present to stakeholders, gather feedback
+5. **Adjust** - Apply approved adjustments
+6. **Finalize** - Upload finalized data to Adaptive
+7. **Report** - Generate Google Slides/Sheets reports
 
-**Success Metrics:**
-- [TO BE MEASURED] Baseline: Time currently spent on manual consolidation
-- [TO BE VALIDATED] Target: Significant reduction in consolidation time
-- Expected outcome: Majority of manual data entry eliminated
-
-**Edge Cases to Handle:**
-- Different column naming conventions across departments
-- Missing or incomplete data in source files
-- New account codes not in master mapping
-- Files with extra columns (employee name, cost center, project code)
-- Date format variations (MM/DD/YYYY, YYYY-MM-DD, text month names)
+**Integration Specifications:**
+- [specs/adaptive/ADAPTIVE_API_SPEC.md](specs/adaptive/ADAPTIVE_API_SPEC.md) - Adaptive Insights API integration
+- [specs/databricks/DATABRICKS_API_SPEC.md](specs/databricks/DATABRICKS_API_SPEC.md) - Databricks SQL API integration
+- [specs/google/GOOGLE_WORKSPACE_SPEC.md](specs/google/GOOGLE_WORKSPACE_SPEC.md) - Google Workspace integration
 
 ---
 
-#### Story 1.2: GL Account Reconciliation
+#### Story 1.1: Extract Actuals from Databricks
 
 **As an** FP&A Analyst
-**I want to** verify all budget accounts have matching actuals and vice versa
-**So that** I can identify missing data before running variance analysis
+**I want to** automatically extract monthly actuals from Databricks SQL warehouse
+**So that** I can analyze variance without manual data exports
 
 **Acceptance Criteria:**
-- [ ] System compares account lists from budget and actuals files
-- [ ] Accounts in budget but missing from actuals are listed as "No Actuals Reported"
-- [ ] Accounts in actuals but not in budget are listed as "Unbudgeted Activity"
-- [ ] Reconciliation report generated showing all mismatches
-- [ ] Option to proceed with analysis or halt until reconciliation complete
-- [ ] Reconciliation report saved with timestamp for audit trail
+- [ ] Connect to Databricks SQL warehouse via Personal Access Token
+- [ ] Execute parameterized queries for specific month/year
+- [ ] Pull actuals data grouped by account and department
+- [ ] Convert all amounts to Decimal precision (no float)
+- [ ] Handle NULL values explicitly (flag for review)
+- [ ] Save extracted data locally for offline analysis
+- [ ] Log all queries to audit trail with timestamp and parameters
+
+**Success Metrics:**
+- [TO BE MEASURED] Time saved vs. manual CSV export
+- Zero data precision errors (Decimal enforcement)
+- Complete audit trail of data extraction
+
+**Edge Cases to Handle:**
+- Databricks warehouse offline/unavailable (retry logic)
+- Query timeout on large datasets (async execution)
+- Account IDs not matching Adaptive chart of accounts (reconciliation report)
+- NULL amounts in source data (flag, don't drop)
+
+---
+
+#### Story 1.2: Extract Budget from Adaptive Insights
+
+**As an** FP&A Analyst
+**I want to** automatically extract budget data from Adaptive Insights
+**So that** I have both actuals and budget ready for variance analysis
+
+**Acceptance Criteria:**
+- [ ] Connect to Adaptive Insights API via API token
+- [ ] Export budget for specific version (e.g., "FY 2025 Budget")
+- [ ] Pull budget data for specific month/year
+- [ ] Parse XML response format to structured data
+- [ ] Convert amounts to Decimal precision
+- [ ] Reconcile account lists (Databricks actuals vs Adaptive budget)
+- [ ] Flag unmatched accounts for review
+- [ ] Save extracted data locally
 
 **Success Metrics:**
 - Zero undetected account mismatches
-- Reconciliation issues identified before variance calculation
-- Audit trail for all reconciliation decisions
+- Complete audit trail for budget extraction
+- Reconciliation report generated before analysis
+
+**Edge Cases to Handle:**
+- API rate limits (exponential backoff retry)
+- Version not found (clear error message)
+- Account structure changes (reconciliation workflow)
+- Negative budget values (handle correctly for contra accounts)
 
 ---
 

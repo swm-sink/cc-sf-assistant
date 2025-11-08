@@ -152,6 +152,64 @@ See `.claude/skills/financial-validator/` for comprehensive test suite including
 
 ---
 
+## Architecture Principles
+
+**Reference:** Full details in MONOREPO_ARCHITECTURE.md (for historical context; project now uses Claude Code-native architecture)
+
+**Claude Code-Native Architecture:**
+- Skills (auto-invoked capabilities), Commands (slash commands), Agents (subagents)
+- Dev/Prod/Shared environment split
+- Python scripts executed by Claude, not distributed as standalone software
+
+### Separation of Concerns
+
+**1. Pure Business Logic (scripts/core/)**
+- Core FP&A calculations (variance, consolidation, forecasting)
+- NO I/O, NO external APIs, pure functions
+- Most foundational layer - no dependencies on other modules
+- Example: `calculate_variance(actual: Decimal, budget: Decimal, account_type: str) -> VarianceResult`
+
+**2. External System Adapters (scripts/integrations/)**
+- Abstract external services (Adaptive, Databricks, Google)
+- Adapters pattern - swap implementations without changing core
+- Depends on core types/models
+- Example: `AdaptiveClient`, `DatabricksClient`, `GoogleSheetsClient`
+
+**3. Orchestration & Human-in-Loop (scripts/workflows/)**
+- Coordinate multi-step processes with human approval checkpoints
+- Research → Plan → Implement → Verify workflows
+- Approval gates (user reviews before proceeding)
+- Depends on core + integrations
+
+**4. User Interface (.claude/commands/)**
+- Slash commands hide complexity from non-technical users
+- Interactive prompts for file paths, date ranges
+- Human-friendly error messages
+- Example: `/prod:variance-analysis budget.xlsx actuals.xlsx`
+
+### External Dependencies Strategy
+
+**Cloned Repos (external/ via git submodules):**
+1. **Pin exact versions** - No surprise breaking changes
+2. **Customize if needed** - Can patch bugs or add features
+3. **Audit code** - Review security and quality before use
+4. **Offline development** - No dependency on PyPI availability
+
+**Installed via pip (specified in pyproject.toml):**
+- pandas, gspread, openpyxl, xlsxwriter (production dependencies)
+- pytest, mypy, ruff, bandit (development dependencies)
+
+### Benefits
+
+1. **Clear Boundaries:** Each layer has single responsibility
+2. **Independent Testing:** Test business logic without API calls
+3. **Flexible Deployment:** Single-user local setup, easily customizable
+4. **Team Scalability:** Different people can own different layers (future)
+5. **Audit Trail:** External code in `external/`, our code in `scripts/` and `.claude/`
+6. **Non-Technical Users:** Commands hide complexity, expose value
+
+---
+
 ## Code Quality Standards
 
 **Type Safety:**
