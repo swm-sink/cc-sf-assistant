@@ -346,6 +346,24 @@ See `.claude/skills/financial-validator/references/edge-cases.md` for:
 
 ## Quick Start
 
+**See [QUICK_START.md](QUICK_START.md) for complete installation and setup instructions.**
+
+### Installation (Brief)
+
+```bash
+# Clone and setup
+git clone <repository-url>
+cd cc-sf-assistant
+git submodule update --init --recursive
+
+# Install with Poetry
+poetry install
+
+# Verify
+poetry shell
+python -c "import fpa_core; import fpa_integrations; import fpa_workflows; import fpa_cli"
+```
+
 ### Using Claude Code
 
 ```bash
@@ -356,17 +374,7 @@ See `.claude/skills/financial-validator/references/edge-cases.md` for:
 # financial-validator skill activates automatically
 
 # Request code review (independent verification)
-@code-reviewer Please verify variance calculation in src/core/
-```
-
-### Running Validation Locally
-
-```bash
-# Run financial precision tests
-python .claude/skills/financial-validator/scripts/validate_precision.py
-
-# Run quality gates manually
-.claude/hooks/stop.sh
+@code-reviewer Please verify variance calculation in packages/fpa-core/
 ```
 
 ---
