@@ -163,7 +163,8 @@ specs/
 ├── plan.md                    # Main technical plan (HOW to build)
 ├── {topic}/                   # Topic-specific research and planning (READ-ONLY after approval)
 │   ├── research.md            # Research findings for this topic
-│   └── plan.md                # Detailed implementation plan for this topic
+│   ├── plan.md                # Detailed implementation plan for this topic
+│   └── checklist.md           # Validation checklist to assess alignment
 └── ...
 ```
 
@@ -171,13 +172,16 @@ specs/
 - Topic directory: `specs/{topic}/` (kebab-case, descriptive)
 - Research artifact: `specs/{topic}/research.md`
 - Implementation plan: `specs/{topic}/plan.md`
+- Validation checklist: `specs/{topic}/checklist.md`
 
 **Examples:**
-- Meta-skills: `specs/meta-skills/research.md` → `specs/meta-skills/plan.md`
-- Google integration: `specs/google-workspace/research.md` → `specs/google-workspace/plan.md`
+- Meta-skills: `specs/meta-skills/research.md` → `specs/meta-skills/plan.md` + `specs/meta-skills/checklist.md`
+- Google integration: `specs/google-workspace/research.md` → `specs/google-workspace/plan.md` + `specs/google-workspace/checklist.md`
 
 **Enforcement:**
-- ALL complex implementations must have research + plan documents in specs/
+- ALL complex implementations must have research + plan + checklist documents in specs/{topic}/
+- checklist.md tracks validation and alignment across all 4 phases
+- Update checklist.md status indicators (✅ 🔄 ⏳ ❌) as work progresses
 - Documents are READ-ONLY after user approval (create new versions if major changes needed)
 - Each checkpoint requires explicit user approval before proceeding
 - Atomic git commits after each phase completion
@@ -358,6 +362,7 @@ See `.claude/skills/financial-validator/` for comprehensive test suite including
 - `CLAUDE.md` - Behavioral rules (HOW Claude operates) - This file
 - `specs/{topic}/research.md` - Research artifacts for specific topics (meta-skills, integrations, etc.)
 - `specs/{topic}/plan.md` - Implementation plans for specific topics
+- `specs/{topic}/checklist.md` - Validation checklist to assess alignment across all phases
 - `.claude/skills/{skill-name}/SKILL.md` - Auto-invoked capabilities (variance-analyzer, financial-validator)
 - `.claude/commands/{subdir}/{command}.md` - Slash commands (/variance-analysis, /sync-docs, etc.)
 - `.claude/agents/{subdir}/{agent}.md` - Specialized subagents (code-reviewer, data-analyst)
