@@ -1,8 +1,29 @@
 # Meta-Infrastructure Validation Checklist
 
-**Version:** 1.0-DRAFT
-**Date:** 2025-11-09
+**Version:** 1.1-DRAFT (RESEQUENCED)
+**Date:** 2025-11-09 (Updated for Dev-First Priority)
 **Purpose:** Track progress and validate alignment across RPIV phases for meta-infrastructure development
+
+---
+
+## ⚠️ CRITICAL: RESEQUENCED IMPLEMENTATION ORDER
+
+**🚨 IMPLEMENTATION ORDER CHANGE (2025-11-09):**
+
+Phases below are numbered sequentially (Phase 1, 2, 3...) for organizational clarity, but **implementation order is different**:
+
+```
+ACTUAL IMPLEMENTATION SEQUENCE:
+
+1️⃣ FIRST: Phase 7 (Development Workflows) - Week 1-2
+2️⃣ SECOND: Phase 1 (Shared Foundation) - Week 3
+3️⃣ THIRD: Phases 2-6 (Production Infrastructure) - Week 4-11
+4️⃣ FOURTH: Phase 8 (Orchestration) - Week 12
+```
+
+**When marking components complete, implement in the order above, NOT numerical order.**
+
+**See:** plan.md for full rationale. TL;DR: Build the tools to build tools first.
 
 ---
 
@@ -53,9 +74,11 @@
 
 ---
 
-#### Phase 1: Shared Foundation (Week 1)
+#### Phase 1 ➡️ ACTUAL PRIORITY 2: Shared Foundation (Week 3)
 
-**Target:** 3 components
+**⚠️ IMPLEMENT AFTER:** Phase 7 (Actual Priority 1) is complete.
+
+**Target:** 3 components (built using dev tools from Phase 7)
 
 | Component | Type | Status | Notes |
 |-----------|------|--------|-------|
@@ -145,9 +168,11 @@
 
 ---
 
-#### Phase 7: Development Workflows (Week 12-13)
+#### Phase 7 ➡️ ACTUAL PRIORITY 1: Development Workflows ⭐ **IMPLEMENT FIRST** (Week 1-2)
 
-**Target:** 8 components
+**🚨 CRITICAL:** Implement this phase BEFORE all others.
+
+**Target:** 8 components (tools to build tools)
 
 | Component | Type | Status | Notes |
 |-----------|------|--------|-------|

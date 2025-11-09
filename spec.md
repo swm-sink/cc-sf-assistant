@@ -19,6 +19,52 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 
 ---
 
+## ⚠️ CRITICAL: Development Infrastructure First
+
+**🚨 MANDATORY PREREQUISITE:** Epic 0 (Meta-Infrastructure) MUST be completed BEFORE any business feature implementation (Epics 1-4).
+
+**WHY THIS ORDER IS NON-NEGOTIABLE:**
+
+We are building a **Claude Code-native FP&A automation system** that uses commands, agents, and skills. Before we can build the business features (variance analysis, reporting, forecasts), we MUST first build the development infrastructure that creates those components.
+
+**The Correct Build Sequence:**
+
+```
+1. FIRST: Development Infrastructure (Story 0.7)
+   └─ Build the tools to build tools
+   └─ /create-script, /validate-script, /review-code commands
+   └─ @script-generator, @test-generator, @script-validator agents
+   └─ python-best-practices, test-suite-generator skills
+
+2. SECOND: Shared Foundation (Story 0.1)
+   └─ Build quality enforcement
+   └─ decimal-precision-enforcer, audit-trail-enforcer skills
+   └─ /setup command
+
+3. THIRD: Production Infrastructure (Stories 0.2-0.6, 0.8)
+   └─ Build business feature components using dev tools
+   └─ Data extraction, reconciliation, reporting, etc.
+   └─ Each created using the development infrastructure from Step 1
+```
+
+**What Happens If We Skip This:**
+- ❌ Manual script creation → high error rate, inconsistent patterns
+- ❌ No automated validation → financial calculation bugs slip through
+- ❌ No test generation → insufficient edge case coverage
+- ❌ Reinventing the wheel for each component
+
+**What Happens If We Follow This:**
+- ✅ Automated script generation with validated templates
+- ✅ Every component gets comprehensive test suite automatically
+- ✅ Independent code review for financial calculations
+- ✅ Consistent patterns enforced across all infrastructure
+
+**Priority:** Development tools (Story 0.7) → Shared foundation (Story 0.1) → Production features (Stories 0.2-0.6, 0.8) → Business features (Epics 1-4)
+
+**See:** [specs/meta-infrastructure/plan.md](specs/meta-infrastructure/plan.md) for resequenced 8-phase implementation plan
+
+---
+
 ## Problem Statement
 
 ### Current Pain Points
@@ -132,11 +178,52 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 
 ---
 
-#### Story 0.1: Shared Foundation Infrastructure
+## 🔧 RESEQUENCED IMPLEMENTATION ORDER
+
+**⚠️ CRITICAL:** Stories are numbered sequentially (0.1, 0.2, ..., 0.8) for reference, but **implementation order is different**.
+
+**ACTUAL IMPLEMENTATION SEQUENCE:**
+
+```
+Priority 1: DEVELOPMENT INFRASTRUCTURE (Week 1-2)
+  └─ Story 0.7: Development Workflow Infrastructure
+     Build the tools to create all other components
+
+Priority 2: SHARED FOUNDATION (Week 3)
+  └─ Story 0.1: Shared Foundation Infrastructure
+     Build quality enforcement that dev tools will use
+
+Priority 3: PRODUCTION INFRASTRUCTURE (Week 4-11)
+  └─ Story 0.2: Data Extraction Infrastructure
+  └─ Story 0.3: Account Reconciliation Infrastructure
+  └─ Story 0.4: Reporting Infrastructure
+  └─ Story 0.5: Google Workspace Integration Infrastructure
+  └─ Story 0.6: Forecast Maintenance Infrastructure
+     Build business components using dev tools from Priority 1
+
+Priority 4: ORCHESTRATION (Week 12)
+  └─ Story 0.8: Orchestration Infrastructure
+     Tie everything together in end-to-end workflow
+```
+
+**Rationale:** We cannot efficiently build production components (Stories 0.2-0.6) without development tools (Story 0.7). Building dev infrastructure first ensures every subsequent component gets automated generation, comprehensive testing, and independent review.
+
+**Stories Listed Below:** Stories appear in numerical order (0.1-0.8) for organizational clarity, but **must be implemented in the priority order shown above**.
+
+---
+
+#### Story 0.1: Shared Foundation Infrastructure (Priority 2 - Week 3)
+
+**⚠️ IMPLEMENT AFTER:** Story 0.7 (Development Workflow Infrastructure) is complete
 
 **As a** Developer
 **I want** shared enforcement skills and setup commands
 **So that** all production and development components follow financial precision and audit standards
+
+**Why After 0.7:**
+- Development tools (0.7) will be used to BUILD these enforcement skills
+- Ensures consistency with all other infrastructure components
+- Enforcement skills are used by production components (0.2-0.6) built after this
 
 **Acceptance Criteria:**
 - [ ] `decimal-precision-enforcer` skill auto-invokes on all financial code generation
@@ -146,10 +233,10 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 - [ ] Configuration directories created (credentials, workflow-state, logs)
 - [ ] All tests pass after setup
 
-**Components (Phase 1 - Week 1):**
-- `decimal-precision-enforcer` skill (shared)
-- `audit-trail-enforcer` skill (shared)
-- `/setup` command (shared)
+**Components (Priority 2 - Week 3):**
+- `decimal-precision-enforcer` skill (shared) - **Built using /create-script from 0.7**
+- `audit-trail-enforcer` skill (shared) - **Built using /create-script from 0.7**
+- `/setup` command (shared) - **Built using development tools from 0.7**
 
 **Success Metrics:**
 - Setup time for new user: <30 minutes
@@ -298,11 +385,19 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 
 ---
 
-#### Story 0.7: Development Workflow Infrastructure
+#### Story 0.7: Development Workflow Infrastructure ⭐ **PRIORITY 1 - IMPLEMENT FIRST**
+
+**🚨 CRITICAL:** This story MUST be implemented FIRST (Week 1-2), before all other stories, including Story 0.1.
 
 **As a** Developer
 **I want** automated script generation with TDD workflow
 **So that** new financial calculations are generated correctly with comprehensive tests
+
+**Why This Comes First:**
+- This builds the **tools to build tools**
+- All subsequent components (0.1-0.6, 0.8) will be created using these development tools
+- Ensures consistency, quality, and comprehensive testing from day 1
+- Prevents manual script creation errors that are costly in financial systems
 
 **Acceptance Criteria:**
 - [ ] `/create-script` command generates new Python scripts from specifications
@@ -313,7 +408,7 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 - [ ] All edge cases from financial-validator tested
 - [ ] Scripts only saved to `scripts/` after human approval
 
-**Components (Phase 7 - Week 12-13):**
+**Components (Priority 1 - Week 1-2):**
 - `python-best-practices` skill (dev)
 - `test-suite-generator` skill (dev)
 - `@script-generator` agent (dev)
@@ -327,6 +422,8 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 - 100% of generated scripts use Decimal for currency
 - >95% test coverage on all scripts
 - Zero financial calculation errors in production
+
+**Once Complete:** Use these tools to build all components in Stories 0.1-0.6 and 0.8
 
 ---
 

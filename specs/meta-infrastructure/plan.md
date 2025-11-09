@@ -1,9 +1,47 @@
 # Meta-Infrastructure Implementation Plan
 
-**Version:** 1.0-DRAFT
-**Date:** 2025-11-09
+**Version:** 1.1-DRAFT (RESEQUENCED)
+**Date:** 2025-11-09 (Updated for Dev-First Priority)
 **Status:** 📋 PLANNING PHASE
 **Purpose:** Detailed implementation plan for creating all commands, agents, and skills
+
+---
+
+## ⚠️ CRITICAL: RESEQUENCED IMPLEMENTATION ORDER
+
+**🚨 BREAKING CHANGE:** Phase ordering has been RESEQUENCED to prioritize development infrastructure.
+
+**OLD ORDER (Deprecated):**
+~~Phase 1: Shared Foundation → Phase 2: Data Extraction → ... → Phase 7: Dev Workflows~~
+
+**NEW ORDER (Effective 2025-11-09):**
+```
+Phase 1: Development Workflows (Week 1-2) ⭐ IMPLEMENT FIRST
+  └─ Build the tools to build tools
+  └─ /create-script, @script-generator, python-best-practices
+
+Phase 2: Shared Foundation (Week 3)
+  └─ Built using dev tools from Phase 1
+  └─ decimal-precision-enforcer, audit-trail-enforcer
+
+Phase 3-7: Production Infrastructure (Week 4-11)
+  └─ Built using dev tools from Phase 1
+  └─ All production components created with automated generation
+
+Phase 8: Orchestration (Week 12)
+  └─ Tie everything together
+```
+
+**WHY THIS MATTERS:**
+- Phase 1 (Dev Workflows) builds the automation infrastructure
+- All subsequent phases leverage that automation
+- Ensures consistency, quality, comprehensive testing
+- Prevents manual script creation errors in financial systems
+
+**READ THIS ENTIRE PLAN WITH THE NEW PHASE NUMBERS:**
+- What was "Phase 7" is now **Phase 1** (Development Workflows)
+- What was "Phase 1" is now **Phase 2** (Shared Foundation)
+- All other production phases shift accordingly
 
 ---
 
@@ -20,27 +58,35 @@ Based on research findings (see `research.md`), we need to create:
 
 ## Implementation Strategy
 
-### Phased Rollout
+### Phased Rollout (RESEQUENCED)
 
-**Phase-by-Phase Approach:**
-1. Build shared foundation (enforcers, setup)
-2. Build production components in dependency order
-3. Build development workflows last (use them to validate production)
-4. Build orchestration command to tie everything together
+**Phase-by-Phase Approach (NEW ORDER):**
+1. **Phase 1: Build development workflows FIRST** (tools to build tools)
+2. **Phase 2: Build shared foundation** (using dev tools from Phase 1)
+3. **Phases 3-7: Build production components** (using dev tools from Phase 1)
+4. **Phase 8: Build orchestration** (tie everything together)
 
 **Per-Component Workflow:**
 - Use meta-skills (`creating-commands`, `creating-agents`, `creating-skills`)
+- Use Phase 1 dev tools (`/create-script`, `@script-generator`) for Phases 2-8
 - Follow RPIV workflow for each component
 - Human approval at each checkpoint
 - Independent verification before marking complete
 
 ---
 
-## Phase 1: Shared Foundation (Week 1)
+## Phase 1 ➡️ ACTUAL PHASE 2: Shared Foundation (Week 3)
 
-### Priority: CRITICAL (blocks all other work)
+### Priority: HIGH (implement AFTER Phase 7/Actual Phase 1)
 
-**Goal:** Build shared infrastructure used by all production and development components.
+**🚨 RESEQUENCED:** This is Phase 1 in the document, but **Phase 2 in implementation order**.
+
+**Goal:** Build shared enforcement infrastructure using dev tools from Phase 7 (Actual Phase 1).
+
+**Why After Phase 7:**
+- Use `/create-script` and `@script-generator` from Phase 7 to build these components
+- Ensures consistent quality and comprehensive testing
+- Development tools are ready to validate enforcement logic
 
 ### 1.1: `decimal-precision-enforcer` Skill
 
@@ -723,11 +769,19 @@ When invoked to validate Excel report:
 
 ---
 
-## Phase 7: Development Workflows (Week 12-13)
+## Phase 7 ➡️ ACTUAL PHASE 1: Development Workflows ⭐ **IMPLEMENT FIRST** (Week 1-2)
 
-### Priority: HIGH (use these to build production components)
+### Priority: CRITICAL - IMPLEMENT BEFORE ALL OTHER PHASES
 
-**Goal:** Enable on-demand script generation with TDD workflow.
+**🚨 RESEQUENCED:** This is Phase 7 in the document, but **Phase 1 in implementation order**.
+
+**Goal:** Build the tools to build tools - enable automated component generation with TDD workflow.
+
+**Why First:**
+- Cannot efficiently build 34 components manually
+- Provides automated script generation for all subsequent phases
+- Ensures consistency and quality from day 1
+- TDD workflow catches financial calculation errors early
 
 ### 7.1: `python-best-practices` Skill
 

@@ -9,21 +9,47 @@
 
 ---
 
-## Meta-Infrastructure Plan
+## ⚠️ CRITICAL: Development Infrastructure First
 
-**NEW (2025-11-09):** Detailed planning for commands, agents, and skills infrastructure.
+**🚨 MANDATORY PREREQUISITE:** Epic 0 (Meta-Infrastructure) MUST be completed BEFORE any business feature implementation (Epics 1-4).
 
-Before implementing Epic 1-4 business features, we must build the Claude Code-native infrastructure (Epic 0):
+**PRIORITY ORDER (Updated 2025-11-09):**
+
+```
+PRIORITY 1: Development Workflow Infrastructure (Week 1-2)
+  └─ Build the tools to build tools FIRST
+  └─ Story 0.7: /create-script, @script-generator, python-best-practices
+  └─ Enable automated component creation with TDD
+
+PRIORITY 2: Shared Foundation (Week 3)
+  └─ Build quality enforcement
+  └─ Story 0.1: decimal-precision-enforcer, audit-trail-enforcer
+  └─ Use dev tools from Priority 1 to build these
+
+PRIORITY 3: Production Infrastructure (Week 4-11)
+  └─ Stories 0.2-0.6: Data extraction, reconciliation, reporting, etc.
+  └─ Use dev tools from Priority 1 to build all components
+
+PRIORITY 4: Orchestration (Week 12)
+  └─ Story 0.8: /prod:monthly-close end-to-end workflow
+```
 
 **See:** [specs/meta-infrastructure/](specs/meta-infrastructure/) for comprehensive planning:
 - **[research.md](specs/meta-infrastructure/research.md)** - Research findings: 15 commands, 11 agents, 18 skills needed
-- **[plan.md](specs/meta-infrastructure/plan.md)** - Implementation plan: 8 phases over 14 weeks
+- **[plan.md](specs/meta-infrastructure/plan.md)** - Implementation plan: RESEQUENCED to prioritize dev tools
 - **[checklist.md](specs/meta-infrastructure/checklist.md)** - Validation checklist tracking RPIV progress
 
 **Summary:**
 - **44 total components** to build (10 exist, 34 to create)
-- **Phased rollout:** Shared foundation → Data extraction → Reconciliation → Reporting → Google integration → Forecast maintenance → Dev workflows → Orchestration
+- **RESEQUENCED ROLLOUT:** Dev workflows (FIRST) → Shared foundation → Production infrastructure → Orchestration
 - **RPIV workflow:** Research → Plan → Implement → Verify with human checkpoints
+- **External repos:** 24 repositories cloned with battle-tested patterns to leverage
+
+**Rationale for Dev-First:**
+- Cannot efficiently build 34 components manually
+- Dev infrastructure automates component creation, testing, validation
+- Ensures consistency and quality from day 1
+- Prevents costly financial calculation errors
 
 **This meta-infrastructure enables all FP&A automation workflows described in this document.**
 
