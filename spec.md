@@ -98,6 +98,263 @@ An intelligent automation assistant designed to eliminate repetitive data collec
 
 **Phase Validation:** See [specs/PHASE_VALIDATION_CHECKLIST.md](specs/PHASE_VALIDATION_CHECKLIST.md) for exit criteria for each implementation phase.
 
+**Meta-Infrastructure:** See [specs/meta-infrastructure/](specs/meta-infrastructure/) for detailed plan of commands, agents, and skills infrastructure.
+
+---
+
+### Epic 0: Meta-Infrastructure (Foundation)
+
+**Purpose:** Build the commands, agents, and skills infrastructure that enables all FP&A automation workflows.
+
+**Status:** 📋 PLANNED - See [specs/meta-infrastructure/plan.md](specs/meta-infrastructure/plan.md)
+
+**Scope:** This epic covers the creation of Claude Code-native infrastructure components:
+- **Commands:** User-facing slash commands (e.g., `/variance-analysis`, `/extract-databricks`)
+- **Agents:** Specialized subagents for validation and generation (e.g., `@code-reviewer`, `@databricks-validator`)
+- **Skills:** Auto-invoked capabilities for enforcement and patterns (e.g., `decimal-precision-enforcer`, `audit-trail-enforcer`)
+
+**Why This Matters:**
+- Commands provide user-friendly interface hiding technical complexity
+- Agents provide independent verification and specialized analysis
+- Skills enforce quality standards (Decimal precision, audit trails) automatically
+- Together, these components ensure financial accuracy and auditability
+
+**Components to Build:** 44 total (10 exist, 34 to create)
+- 15 commands (3 exist, 12 to create)
+- 11 agents (1 exists, 10 to create)
+- 18 skills (6 exist, 12 to create)
+
+**Implementation Approach:** Research → Plan → Implement → Verify (RPIV workflow)
+
+**Detailed Plan:** [specs/meta-infrastructure/plan.md](specs/meta-infrastructure/plan.md)
+
+**Validation Checklist:** [specs/meta-infrastructure/checklist.md](specs/meta-infrastructure/checklist.md)
+
+---
+
+#### Story 0.1: Shared Foundation Infrastructure
+
+**As a** Developer
+**I want** shared enforcement skills and setup commands
+**So that** all production and development components follow financial precision and audit standards
+
+**Acceptance Criteria:**
+- [ ] `decimal-precision-enforcer` skill auto-invokes on all financial code generation
+- [ ] `audit-trail-enforcer` skill auto-invokes on all data transformations
+- [ ] `/setup` command guides users through initial project setup
+- [ ] Pre-commit hooks installed and enforce quality gates
+- [ ] Configuration directories created (credentials, workflow-state, logs)
+- [ ] All tests pass after setup
+
+**Components (Phase 1 - Week 1):**
+- `decimal-precision-enforcer` skill (shared)
+- `audit-trail-enforcer` skill (shared)
+- `/setup` command (shared)
+
+**Success Metrics:**
+- Setup time for new user: <30 minutes
+- 100% of financial code uses Decimal type (enforced automatically)
+- 100% of data transformations have audit trails (enforced automatically)
+
+---
+
+#### Story 0.2: Data Extraction Infrastructure
+
+**As an** FP&A Analyst
+**I want** automated data extraction from Databricks and Adaptive Insights
+**So that** I don't manually export CSV files every month
+
+**Acceptance Criteria:**
+- [ ] `/extract-databricks` command extracts actuals from Databricks SQL warehouse
+- [ ] `/extract-adaptive` command extracts budget from Adaptive Insights API
+- [ ] All amounts converted to Decimal precision (no float)
+- [ ] NULL values explicitly flagged for review
+- [ ] Retry logic handles network failures (exponential backoff)
+- [ ] Audit trail logged for all extractions
+- [ ] Independent validation by dedicated agents
+
+**Components (Phase 2 - Week 2-3):**
+- `databricks-extractor` skill (prod)
+- `@databricks-validator` agent (prod)
+- `/extract-databricks` command (prod)
+- `adaptive-extractor` skill (prod)
+- `@adaptive-validator` agent (prod)
+- `/extract-adaptive` command (prod)
+
+**Success Metrics:**
+- [TO BE MEASURED] Time saved vs. manual CSV export
+- Zero data precision errors (Decimal enforcement)
+- Zero undetected NULL values
+
+---
+
+#### Story 0.3: Account Reconciliation Infrastructure
+
+**As an** FP&A Analyst
+**I want** automated account reconciliation between Databricks and Adaptive
+**So that** I can match actuals to budget without manual mapping spreadsheets
+
+**Acceptance Criteria:**
+- [ ] `/reconcile-accounts` command matches accounts between data sources
+- [ ] Fuzzy matching suggests mappings for unmatched accounts
+- [ ] Reconciliation report shows matched/unmatched with confidence scores
+- [ ] Human approval required before saving mapping configuration
+- [ ] Mapping configuration persisted to `config/account_mapping.yaml`
+- [ ] 100% match required before proceeding to variance analysis
+
+**Components (Phase 3 - Week 4):**
+- `account-mapper` skill (prod)
+- `@account-reconciler` agent (prod)
+- `/reconcile-accounts` command (prod)
+
+**Success Metrics:**
+- [TO BE MEASURED] Time saved vs. manual reconciliation
+- >90% auto-matched accounts (fuzzy matching)
+- Zero undetected mismatches
+
+---
+
+#### Story 0.4: Reporting Infrastructure
+
+**As an** FP&A Manager
+**I want** automated Excel report generation with professional formatting
+**So that** my team delivers consistent, branded reports to leadership
+
+**Acceptance Criteria:**
+- [ ] `/generate-excel-report` command creates multi-sheet workbook
+- [ ] Executive Summary, Detailed Analysis, Material Variances sheets included
+- [ ] Conditional formatting applied (green=favorable, red=unfavorable)
+- [ ] Number formatting correct (currency, percentage)
+- [ ] Metadata embedded (timestamp, source files, thresholds)
+- [ ] Independent validation ensures output quality
+
+**Components (Phase 4 - Week 5-6):**
+- `excel-report-generator` skill (prod)
+- `@report-formatter` agent (prod)
+- `/generate-excel-report` command (prod)
+
+**Success Metrics:**
+- [TO BE MEASURED] Time saved vs. manual report formatting
+- 100% of reports pass formatting validation
+- Zero Excel formula errors
+
+---
+
+#### Story 0.5: Google Workspace Integration Infrastructure
+
+**As an** FP&A Analyst
+**I want** automated Google Slides and Sheets updates
+**So that** board decks are always current without manual slide-by-slide updates
+
+**Acceptance Criteria:**
+- [ ] `/update-google-slides` command updates presentations with latest data
+- [ ] `/update-google-sheets` command updates spreadsheets with variance results
+- [ ] Placeholder detection (e.g., `{{REVENUE_ACTUAL}}`) works correctly
+- [ ] Preview mode shows changes before applying
+- [ ] Human approval required before updating shared presentations
+- [ ] "Last Updated" timestamp updated automatically
+- [ ] OAuth and Service Account authentication both supported
+
+**Components (Phase 5 - Week 7-9):**
+- `google-slides-updater` skill (prod)
+- `@slides-previewer` agent (prod)
+- `/update-google-slides` command (prod)
+- `google-sheets-updater` skill (prod)
+- `/update-google-sheets` command (prod)
+
+**Success Metrics:**
+- [TO BE MEASURED] Time saved vs. manual slide updates
+- Zero presentation errors (broken charts, wrong data)
+- 100% of updates previewed before applying
+
+---
+
+#### Story 0.6: Forecast Maintenance Infrastructure
+
+**As an** FP&A Analyst
+**I want** automated rolling forecast updates with assumption tracking
+**So that** forecasts stay current without manual period replacement
+
+**Acceptance Criteria:**
+- [ ] `/update-rolling-forecast` command replaces forecast with actuals for closed periods
+- [ ] Forecast window extended forward automatically
+- [ ] Forecast formulas preserved for future periods
+- [ ] `/track-forecast-assumptions` command documents assumption changes
+- [ ] Assumption change log includes timestamp, user, and rationale
+- [ ] Suggested assumption updates based on actual trends
+
+**Components (Phase 6 - Week 10-11):**
+- `forecast-updater` skill (prod)
+- `@forecast-validator` agent (prod)
+- `/update-rolling-forecast` command (prod)
+- `assumption-tracker` skill (prod)
+- `@assumption-analyzer` agent (prod)
+- `/track-forecast-assumptions` command (prod)
+
+**Success Metrics:**
+- [TO BE MEASURED] Time saved vs. manual forecast updates
+- 100% of closed periods replaced correctly
+- Complete audit trail of assumption changes
+
+---
+
+#### Story 0.7: Development Workflow Infrastructure
+
+**As a** Developer
+**I want** automated script generation with TDD workflow
+**So that** new financial calculations are generated correctly with comprehensive tests
+
+**Acceptance Criteria:**
+- [ ] `/create-script` command generates new Python scripts from specifications
+- [ ] TDD workflow enforced: RED (write tests) → GREEN (implement) → REFACTOR → VERIFY
+- [ ] `/validate-script` command runs pytest, mypy, ruff, bandit, coverage
+- [ ] `/review-code` command invokes @code-reviewer for independent verification
+- [ ] >95% test coverage required (enforced by pre-commit hook)
+- [ ] All edge cases from financial-validator tested
+- [ ] Scripts only saved to `scripts/` after human approval
+
+**Components (Phase 7 - Week 12-13):**
+- `python-best-practices` skill (dev)
+- `test-suite-generator` skill (dev)
+- `@script-generator` agent (dev)
+- `@test-generator` agent (dev)
+- `@script-validator` agent (dev)
+- `/create-script` command (dev)
+- `/validate-script` command (dev)
+- `/review-code` command (dev)
+
+**Success Metrics:**
+- 100% of generated scripts use Decimal for currency
+- >95% test coverage on all scripts
+- Zero financial calculation errors in production
+
+---
+
+#### Story 0.8: Orchestration Infrastructure
+
+**As an** FP&A Manager
+**I want** a single command to run the entire monthly close process
+**So that** my team executes a consistent, documented workflow every month
+
+**Acceptance Criteria:**
+- [ ] `/prod:monthly-close` command orchestrates full post-close workflow
+- [ ] Workflow: Extract data → Reconcile accounts → Calculate variances → Generate reports → Update dashboards
+- [ ] Human checkpoints at each major phase
+- [ ] Error recovery with workflow state management (resume from failure)
+- [ ] Complete audit trail for entire workflow
+- [ ] Execution summary with time saved metrics
+
+**Components (Phase 8 - Week 14):**
+- `/prod:monthly-close` command (prod, orchestration)
+
+**Success Metrics:**
+- [TO BE MEASURED] End-to-end execution time
+- [TO BE MEASURED] Time saved vs. manual monthly close
+- 100% workflow completion rate (with error recovery)
+- Complete audit trail for compliance
+
+---
+
 ### Epic 1: Post-Close Variance Analysis
 
 **Scope Change:** Focus on POST-CLOSE processes, not month-end close itself. Month-end close happens in separate systems (Adaptive Insights, Databricks). This epic focuses on extracting closed data, analyzing variances, stakeholder review, adjustments, and finalizing reports.

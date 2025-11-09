@@ -1,11 +1,31 @@
 # FP&A Automation Assistant - Technical Planning Document
 
-**Version:** 1.0-DRAFT
-**Last Updated:** 2025-11-08
+**Version:** 1.1-DRAFT
+**Last Updated:** 2025-11-09
 **Status:** 🚧 IN PLANNING
 **References:** spec.md (business requirements), CLAUDE.md (behavioral rules)
 
 **Key Principle:** spec.md defines WHAT to build. This document defines HOW to build it.
+
+---
+
+## Meta-Infrastructure Plan
+
+**NEW (2025-11-09):** Detailed planning for commands, agents, and skills infrastructure.
+
+Before implementing Epic 1-4 business features, we must build the Claude Code-native infrastructure (Epic 0):
+
+**See:** [specs/meta-infrastructure/](specs/meta-infrastructure/) for comprehensive planning:
+- **[research.md](specs/meta-infrastructure/research.md)** - Research findings: 15 commands, 11 agents, 18 skills needed
+- **[plan.md](specs/meta-infrastructure/plan.md)** - Implementation plan: 8 phases over 14 weeks
+- **[checklist.md](specs/meta-infrastructure/checklist.md)** - Validation checklist tracking RPIV progress
+
+**Summary:**
+- **44 total components** to build (10 exist, 34 to create)
+- **Phased rollout:** Shared foundation → Data extraction → Reconciliation → Reporting → Google integration → Forecast maintenance → Dev workflows → Orchestration
+- **RPIV workflow:** Research → Plan → Implement → Verify with human checkpoints
+
+**This meta-infrastructure enables all FP&A automation workflows described in this document.**
 
 ---
 
