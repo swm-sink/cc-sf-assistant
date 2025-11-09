@@ -34,3 +34,57 @@
 [submodule "external/claude-code/anthropics-skills"]
 	path = external/claude-code/anthropics-skills
 	url = https://github.com/anthropics/skills
+[submodule "external/financial-modeling/FinanceToolkit"]
+	path = external/financial-modeling/FinanceToolkit
+	url = https://github.com/JerBouma/FinanceToolkit.git
+[submodule "external/financial-modeling/pyxirr"]
+	path = external/financial-modeling/pyxirr
+	url = https://github.com/Anexen/pyxirr.git
+[submodule "external/data-warehouse/duckdb"]
+	path = external/data-warehouse/duckdb
+	url = https://github.com/duckdb/duckdb.git
+[submodule "external/data-warehouse/great-expectations"]
+	path = external/data-warehouse/great-expectations
+	url = https://github.com/great-expectations/great_expectations.git
+[submodule "external/precision-currency/stockholm"]
+	path = external/precision-currency/stockholm
+	url = https://github.com/kalaspuff/stockholm.git
+[submodule "external/data-validation/pandera"]
+	path = external/data-validation/pandera
+	url = https://github.com/unionai-oss/pandera.git
+[submodule "external/audit-compliance/python-audit-log"]
+	path = external/audit-compliance/python-audit-log
+	url = https://github.com/Amsterdam/python-audit-log.git
+[submodule "external/reporting-automation/XlsxWriter"]
+	path = external/reporting-automation/XlsxWriter
+	url = https://github.com/jmcnamara/XlsxWriter.git
+[submodule "external/reporting-automation/great-tables"]
+	path = external/reporting-automation/great-tables
+	url = https://github.com/posit-dev/great-tables.git
+[submodule "external/api-integration/tenacity"]
+	path = external/api-integration/tenacity
+	url = https://github.com/jd/tenacity.git
+[submodule "external/reconciliation/splink"]
+	path = external/reconciliation/splink
+	url = https://github.com/moj-analytical-services/splink.git
+[submodule "external/reconciliation/dedupe"]
+	path = external/reconciliation/dedupe
+	url = https://github.com/dedupeio/dedupe.git
+[submodule "external/api-integration/google-api-python-client"]
+	path = external/api-integration/google-api-python-client
+	url = https://github.com/googleapis/google-api-python-client.git
+[submodule "external/etl-pipelines/prefect"]
+	path = external/etl-pipelines/prefect
+	url = https://github.com/PrefectHQ/prefect.git
+[submodule "external/etl-pipelines/dbt-core"]
+	path = external/etl-pipelines/dbt-core
+	url = https://github.com/dbt-labs/dbt-core.git
+[submodule "external/data-validation/hypothesis"]
+	path = external/data-validation/hypothesis
+	url = https://github.com/HypothesisWorks/hypothesis.git
+[submodule "external/financial-modeling/mplfinance"]
+	path = external/financial-modeling/mplfinance
+	url = https://github.com/matplotlib/mplfinance.git
+[submodule "external/data-validation/typeguard"]
+	path = external/data-validation/typeguard
+	url = https://github.com/agronholm/typeguard.git
