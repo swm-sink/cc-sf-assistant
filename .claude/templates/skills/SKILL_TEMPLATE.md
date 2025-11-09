@@ -39,11 +39,10 @@ Clear, concise instruction for the third step.
 - Output format 2
 
 ## Progressive Disclosure
-Keep SKILL.md concise. For additional details, create:
-- `references/` - Detailed documentation (loaded on-demand)
+Keep SKILL.md concise (<200 lines). For additional details, create subdirectories:
 - `scripts/` - Executable Python/Bash scripts
-- `templates/` - File templates
-- `assets/` - Binary files (images, fonts, etc.)
+- `references/` - Detailed documentation (loaded on-demand)
+- `assets/` - Templates, config files, binary files (images, fonts, etc.)
 
 ## Examples
 

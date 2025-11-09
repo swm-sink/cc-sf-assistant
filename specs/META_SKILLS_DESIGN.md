@@ -14,17 +14,16 @@
 
 **Auto-Invocation Trigger:** User requests "create a skill for..." or "I need a skill that..."
 
-**Architecture Note (November 2025):** Commands are now INSIDE skills at `.claude/skills/{env}/{skill-name}/workflows/`, not standalone in `.claude/commands/`. Skills provide reusable expertise, commands are workflows that use that expertise.
+**Architecture Note (November 2025 - OFFICIAL ANTHROPIC PATTERN):** Commands are in `.claude/commands/`, SEPARATE from skills. Skills are auto-invoked capabilities in `.claude/skills/`. This follows official Anthropic documentation.
 
 ### Workflow
 
 1. **Gather Requirements:**
    - Skill name (kebab-case)
    - Description (for auto-invocation detection)
-   - Target environment (dev/prod/shared)
-   - Does this skill need commands (user-triggered workflows)?
    - Tool permissions needed (Read, Edit, Write, Bash, etc.)
    - Complexity estimate (simple/medium/complex)
+   - Subdirectories needed (scripts/, references/, assets/)
 
 2. **Research Phase:**
    - Search .claude/templates/skills/SKILL_TEMPLATE.md
@@ -38,35 +37,36 @@
 
 3. **Generate Spec:**
    - Present skill specification to user
-   - Include: name, description, workflows (commands), context files, tool permissions
+   - Include: name, description, subdirectories needed, tool permissions
    - User approval checkpoint
 
 4. **Implement:**
-   - Create directory structure:
+   - Create directory structure (OFFICIAL ANTHROPIC PATTERN):
      ```
-     .claude/skills/{env}/{skill-name}/
-     ├── SKILL.md                   # Main skill file (routing logic)
-     ├── workflows/                 # Commands go here
-     │   ├── command1.md
-     │   └── command2.md
-     └── context/                   # Supporting context files
-         ├── formulas.md
-         └── edge-cases.md
+     .claude/skills/{skill-name}/
+     ├── SKILL.md                   # Main skill file (auto-invocation logic)
+     ├── scripts/                   # Optional - Executable Python scripts
+     │   └── validator.py
+     ├── references/                # Optional - Detailed documentation
+     │   ├── formulas.md
+     │   └── edge-cases.md
+     └── assets/                    # Optional - Templates, config files
+         └── template.xlsx
      ```
    - Generate SKILL.md with YAML frontmatter
-   - Create workflows/ directory if skill needs commands
-   - Create context/ directory for Progressive Disclosure
+   - Create scripts/ directory if skill has executable code
+   - Create references/ directory for Progressive Disclosure
+   - Create assets/ directory if templates/configs needed
 
 5. **Validate:**
    - Verify YAML frontmatter syntax
    - Check description clarity for auto-invocation
-   - Ensure Progressive Disclosure (SKILL.md <200 lines, details in context/)
+   - Ensure Progressive Disclosure (SKILL.md <200 lines, details in references/)
    - Test auto-invocation detection
-   - Verify workflows/ commands have correct syntax
+   - Verify official subdirectory structure
 
 6. **Document:**
    - Add skill to README.md
-   - Update .claude/skills/{env}/README.md if exists
    - Commit with message: `feat: add {skill-name} skill`
 
 ### Template Generation
@@ -118,22 +118,22 @@ For detailed information, see:
 
 ## Meta-Skill 2: command-creator
 
-**Location:** `.claude/skills/shared/command-creator/SKILL.md`
+**Location:** `.claude/skills/command-creator/SKILL.md`
 
-**Purpose:** Generate workflow commands (within skills) with human checkpoints and $ARGUMENTS placeholders
+**Purpose:** Generate slash commands with human checkpoints and $ARGUMENTS placeholders
 
 **Auto-Invocation Trigger:** User requests "create a command for..." or "I need a /command that..." or "create a workflow for..."
 
-**Architecture Note (November 2025):** Commands are workflows within skills, not standalone files. They live in `.claude/skills/{env}/{skill-name}/workflows/` and are invoked as `/{env}:{skill-name}:{workflow-name}`
+**Architecture Note (November 2025 - OFFICIAL ANTHROPIC PATTERN):** Commands are slash commands in `.claude/commands/`, SEPARATE from skills. Commands are explicit user-invoked workflows. Invocation: `/command-name args`
 
 ### Workflow
 
 1. **Gather Requirements:**
    - Command name (kebab-case)
-   - Environment (dev/prod/shared)
-   - Arguments needed ($BUDGET_FILE, $ACTUAL_FILE, etc.)
+   - Organization subdirectory (dev/prod/shared - optional)
+   - Arguments needed ($1, $2, $ARGUMENTS, etc.)
    - Human checkpoints required
-   - Skill dependencies
+   - Skills to invoke
    - Model preference (sonnet/haiku)
 
 2. **Research Phase:**
@@ -147,24 +147,24 @@ For detailed information, see:
    - User approval checkpoint
 
 4. **Implement:**
-   - Identify or create parent skill (commands must belong to a skill)
-   - Create file: `.claude/skills/{env}/{skill-name}/workflows/{command-name}.md`
+   - Create file: `.claude/commands/{subdir}/{command-name}.md`
+     - Subdirectory optional (prod/, dev/, shared/ for organization)
+     - Subdirectory appears in description: "(project:prod)"
    - Generate YAML frontmatter + workflow
-   - Add $ARGUMENTS placeholders
+   - Add argument placeholders ($1, $2, or $ARGUMENTS)
    - Insert human approval checkpoints
-   - Update parent SKILL.md to reference new workflow
+   - Reference related skills if needed
 
 5. **Validate:**
-   - Verify YAML frontmatter
+   - Verify YAML frontmatter (description, allowed-tools, model)
    - Check argument substitution
    - Ensure human checkpoints at critical decisions
-   - Test command invocation
+   - Test command invocation: `/command-name args`
 
 6. **Document:**
    - Add to README.md usage section
-   - Update parent SKILL.md's "Available Workflows" section
    - Update QUICK_START.md if user-facing
-   - Commit: `feat: add /{env}:{skill-name}:{workflow-name} workflow`
+   - Commit: `feat: add /command-name slash command`
 
 ### Template Generation
 
@@ -173,15 +173,16 @@ For detailed information, see:
 description: {One-line description}
 model: sonnet
 allowed-tools: [Read, Write, Bash]
+argument-hint: [arg1] [arg2]
 ---
 
 # {Command Title}
 
-**Usage:** `/{env}:{skill-name}:{workflow-name} $ARG1 $ARG2`
+**Usage:** `/{command-name} $1 $2`
 
 **Purpose:** {One sentence}
 
-**Parent Skill:** See `.claude/skills/{env}/{skill-name}/SKILL.md`
+**Related Skills:** {skill-name} (auto-invoked when...)
 
 ## Workflow
 
@@ -190,8 +191,8 @@ allowed-tools: [Read, Write, Bash]
 {Instructions}
 
 **Arguments:**
-- `$ARG1` - {Description}
-- `$ARG2` - {Description}
+- `$1` - {Description of first argument}
+- `$2` - {Description of second argument}
 
 ### Step 2: {Human Checkpoint}
 
@@ -203,9 +204,10 @@ Present {what} to user for approval:
 
 ### Step 3: {Execution}
 
-Invoke skills:
-1. `/skills/{skill-name}` with {parameters}
+Execute workflow:
+1. Invoke {skill-name} skill (auto-triggered by keywords)
 2. Execute {operation}
+3. Generate output
 
 ### Step 4: {Completion}
 
@@ -216,12 +218,12 @@ Output:
 ## Example
 
 ```bash
-/{env}:{skill-name}:{workflow-name} budget.xlsx actuals.xlsx
+/{command-name} budget.xlsx actuals.xlsx
 ```
 
 **Real Example:**
 ```bash
-/prod:variance-analyzer:analyze budget_2025.xlsx actuals_nov_2025.xlsx
+/variance-analysis budget_2025.xlsx actuals_nov_2025.xlsx
 ```
 ```
 

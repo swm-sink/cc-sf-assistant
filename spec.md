@@ -957,7 +957,7 @@ This specification is grounded in industry research conducted November 2024-2025
 - Immediate availability in Claude Code environment
 
 **What This Means:**
-- Primary interface: Slash commands (e.g., `/prod:variance-analysis budget.xlsx actuals.xlsx`)
+- Primary interface: Slash commands (e.g., `/variance-analysis budget.xlsx actuals.xlsx`)
 - Pre-written Python scripts in `scripts/` directory (executed by Claude)
 - Skills auto-invoke for specific tasks (e.g., variance analysis, account mapping)
 - Agents provide independent verification (e.g., code-reviewer, data-validator)
@@ -972,9 +972,9 @@ This specification is grounded in industry research conducted November 2024-2025
 │   ├── prod/         # Production agents (finance-reviewer, data-validator, reconciler)
 │   └── shared/       # Shared utilities (research-agent)
 ├── commands/
-│   ├── dev/          # Development workflows (/dev:create-script, /dev:validate-script)
-│   ├── prod/         # Production workflows (/prod:monthly-close, /prod:variance-analysis)
-│   └── shared/       # Shared commands (/shared:help, /shared:config)
+│   ├── dev/          # Development workflows (/create-script, /validate-script)
+│   ├── prod/         # Production workflows (/monthly-close, /variance-analysis)
+│   └── shared/       # Shared commands (/help, /config)
 └── skills/
     ├── dev/          # Dev skills (python-best-practices, financial-script-generator)
     ├── prod/         # Prod skills (variance-analyzer, account-mapper, report-generator)
@@ -1081,7 +1081,7 @@ This specification is grounded in industry research conducted November 2024-2025
 
 **Generated Scripts (via Dev Workflows):**
 - User requests analysis not covered by existing scripts
-- Trigger: `/dev:create-script "Calculate YoY revenue growth by department"`
+- Trigger: `/create-script "Calculate YoY revenue growth by department"`
 - Process: Research → Plan (spec) → Implement (TDD) → Verify (validation + review) → Approve → Save to `scripts/`
 - New script becomes available for future prod workflows
 

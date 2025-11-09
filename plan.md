@@ -1209,14 +1209,14 @@ cc-sf-assistant/
 │   │
 │   ├── commands/
 │   │   ├── dev/                      # Development workflows
-│   │   │   ├── create-script.md      # /dev:create-script
-│   │   │   ├── validate-script.md    # /dev:validate-script
-│   │   │   └── review-code.md        # /dev:review-code
+│   │   │   ├── create-script.md      # /create-script
+│   │   │   ├── validate-script.md    # /validate-script
+│   │   │   └── review-code.md        # /review-code
 │   │   ├── prod/                     # Production workflows
-│   │   │   ├── monthly-close.md      # /prod:monthly-close
-│   │   │   ├── variance-analysis.md  # /prod:variance-analysis
-│   │   │   ├── consolidate.md        # /prod:consolidate
-│   │   │   └── board-deck.md         # /prod:board-deck
+│   │   │   ├── monthly-close.md      # /monthly-close
+│   │   │   ├── variance-analysis.md  # /variance-analysis
+│   │   │   ├── consolidate.md        # /consolidate
+│   │   │   └── board-deck.md         # /board-deck
 │   │   └── shared/
 │   │       ├── help.md
 │   │       └── config.md
@@ -1309,7 +1309,7 @@ cc-sf-assistant/
 **Purpose:** Generate new financial calculation scripts when needed.
 
 **Trigger:** User requests analysis not covered by existing scripts.
-**Example:** `/dev:create-script "Calculate YoY revenue growth by department"`
+**Example:** `/create-script "Calculate YoY revenue growth by department"`
 
 **Process:**
 1. Research existing patterns (no coding)
@@ -1341,7 +1341,7 @@ cc-sf-assistant/
 **Purpose:** Execute pre-written, validated scripts for daily FP&A tasks.
 
 **Trigger:** User requests common FP&A analysis.
-**Example:** `/prod:variance-analysis budget.xlsx actuals.xlsx`
+**Example:** `/variance-analysis budget.xlsx actuals.xlsx`
 
 **Process:**
 1. Execute pre-written script from `scripts/`
@@ -1459,7 +1459,7 @@ cc-sf-assistant/
 **Phase 2: Dev Workflows (Week 3-4)**
 - Build dev skills (python-best-practices, financial-script-generator, test-suite-generator)
 - Build dev agents (script-generator, script-validator, test-generator, code-reviewer)
-- Build dev commands (/dev:create-script, /dev:validate-script, /dev:review-code)
+- Build dev commands (/create-script, /validate-script, /review-code)
 - Test script generation pipeline
 
 **Phase 3: Core Scripts - Excel (Week 5-7)**
@@ -1471,7 +1471,7 @@ cc-sf-assistant/
 **Phase 4: Prod Workflows - Excel (Week 8-10)**
 - Build prod skills (variance-analyzer, account-mapper, report-generator)
 - Build prod agents (finance-reviewer, data-validator, reconciler)
-- Build prod commands (/prod:monthly-close, /prod:variance-analysis, /prod:consolidate)
+- Build prod commands (/monthly-close, /variance-analysis, /consolidate)
 - End-to-end testing with sample data
 
 **Phase 5: Google Integration (Week 11-13)**
@@ -1613,7 +1613,7 @@ with Path("config/audit.log").open() as f:
 Every prod workflow starts with validation phase:
 
 ```markdown
-## /prod:variance-analysis Workflow
+## /variance-analysis Workflow
 
 ### Phase 1: Data Validation (Automatic)
 1. Invoke `data-validator` agent
@@ -1866,7 +1866,7 @@ def monthly_close_workflow(period: str, resume: bool = False):
                 "status": "failed",
                 "error": str(e)
             })
-            print(f"❌ Workflow failed at step {step}. State saved. Resume with: /prod:monthly-close --resume")
+            print(f"❌ Workflow failed at step {step}. State saved. Resume with: /monthly-close --resume")
             raise
 
     # Mark complete
@@ -1883,7 +1883,7 @@ description: Monthly close workflow with error recovery
 # Monthly Close Workflow
 
 ## Usage
-`/prod:monthly-close november [--resume]`
+`/monthly-close november [--resume]`
 
 ## Arguments
 - Period: Month name or YYYY-MM format
@@ -1999,7 +1999,7 @@ def install_pre_commit_hook():
 ```
 
 **Skills/Commands:**
-- `/shared:setup` command runs `install_pre_commit_hook()` during initial setup
+- `/setup` command runs `install_pre_commit_hook()` during initial setup
 - `python-best-practices` skill references sample data for test generation
 
 ---
@@ -2152,7 +2152,7 @@ plt.show()
 - Users can copy code for their own analyses
 
 **No Interactive CLI Help:**
-- `/shared:help` provides simple text help
+- `/help` provides simple text help
 - References notebooks for tutorials
 - No step-by-step interactive walkthroughs in CLI
 
