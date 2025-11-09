@@ -11,16 +11,19 @@
 **Objective:** Create two meta-skills (`creating-commands` and `creating-agents`) that follow the proven pattern of `creating-skills`.
 
 **Key Findings:**
-1. **Validated Templates:** Multi-agent analysis recommends 3 command templates + 3 agent templates (from 11 originally)
+1. **Validated Templates:** Multi-agent analysis recommends **6 command templates + 3 agent templates** (9 total, validated against 116 external agents + 12-factor principles)
 2. **External Validation:** 116 agents in awesome-claude-code-subagents provide production-tested patterns
 3. **Architecture Model:** Follow creating-skills pattern (templates + validators + orchestrator + guides)
-4. **Tool Patterns:** Commands allow full tools, agents use minimal tool sets by type
+4. **Tool Patterns:** Commands allow full tools, agents use 3 distinct tool tiers (read-only, read+web, full)
 5. **CSO Not Needed:** Commands/agents use explicit invocation (`/command`, `@agent`), not auto-invocation
+6. **Critical Finding:** Orchestration is a COMMAND responsibility, not agent capability (commands coordinate agents)
 
 **Deliverables Needed:**
-- `.claude/skills/creating-commands/` - Command generator skill
-- `.claude/skills/creating-agents/` - Agent generator skill
+- `.claude/skills/creating-commands/` - Command generator skill (6 templates)
+- `.claude/skills/creating-agents/` - Agent generator skill (3 templates)
 - Each with: SKILL.md, templates/, scripts/, references/
+
+**Note:** See `research-validation-addendum.md` for detailed 50+ source validation analysis.
 
 ---
 
@@ -477,31 +480,51 @@ Work with:
 
 **Section Counts by Agent Type:**
 
-| Agent Type | Typical Sections | Length | Depth |
-|------------|------------------|--------|-------|
-| **Reviewer** | 6-8 | 255-285 lines | Deep checklists (7+ items) |
-| **Domain Specialist** | 10-15 | 285-315 lines | Comprehensive domain coverage (8-12 areas) |
-| **Researcher** | 5-7 | 200-250 lines | Investigation structure |
+**IMPORTANT:** All external agents use **6 major sections** with subsections for workflow phases.
+
+| Agent Type | Major Sections | Length | Depth |
+|------------|----------------|--------|-------|
+| **Reviewer** | 6 | 275-285 lines | Deep checklists (8 items), read-only verification |
+| **Domain Specialist** | 6 | 275-285 lines | Comprehensive domain coverage (8-15 areas) |
+| **Researcher** | 6 | 275-285 lines | Investigation structure, web research tools |
+
+**Standard 6-Section Structure:**
+1. Role Statement (1-2 paragraphs)
+2. Communication Protocol (JSON query format)
+3. Checklist (8 items)
+4. Development Workflow (3 phases as subsections: Analysis, Implementation, Excellence)
+5. Integration Notes (optional)
+6. Anti-Patterns (optional)
 
 ### 3.4 Validated Template Recommendations
 
-**Source:** Multi-agent analysis + External validation (116 production agents)
+**Source:** Multi-agent analysis + External validation (116 production agents + 12-factor-agents principles)
 
-**Expanded Recommendations (6 templates):**
+**CRITICAL UPDATE:** Validated against 50+ sources. Reduced from 6 templates to **3 templates** based on evidence.
+See `research-validation-addendum.md` for detailed analysis.
 
-| Template | Score | Use When | Lines | Tool Tier | Unique Features |
-|----------|-------|----------|-------|-----------|-----------------|
-| **AGENT_REVIEWER_TEMPLATE.md** | 8.4/10 | Code review, financial validation, compliance | ~270 | Read-only | Verification checklist, APPROVE/REJECT, structured output |
-| **AGENT_DOMAIN_SPECIALIST_TEMPLATE.md** | 8.2/10 | Financial expert, Python expert, domain knowledge | ~300 | Full access | 8-15 domain areas, comprehensive coverage, constrained expertise |
-| **AGENT_RESEARCHER_TEMPLATE.md** | 7.0/10 | Codebase exploration, documentation research | ~240 | Read + Web | Investigation structure, context queries, discovery focus |
-| **AGENT_ORCHESTRATOR_TEMPLATE.md** | 7.6/10 | Multi-agent coordination, workflow management | ~280 | Write (limited) | Task distribution, state tracking, agent coordination |
-| **AGENT_ANALYZER_TEMPLATE.md** | 7.4/10 | Data analysis, insights generation, pattern recognition | ~275 | Write + Bash | Transform data, generate insights, visualization recommendations |
-| **AGENT_GENERATOR_TEMPLATE.md** | 7.1/10 | Create code/docs/configs/CLI tools | ~265 | Full access | Template-based generation, validation of outputs, artifact creation |
+**Final Recommendations (3 templates):**
 
-**Rationale for Expansion:**
-- **Orchestrator:** Distinct from Domain Specialist (coordination focus, manages other agents/tasks - workflow-orchestrator/task-distributor pattern)
-- **Analyzer:** Transforms data and generates insights (data-analyst pattern, distinct from Researcher which discovers)
-- **Generator:** Creates new artifacts from templates (cli-developer/documentation-engineer pattern, distinct from Domain Specialist which has broader expertise)
+| Template | Score | Use When | Lines | Tool Tier | Pattern Frequency |
+|----------|-------|----------|-------|-----------|-------------------|
+| **AGENT_DOMAIN_SPECIALIST_TEMPLATE.md** | 9.5/10 ↑ | Financial expert, Python expert, domain knowledge, data analysis, CLI generation | ~280 | Full access | **PRIMARY** - 100+ agents (86%) |
+| **AGENT_RESEARCHER_TEMPLATE.md** | 8.6/10 ↑ | Codebase exploration, web research, competitive intelligence | ~280 | Read + Web | 6 agents (5%) - DISTINCT web tools |
+| **AGENT_REVIEWER_TEMPLATE.md** | 7.8/10 ↓ | Code review, security audit, compliance verification | ~280 | Read-only | 4-6 agents (3-5%) - DISTINCT read-only |
+
+**Removed Templates (Anti-Patterns/Redundancies):**
+- ❌ **AGENT_ORCHESTRATOR** (anti-pattern): Commands coordinate agents, not agents coordinate agents (context isolation violation)
+- ❌ **AGENT_ANALYZER** (redundant): Same tools/structure as DOMAIN_SPECIALIST; data-analyst IS a domain specialist
+- ❌ **AGENT_GENERATOR** (redundant): Same tools/structure as DOMAIN_SPECIALIST; cli-developer IS a domain specialist
+
+**Key Architectural Principle:**
+- **Commands = Orchestrators** (variance-analysis.md invokes @code-reviewer at checkpoints)
+- **Agents = Workers** (domain specialists, researchers, reviewers - single responsibility)
+- **Agents NEVER coordinate other agents** (context isolation by design per code-reviewer.md:254)
+
+**Tool Tier Validation:**
+- **3 distinct tiers:** Read-only (reviewers), Read+Web (researchers), Full access (specialists)
+- **86% of agents** use Domain Specialist pattern (primary template)
+- **All agent types use 6 major sections** (not 7-12 as initially proposed)
 
 ---
 
@@ -689,42 +712,41 @@ description: Use when creating slash commands, building workflows, need command 
 ├── SKILL.md                                    # Main skill (target: <200 lines)
 ├── assets/
 │   └── templates/
-│       ├── AGENT_REVIEWER_TEMPLATE.md          # ~270 lines, read-only
-│       ├── AGENT_DOMAIN_SPECIALIST_TEMPLATE.md # ~300 lines, full tools
-│       ├── AGENT_RESEARCHER_TEMPLATE.md        # ~240 lines, read+web
-│       ├── AGENT_ORCHESTRATOR_TEMPLATE.md      # ~280 lines, write (limited)
-│       ├── AGENT_ANALYZER_TEMPLATE.md          # ~275 lines, write+bash
-│       └── AGENT_GENERATOR_TEMPLATE.md         # ~265 lines, full access
+│       ├── AGENT_DOMAIN_SPECIALIST_TEMPLATE.md # ~280 lines, full tools (PRIMARY)
+│       ├── AGENT_RESEARCHER_TEMPLATE.md        # ~280 lines, read+web
+│       └── AGENT_REVIEWER_TEMPLATE.md          # ~280 lines, read-only
 ├── scripts/
-│   ├── generate_agent.py                       # Orchestrator
+│   ├── generate_agent.py                       # Orchestrator (3 template options)
 │   ├── validate_agent_yaml.py                  # YAML frontmatter
 │   ├── validate_agent_naming.py                # Kebab-case
-│   ├── validate_agent_structure.py             # Required sections (6 templates)
+│   ├── validate_agent_structure.py             # Required sections (3 templates)
 │   └── validate_agent_tools.py                 # Tool tier compliance
 └── references/
-    ├── reviewer-patterns.md                    # Checklist design, output format
-    ├── domain-specialist-guide.md              # Constrained expertise, comprehensive coverage
-    ├── researcher-patterns.md                  # Investigation structure, discovery focus
-    ├── orchestrator-patterns.md                # Multi-agent coordination, task distribution
-    ├── analyzer-patterns.md                    # Data transformation, insight generation
-    └── generator-patterns.md                   # Template-based creation, artifact validation
+    ├── domain-specialist-guide.md              # Constrained expertise, comprehensive coverage (PRIMARY)
+    ├── researcher-patterns.md                  # Investigation structure, web research tools
+    └── reviewer-patterns.md                    # Checklist design, read-only verification
 ```
 
 **SKILL.md CSO Description:**
 ```yaml
-description: Use when creating agents, building subagents, need agent scaffolding, want @agent-name patterns, before writing .claude/agents/*.md, thinking "I need an agent template", planning reviewer/specialist/researcher/orchestrator/analyzer/generator agents - provides 6 specialized templates with tool tier validation for diverse agent patterns
+description: Use when creating agents, building subagents, need agent scaffolding, want @agent-name patterns, before writing .claude/agents/*.md, thinking "I need an agent template", planning domain specialist/researcher/reviewer agents - provides 3 validated templates with tool tier enforcement based on 116 production agents
 ```
 
 **Template Characteristics:**
 
-| Template | Placeholders | Tool Tier | Sections | Unique Features |
-|----------|--------------|-----------|----------|-----------------|
-| Reviewer | `{{AGENT_NAME}}`, `{{CHECK_1_NAME}}` | Read-only | 8 | Output format (CRITICAL/WARNING), APPROVE/REJECT |
-| Domain Specialist | `{{DOMAIN}}`, `{{AREA_1_NAME}}` | Full access | 12 | 8-15 domain areas, comprehensive checklists |
-| Researcher | `{{RESEARCH_FOCUS}}`, `{{QUERY_1}}` | Read + Web | 7 | Investigation structure, context queries |
-| Orchestrator | `{{AGENT_1}}`, `{{TASK_1}}`, `{{DEPENDENCY_1}}` | Write (limited) | 9 | Task distribution, state tracking, coordination |
-| Analyzer | `{{DATA_SOURCE}}`, `{{ANALYSIS_1}}`, `{{INSIGHT_1}}` | Write + Bash | 10 | Transform data, generate insights, visualizations |
-| Generator | `{{ARTIFACT_TYPE}}`, `{{TEMPLATE_1}}`, `{{VALIDATION_1}}` | Full access | 9 | Template-based creation, output validation |
+| Template | Placeholders | Tool Tier | Sections | Pattern Frequency |
+|----------|--------------|-----------|----------|-------------------|
+| Domain Specialist | `{{DOMAIN}}`, `{{AREA_1_NAME}}` | Full access | 6 | **PRIMARY** (86% of agents) |
+| Researcher | `{{RESEARCH_FOCUS}}`, `{{QUERY_1}}` | Read + Web | 6 | Web research (5% of agents) |
+| Reviewer | `{{AGENT_NAME}}`, `{{CHECK_1_NAME}}` | Read-only | 6 | Verification (3-5% of agents) |
+
+**All templates use standardized 6-section structure:**
+1. Role Statement
+2. Communication Protocol (JSON query format)
+3. Checklist (8 items)
+4. Development Workflow (3 phases: Analysis, Implementation, Excellence)
+5. Integration Notes (optional)
+6. Anti-Patterns (optional)
 
 **Validators:**
 
@@ -739,20 +761,15 @@ description: Use when creating agents, building subagents, need agent scaffoldin
    - Location: `.claude/agents/` (global, not environment-specific)
 
 3. **validate_agent_structure.py**
-   - Reviewer: 8 sections (Role, When Invoked, Checklist, 5 domain areas, Output Format, Anti-Patterns)
-   - Domain Specialist: 12 sections (Role, When Invoked, Checklist, 8-12 domain areas, Workflow, Integration, Anti-Patterns)
-   - Researcher: 7 sections (Role, When Invoked, Focus Areas, Investigation Structure, Output Format, Anti-Patterns)
-   - Orchestrator: 9 sections (Role, When Invoked, Coordination Checklist, Task Distribution, State Management, Agent Integration, Output Format, Anti-Patterns)
-   - Analyzer: 10 sections (Role, When Invoked, Analysis Checklist, Data Processing, Statistical Methods, Visualization, Insights, Output Format, Anti-Patterns)
-   - Generator: 9 sections (Role, When Invoked, Generation Checklist, Template Management, Artifact Creation, Validation, Output Format, Anti-Patterns)
+   - All templates: 6 major sections
+   - Domain Specialist: 8-15 domain areas (subsections)
+   - Researcher: Investigation workflow structure
+   - Reviewer: Verification checklist structure
 
 4. **validate_agent_tools.py**
    - Reviewer: `tools: [Read, Grep, Glob]` (exactly - read-only)
    - Researcher: `tools: [Read, Grep, Glob, WebFetch, WebSearch]` (exactly - read + web)
    - Domain Specialist: `tools: [Read, Write, Edit, Bash, Glob, Grep]` (exactly - full access)
-   - Orchestrator: `tools: [Read, Write, Edit, Glob, Grep]` (exactly - write limited, no Bash)
-   - Analyzer: `tools: [Read, Write, Edit, Bash, Glob, Grep]` (exactly - write + bash)
-   - Generator: `tools: [Read, Write, Edit, Bash, Glob, Grep]` (exactly - full access)
    - Error if tools don't match template type exactly
 
 ---
@@ -806,17 +823,26 @@ description: Use when creating agents, building subagents, need agent scaffoldin
 
 ### 8.1 Template Development Order
 
-**Phase 1: High-Value Templates (Tier 1)**
-1. COMMAND_RPIV_TEMPLATE.md (score: 9.8/10)
-2. COMMAND_VALIDATION_TEMPLATE.md (score: 8.6/10)
-3. AGENT_REVIEWER_TEMPLATE.md (score: 8.4/10)
-4. AGENT_DOMAIN_SPECIALIST_TEMPLATE.md (score: 8.2/10)
+**Phase 1: Primary Templates (Tier 1)**
+1. COMMAND_RPIV_TEMPLATE.md (score: 9.8/10) - Proven in variance-analysis.md
+2. AGENT_DOMAIN_SPECIALIST_TEMPLATE.md (score: 9.5/10 ↑) - **PRIMARY** agent pattern (86% frequency)
+3. COMMAND_VALIDATION_TEMPLATE.md (score: 8.6/10) - Proven in sync-docs.md
+4. AGENT_RESEARCHER_TEMPLATE.md (score: 8.6/10 ↑) - Distinct web research pattern
 
-**Phase 2: Proven Patterns (Tier 2)**
-5. COMMAND_BATCH_PROCESSING_TEMPLATE.md (score: 8.4/10)
-6. AGENT_RESEARCHER_TEMPLATE.md (score: 7.0/10)
+**Phase 2: Supporting Templates (Tier 2)**
+5. COMMAND_BATCH_PROCESSING_TEMPLATE.md (score: 8.4/10) - High FP&A demand
+6. AGENT_REVIEWER_TEMPLATE.md (score: 7.8/10) - Proven in code-reviewer.md
 
-**Rationale:** Tier 1 templates are proven (variance-analysis uses RPIV, code-reviewer is reviewer pattern). Tier 2 templates are validated but not yet implemented in project.
+**Phase 3: Additional Command Templates (Tier 3)**
+7. COMMAND_DATA_TRANSFORMATION_TEMPLATE.md (score: 7.8/10) - ETL workflows
+8. COMMAND_ORCHESTRATION_TEMPLATE.md (score: 7.5/10) - Multi-agent coordination
+9. COMMAND_REPORTING_TEMPLATE.md (score: 7.2/10) - Analytics and dashboards
+
+**Rationale:**
+- Tier 1 prioritizes proven patterns (variance-analysis, code-reviewer) and primary agent pattern (86% frequency)
+- Tier 2 adds high-demand supporting templates
+- Tier 3 covers specialized command workflows
+- Agent templates reduced from 6 to 3 based on validation (orchestrator/analyzer/generator removed as redundant/anti-patterns)
 
 ### 8.2 Validator Complexity Ranking
 
@@ -830,25 +856,33 @@ description: Use when creating agents, building subagents, need agent scaffoldin
 - validate_agent_tools.py (tool tier matching)
 
 **Complex (150-300 lines):**
-- validate_command_structure.py (3 templates × 6-8 sections)
-- validate_agent_structure.py (3 templates × 7-12 sections)
+- validate_command_structure.py (6 templates × 6-8 sections)
+- validate_agent_structure.py (3 templates × 6 sections each)
 - validate_command_usage.py (usage line parsing, arg matching)
 
 ### 8.3 Progressive Disclosure Strategy
 
-**Commands:**
+**Commands (6 templates, 6 reference guides):**
 - Main SKILL.md: 6 sections (Overview, When to Use, Instructions, Pitfalls, Examples, Progressive Disclosure)
 - references/rpiv-workflow-guide.md: Deep dive on checkpoints, progress tracking
 - references/validation-patterns.md: ✅⚠️❌ reporting, systematic checks
 - references/batch-processing-guide.md: Error handling, loop patterns, summary reports
+- references/data-transformation-guide.md: ETL pipelines, data quality gates
+- references/orchestration-guide.md: Multi-agent coordination (commands coordinate agents)
+- references/reporting-guide.md: Aggregation, formatting, distribution
 
-**Agents:**
+**Agents (3 templates, 3 reference guides):**
 - Main SKILL.md: 6 sections (same as commands)
-- references/reviewer-patterns.md: Checklist design, output format (CRITICAL/WARNING/SUGGESTION)
-- references/domain-specialist-guide.md: Constrained expertise, comprehensive coverage (8-15 areas)
-- references/tool-permissions.md: Read-only vs read+web vs full, security implications
+- references/domain-specialist-guide.md: Constrained expertise, comprehensive coverage (8-15 areas) - **PRIMARY**
+- references/researcher-patterns.md: Investigation structure, web research tools
+- references/reviewer-patterns.md: Checklist design, read-only verification
 
 **Target:** Main SKILL.md <200 lines, references/ 300-500 lines each
+
+**Removed Guides:**
+- ❌ orchestrator-patterns.md (anti-pattern - commands coordinate agents)
+- ❌ analyzer-patterns.md (redundant - use domain-specialist-guide.md)
+- ❌ generator-patterns.md (redundant - use domain-specialist-guide.md)
 
 ---
 
@@ -931,16 +965,24 @@ def test_rpiv_template_generation():
 
 **Required Deliverables:**
 - [ ] SKILL.md (technique type, <200 lines)
-- [ ] 6 templates (Reviewer, Domain Specialist, Researcher, Orchestrator, Analyzer, Generator)
+- [ ] **3 templates** (Domain Specialist, Researcher, Reviewer) - validated against 116 external agents
 - [ ] 4 validators (yaml, naming, structure, tools)
-- [ ] 1 orchestrator (generate_agent.py)
-- [ ] 6 reference guides (reviewer, specialist, researcher, orchestrator, analyzer, generator)
+- [ ] 1 orchestrator (generate_agent.py with 3 template options)
+- [ ] **3 reference guides** (domain-specialist-guide.md, researcher-patterns.md, reviewer-patterns.md)
 
 **Quality Gates:**
 - [ ] All validators pass on creating-agents SKILL.md
 - [ ] Generated code-reviewer.md from Reviewer template passes validators
-- [ ] Generated fintech-engineer.md from Domain Specialist template passes validators
+- [ ] Generated fintech-engineer.md from Domain Specialist template passes validators (PRIMARY pattern)
+- [ ] Generated research-analyst.md from Researcher template passes validators
 - [ ] Manual test: Generate new agent, invoke it successfully
+- [ ] Validation: All templates use 6 major sections (not 7-12)
+
+**Removed Deliverables:**
+- ❌ AGENT_ORCHESTRATOR template (anti-pattern - commands coordinate agents)
+- ❌ AGENT_ANALYZER template (redundant with Domain Specialist)
+- ❌ AGENT_GENERATOR template (redundant with Domain Specialist)
+- ❌ orchestrator-patterns.md, analyzer-patterns.md, generator-patterns.md (removed guides)
 
 ### 10.3 Integration with creating-skills
 
@@ -966,12 +1008,17 @@ def test_rpiv_template_generation():
 - sync-docs.md: 269 lines (Validation pattern)
 
 **Implication:** Target template sizes:
-- COMMAND_RPIV: ~250 lines (with placeholders + documentation)
-- COMMAND_VALIDATION: ~200 lines
-- COMMAND_BATCH: ~230 lines
-- AGENT_REVIEWER: ~270 lines
-- AGENT_SPECIALIST: ~300 lines
-- AGENT_RESEARCHER: ~240 lines
+- **Commands:**
+  - COMMAND_RPIV: ~250 lines
+  - COMMAND_VALIDATION: ~200 lines
+  - COMMAND_BATCH: ~230 lines
+  - COMMAND_DATA_TRANSFORMATION: ~220 lines
+  - COMMAND_ORCHESTRATION: ~240 lines
+  - COMMAND_REPORTING: ~210 lines
+- **Agents (standardized to 275-285 line range):**
+  - AGENT_DOMAIN_SPECIALIST: ~280 lines (PRIMARY)
+  - AGENT_RESEARCHER: ~280 lines
+  - AGENT_REVIEWER: ~280 lines
 
 ---
 
@@ -1024,9 +1071,12 @@ def test_rpiv_template_generation():
 
 ---
 
-## Appendix D: New Template Details (Expansion to 6 Templates Each)
+## Appendix D: Template Details and Validation
 
-### D.1 Additional Command Templates
+**CRITICAL UPDATE:** Based on deep validation against 116 external agents + 12-factor-agents principles, agent templates reduced from 6 to 3.
+See `research-validation-addendum.md` for complete 50+ source validation analysis.
+
+### D.1 Command Templates (6 Templates - All Validated)
 
 **4. COMMAND_DATA_TRANSFORMATION_TEMPLATE.md (Score: 7.8/10)**
 
@@ -1162,204 +1212,180 @@ def test_rpiv_template_generation():
 
 ---
 
-### D.2 Additional Agent Templates
+### D.2 Agent Templates (3 Templates - Validated Against 116 External Agents)
 
-**4. AGENT_ORCHESTRATOR_TEMPLATE.md (Score: 7.6/10)**
+**VALIDATION SUMMARY:**
+- ✅ **KEPT:** 3 templates (DOMAIN_SPECIALIST, RESEARCHER, REVIEWER) - architecturally distinct tool tiers
+- ❌ **REMOVED:** 3 templates (ORCHESTRATOR, ANALYZER, GENERATOR) - anti-patterns or redundancies
+- **Evidence:** 116 external agents in awesome-claude-code-subagents + 12-factor-agents principles
 
-**Use Cases:**
-- Coordinate multiple agents for complex tasks
-- Manage workflow dependencies
-- Task distribution and load balancing
-- Multi-step process management
+**1. AGENT_DOMAIN_SPECIALIST_TEMPLATE.md (Score: 9.5/10 ↑) - PRIMARY**
 
-**Structure (9 sections):**
+**Pattern Frequency:** 100+ agents (86% of total) 🌟
+
+**Use Cases (Validated from External Agents):**
+- Language expertise: python-pro, typescript-pro, rust-engineer (23 agents)
+- Domain expertise: fintech-engineer, quant-analyst, healthcare-specialist (18 agents)
+- Infrastructure: kubernetes-specialist, cloud-architect (12 agents)
+- **Data analysis:** data-analyst, data-scientist (12 agents) - was "Analyzer"
+- **Artifact generation:** cli-developer, tooling-engineer (10 agents) - was "Generator"
+
+**Structure (6 major sections - STANDARDIZED):**
 ```markdown
-# Agent Role
-You are a workflow orchestrator coordinating multiple agents...
+# Role Statement (1-2 paragraphs)
+You are a [seniority] [domain] specialist with expertise in [areas]...
 
-## When Invoked
-1. Query for workflow requirements
-2. Review available agents and capabilities
-3. Analyze dependencies and execution order
-4. Coordinate execution and aggregate results
+## Communication Protocol
+### Context Query Format (JSON)
+{
+  "requesting_agent": "domain-specialist-name",
+  "requirements": "..."
+}
 
-## Coordination Checklist
-- [ ] Dependency graph validated
-- [ ] Agent capabilities confirmed
-- [ ] State transitions defined
-- [ ] Failure handling planned
-- [ ] Results aggregation strategy clear
+## Checklist (8 items)
+- [ ] Domain criterion 1 verified
+- [ ] Domain criterion 2 achieved
+...
 
-## Task Distribution (8-10 strategies)
-- Priority scheduling
-- Load balancing
-- Capacity tracking
-- Failover handling
+## Development Workflow
+### Phase 1: Analysis
+- Understand requirements
+- Review existing state
+### Phase 2: Implementation
+- Execute domain-specific work
+- Track progress
+### Phase 3: Excellence Delivery
+- Validate quality
+- Document results
 
-## State Management (8-10 items)
-- State persistence
-- Transition validation
-- Rollback procedures
+## Integration Notes (Optional)
+Work with:
+- @related-agent-1 on [task]
+...
 
-## Agent Integration (8-10 patterns)
-- Agent discovery
-- Communication protocols
-- Result aggregation
-
-## Output Format
-**Orchestration Summary:**
-- Tasks completed: X/Y
-- Agents involved: [list]
-- Execution time: Xm Ys
-- State: [final state]
+## Anti-Patterns (Optional)
+❌ Bad practice 1
+✅ Good practice 1
 ```
 
-**Tool Tier:** Write (limited) - `[Read, Write, Edit, Glob, Grep]` (no Bash - coordination only)
+**Tool Tier:** Full access - `[Read, Write, Edit, Bash, Glob, Grep]` (100% consistency across 100+ agents)
 
-**Key Differentiators:**
-- Manages other agents (not domain expert)
-- Dependency tracking focus
-- State management required
-- Coordination over implementation
+**Key Insights:**
+- **THIS IS THE PRIMARY TEMPLATE** - use for 86% of agent needs
+- data-analyst is NOT a separate template, it's a domain specialist in data analysis
+- cli-developer is NOT a separate template, it's a domain specialist in CLI development
+- External agents classify these as "domain specialists" not separate categories
 
-**External Validation:** workflow-orchestrator (285 lines), task-distributor (285 lines)
+**External Examples:**
+- `/external/awesome-claude-code-subagents/categories/02-language-specialists/python-pro.md`
+- `/external/awesome-claude-code-subagents/categories/07-specialized-domains/fintech-engineer.md`
+- `/external/awesome-claude-code-subagents/categories/05-data-ai/data-analyst.md` (was "analyzer")
+- `/external/awesome-claude-code-subagents/categories/06-developer-experience/cli-developer.md` (was "generator")
 
 ---
 
-**5. AGENT_ANALYZER_TEMPLATE.md (Score: 7.4/10)**
+**2. AGENT_RESEARCHER_TEMPLATE.md (Score: 8.6/10 ↑)**
 
-**Use Cases:**
-- Business intelligence analysis
-- Data transformation and insights
-- Statistical analysis and pattern recognition
-- Visualization recommendations
+**Pattern Frequency:** 6 agents (5% of total, 100% tool consistency)
 
-**Structure (10 sections):**
-```markdown
-# Agent Role
-You are a data analyzer generating insights from complex datasets...
+**Use Cases (Validated from External Agents):**
+- competitive-analyst.md (competitive intelligence)
+- data-researcher.md (data source discovery)
+- market-researcher.md (market analysis)
+- research-analyst.md (general research)
+- search-specialist.md (information retrieval)
+- trend-analyst.md (trend identification)
 
-## When Invoked
-1. Query for business context and data sources
-2. Review data quality and availability
-3. Analyze patterns and statistical significance
-4. Deliver actionable insights with visualizations
+**Structure (6 major sections):**
+Same as Domain Specialist, but with investigation-focused workflow.
 
-## Analysis Checklist
-- [ ] Data quality verified
-- [ ] Statistical significance confirmed
-- [ ] Patterns identified
-- [ ] Insights actionable
-- [ ] Visualizations appropriate
+**Tool Tier:** Read + Web - `[Read, Grep, Glob, WebFetch, WebSearch]` (100% consistency across 6 agents)
 
-## Data Processing (8-10 techniques)
-- Cleaning procedures
-- Transformation logic
-- Normalization methods
-- Feature engineering
-
-## Statistical Methods (8-10 methods)
-- Descriptive statistics
-- Correlation analysis
-- Regression modeling
-- Time series analysis
-
-## Visualization (8-10 types)
-- Chart selection
-- Dashboard design
-- Interactive graphics
-
-## Insights (8-10 types)
-- Trend identification
-- Anomaly detection
-- Forecasting
-
-## Output Format
-**Analysis Report:**
-- Executive Summary
-- Key Findings (3-5 insights)
-- Statistical Results
-- Visualization Recommendations
-- Action Items
-```
-
-**Tool Tier:** Write + Bash - `[Read, Write, Edit, Bash, Glob, Grep]` (full data processing)
-
-**Key Differentiators:**
-- Transforms data (not just discovers like Researcher)
-- Generates insights (analysis focus)
-- Visualization expertise
-- Statistical methods
-
-**External Validation:** data-analyst (285 lines), data-researcher (285 lines)
+**Key Differentiator:**
+- **ONLY template with web research tools** (WebFetch, WebSearch)
+- Architecturally distinct from Domain Specialist (different tools = different permissions)
+- Discovery focus (NOT transformation like analysts)
 
 ---
 
-**6. AGENT_GENERATOR_TEMPLATE.md (Score: 7.1/10)**
+**3. AGENT_REVIEWER_TEMPLATE.md (Score: 7.8/10 ↓)**
 
-**Use Cases:**
-- Generate code from templates (CLI tools, APIs, scripts)
-- Create documentation (API docs, user guides)
-- Generate configuration files (YAML, JSON, TOML)
-- Scaffold new projects/components
+**Pattern Frequency:** 4-6 agents (3-5% of total)
 
-**Structure (9 sections):**
-```markdown
-# Agent Role
-You are a code/content generator creating artifacts from templates...
+**Use Cases (Validated from External Agents):**
+- code-reviewer.md (code quality verification)
+- security-auditor.md (security compliance)
+- architect-reviewer.md (architecture review)
+- compliance-auditor.md (regulatory compliance)
 
-## When Invoked
-1. Query for artifact requirements and constraints
-2. Review templates and examples
-3. Analyze validation criteria
-4. Generate artifacts with validation
+**Structure (6 major sections):**
+Same as Domain Specialist, but with verification-focused workflow and APPROVE/REJECT output.
 
-## Generation Checklist
-- [ ] Template selected appropriately
-- [ ] Placeholders replaced correctly
-- [ ] Validation rules applied
-- [ ] Output tested
-- [ ] Documentation included
+**Tool Tier:** Read-only - `[Read, Grep, Glob]` (100% consistency across reviewers)
 
-## Template Management (8-10 capabilities)
-- Template discovery
-- Placeholder identification
-- Conditional logic
-- Loop handling
+**Key Differentiator:**
+- **Read-only by security design** (no code modification)
+- Architecturally distinct from Domain Specialist (different tools = different permissions)
+- Verification focus with structured output (CRITICAL/WARNING/SUGGESTION, APPROVE/REJECT)
 
-## Artifact Creation (8-10 types)
-- Code generation (CLI, API, scripts)
-- Documentation (Markdown, HTML)
-- Configuration (YAML, JSON)
-- Testing artifacts
-
-## Validation (8-10 checks)
-- Syntax validation
-- Schema compliance
-- Style checking
-- Functional testing
-
-## Output Format
-**Generation Report:**
-- Artifacts Created: [list with paths]
-- Template Used: [template name]
-- Validation Results: [pass/fail]
-- Usage Instructions: [how to use]
-```
-
-**Tool Tier:** Full access - `[Read, Write, Edit, Bash, Glob, Grep]` (create and test artifacts)
-
-**Key Differentiators:**
-- Creates new artifacts (not reviews existing)
-- Template-based approach
-- Validation of outputs
-- Multiple artifact types (code, docs, configs)
-
-**External Validation:** cli-developer (285 lines), documentation-engineer (285 lines), tooling-engineer (285 lines)
+**Note:** Project code-reviewer.md uses this pattern.
 
 ---
 
-### D.3 Scoring Rationale
+### D.3 Removed Templates (Anti-Patterns and Redundancies)
+
+**❌ AGENT_ORCHESTRATOR (Anti-Pattern)**
+
+**Why Removed:**
+1. **Context Isolation Violation:** Agents operate in separate contexts (code-reviewer.md:254), cannot communicate
+2. **No Task Tool:** Task tool for coordination is SDK-only, NOT available in `.claude/agents/`
+3. **Duplicates Command Functionality:** Orchestration is what COMMANDS do (variance-analysis.md invokes @code-reviewer)
+4. **12-Factor Violation:** Factor 10 states "agents are building blocks in a larger, mostly deterministic system" - the system = COMMAND
+
+**Evidence:**
+- `/external/12-factor-agents/content/factor-10-small-focused-agents.md`: "Agents are just one building block"
+- `/external/awesome-claude-code-subagents/categories/09-meta-orchestration/` agents assume SDK context
+- Project variance-analysis.md (COMMAND) invokes @code-reviewer (AGENT) at checkpoints
+
+**Replacement:** Use **COMMAND_ORCHESTRATION_TEMPLATE** instead (commands coordinate agents).
+
+---
+
+**❌ AGENT_ANALYZER (Redundant with Domain Specialist)**
+
+**Why Removed:**
+1. **Same Tools:** Read, Write, Edit, Bash, Glob, Grep (identical to Domain Specialist)
+2. **Same Structure:** 6 sections, 275-285 lines, 3-phase workflow
+3. **Same Pattern:** External agents classify data-analyst AS a domain specialist
+4. **Content vs Structure:** "Analysis" is domain content, not template structure
+
+**Evidence:**
+- `/external/awesome-claude-code-subagents/categories/05-data-ai/data-analyst.md` - uses Domain Specialist pattern
+- Tools are identical to python-pro, fintech-engineer, kubernetes-specialist
+- 12 data/AI agents ALL use Domain Specialist structure
+
+**Replacement:** Use **AGENT_DOMAIN_SPECIALIST_TEMPLATE** with data analysis domain areas.
+
+---
+
+**❌ AGENT_GENERATOR (Redundant with Domain Specialist)**
+
+**Why Removed:**
+1. **Same Tools:** Read, Write, Edit, Bash, Glob, Grep (identical to Domain Specialist)
+2. **Same Structure:** 6 sections, 275-285 lines, 3-phase workflow
+3. **Same Pattern:** External agents classify cli-developer AS a domain specialist
+4. **Content vs Structure:** "Generation" is domain content, not template structure
+
+**Evidence:**
+- `/external/awesome-claude-code-subagents/categories/06-developer-experience/cli-developer.md` - uses Domain Specialist pattern
+- Tools are identical to python-pro, fintech-engineer, data-analyst
+- 10 developer experience agents ALL use Domain Specialist structure
+
+**Replacement:** Use **AGENT_DOMAIN_SPECIALIST_TEMPLATE** with CLI/artifact generation domain areas.
+
+---
+
+### D.4 Scoring Rationale
 
 **Command Template Scores:**
 - RPIV (9.8/10): Proven in production (variance-analysis.md), multi-agent consensus
@@ -1369,19 +1395,27 @@ You are a code/content generator creating artifacts from templates...
 - **Orchestration (7.5/10):** Workflow-orchestrator pattern, multi-agent coordination unique
 - **Reporting (7.2/10):** Previously 6.4/10, upgraded with distinct aggregation/formatting/distribution focus
 
-**Agent Template Scores:**
-- Reviewer (8.4/10): Proven in production (code-reviewer.md), clear read-only pattern
-- Domain Specialist (8.2/10): 86% of 116 external agents use this pattern
-- Researcher (7.0/10): 8 external examples, distinct investigation focus
-- **Orchestrator (7.6/10):** Workflow-orchestrator/task-distributor patterns, coordination focus distinct from Domain Specialist
-- **Analyzer (7.4/10):** Data-analyst pattern, transformation + insights generation distinct from Researcher
-- **Generator (7.1/10):** CLI-developer/documentation-engineer patterns, template-based creation distinct from Domain Specialist
+**Agent Template Scores (REVISED after 50+ source validation):**
+- **Domain Specialist (9.5/10 ↑):** PRIMARY template - 86% frequency, 100+ agents, gold standard pattern
+- **Researcher (8.6/10 ↑):** Distinct web research tools, 100% tool consistency across 6 agents
+- **Reviewer (7.8/10 ↓):** Niche but critical (3-5%), read-only security constraint, proven in code-reviewer.md
+- ❌ ~~Orchestrator (N/A):~~ **REMOVED** - Anti-pattern (commands coordinate agents, not agents)
+- ❌ ~~Analyzer (6.2/10):~~ **REMOVED** - Redundant (data-analyst IS a domain specialist)
+- ❌ ~~Generator (6.0/10):~~ **REMOVED** - Redundant (cli-developer IS a domain specialist)
 
-**Expansion Justification:**
-- All 6 templates per skill score ≥7.0/10
-- Each template has unique use cases and differentiators
-- External validation from 116 production agents
-- FP&A-specific needs addressed (ETL, reporting, coordination)
+**Final Template Count:**
+- **Commands:** 6 templates (all validated against project patterns and FP&A needs)
+- **Agents:** 3 templates (validated against 116 external agents + 12-factor principles)
+- **Total:** 9 templates (down from 12 originally proposed)
+
+**Validation Rigor:**
+- 116 external agents analyzed for patterns
+- 12-factor-agents architectural principles applied
+- Claude Code implementation examined (variance-analysis.md, code-reviewer.md)
+- Tool tier consistency verified (100% match for Domain Specialist and Researcher)
+- Section count standardized (6 major sections for all agents)
+- Anti-patterns identified and removed (orchestrator context violation)
+- Redundancies eliminated (analyzer/generator merged into domain specialist)
 
 ---
 
