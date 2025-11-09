@@ -11,8 +11,6 @@ python = "^3.11"
 
 # Core dependencies for calculation scripts
 pandas = "^2.1.0"
-gspread = "^6.1.2"
-gspread-dataframe = "^4.0.0"
 openpyxl = "^3.1.2"
 xlsxwriter = "^3.1.9"
 click = "^8.1.7"
@@ -21,34 +19,36 @@ python-dotenv = "^1.0.0"
 loguru = "^0.7.2"
 tqdm = "^4.66.0"
 
-# Google Workspace APIs
+# Google Workspace APIs (Priority 3 - Phase 5: Google Integration)
 google-auth = "^2.23.0"
 google-auth-oauthlib = "^1.1.0"
 google-api-python-client = "^2.100.0"
+gspread = "^6.1.2"
+gspread-dataframe = "^4.0.0"
 
-# Precision & Currency (Phase 1 - Shared Foundation)
+# Precision & Currency (Priority 2 - Shared Foundation)
 stockholm = "^0.3.0"
-
-# Data Validation (Phase 1-2)
-pydantic = "^2.0.0"
-pandera = "^0.17.0"
 typeguard = "^4.0.0"
 
-# API Integration (Phase 2)
+# Data Validation (Priority 3 - Phase 2: Data Extraction)
+pydantic = "^2.0.0"
+pandera = "^0.17.0"
+
+# API Integration (Priority 3 - Phase 2: Data Extraction)
 tenacity = "^8.2.0"
 
-# Reporting & Tables (Phase 4)
-great-tables = "^0.2.0"
-
-# Financial Calculations (Phase 6)
-pyxirr = "^0.10.0"
-
-# Reconciliation (Phase 3)
+# Reconciliation (Priority 3 - Phase 3: Account Reconciliation)
 rapidfuzz = "^3.5.0"
 
-# Data Warehouse & Quality (Phase 2-3)
+# Data Warehouse & Quality (Priority 3 - Phases 2-3)
 duckdb = "^0.9.0"
 great-expectations = { version = "^0.18.0", optional = true }
+
+# Reporting & Tables (Priority 3 - Phase 4: Reporting)
+great-tables = "^0.2.0"
+
+# Financial Calculations (Priority 3 - Phase 6: Forecast Maintenance)
+pyxirr = "^0.10.0"
 
 # External dependencies from cloned repos (future use)
 # Option: Install from local paths when needed
@@ -58,23 +58,26 @@ great-expectations = { version = "^0.18.0", optional = true }
 # humanlayer = { path = "external/humanlayer", develop = true }
 
 [tool.poetry.group.dev.dependencies]
+# Priority 1 (Development Workflows) - Required FIRST
 pytest = "^7.4.3"
 pytest-cov = "^4.1.0"
 mypy = "^1.7.1"
 ruff = "^0.1.9"
-hypothesis = "^6.90.0"  # Property-based testing (Phase 7)
+hypothesis = "^6.90.0"  # Property-based testing for test-suite-generator
 
 [tool.poetry.group.orchestration]
 optional = true
 
 [tool.poetry.group.orchestration.dependencies]
-prefect = "^2.14.0"  # Workflow orchestration (Phase 8)
+# Priority 4 (Orchestration) - Required LAST
+prefect = "^2.14.0"  # Workflow orchestration for /prod:monthly-close
 
 [tool.poetry.group.visualization]
 optional = true
 
 [tool.poetry.group.visualization.dependencies]
-mplfinance = "^0.12.0"  # Financial charts
+# Priority 3 - Phase 6 (Forecast Maintenance) - Optional
+mplfinance = "^0.12.0"  # Financial charts for variance trends
 matplotlib = "^3.8.0"
 seaborn = "^0.13.0"
 

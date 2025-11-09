@@ -67,11 +67,80 @@ external/
 
 ---
 
-## Integration by Meta-Infrastructure Phase
+## Integration by Meta-Infrastructure Priority
 
-### Phase 1: Shared Foundation (Week 1)
+**⚠️ NOTE:** Sections below are ordered by Priority (implementation order), not Phase (document order).
 
+**Implementation Sequence:**
+- Priority 1: Development Workflows (Phase 7 in docs) - Week 1-2
+- Priority 2: Shared Foundation (Phase 1 in docs) - Week 3
+- Priority 3: Production Infrastructure (Phases 2-6 in docs) - Week 4-13
+- Priority 4: Orchestration (Phase 8 in docs) - Week 14
+
+---
+
+### Priority 1: Development Workflows (Week 1-2) ⭐ **IMPLEMENT FIRST**
+
+**Phase in Docs:** Phase 7 (Development Workflows)
+**Goals:** python-best-practices, test-suite-generator, @script-generator, /create-script
+
+#### Primary Repos to Study:
+1. **hypothesis (data-validation/)** - Property-based testing
+   - **Location:** `external/data-validation/hypothesis/`
+   - **Key Files:**
+     - `hypothesis/strategies.py` - Data generators
+     - `hypothesis-python/examples/` - Test examples
+   - **Extract:**
+     ```python
+     from hypothesis import given, strategies as st
+     from decimal import Decimal
+
+     # Pattern: Property-based testing for financial functions
+     @given(
+         actual=st.decimals(min_value=0, max_value=1000000, places=2),
+         budget=st.decimals(min_value=0, max_value=1000000, places=2)
+     )
+     def test_variance_calculation_properties(actual: Decimal, budget: Decimal):
+         variance = calculate_variance(actual, budget)
+
+         # Property: variance = actual - budget
+         assert variance == actual - budget
+
+         # Property: reversibility
+         assert budget + variance == actual
+     ```
+   - **Adapt For:** `test-suite-generator` skill - generate edge case tests
+
+2. **typeguard (data-validation/)** - Runtime type checking
+   - **Location:** `external/data-validation/typeguard/`
+   - **Key Files:**
+     - `src/typeguard/_decorators.py` - @typechecked decorator
+     - `src/typeguard/_functions.py` - check_type function
+   - **Extract:**
+     ```python
+     from typeguard import typechecked
+
+     @typechecked
+     def calculate_variance(actual: Decimal, budget: Decimal) -> Decimal:
+         return actual - budget  # Runtime error if wrong types passed
+     ```
+   - **Adapt For:** Enforce Decimal types at runtime in all financial functions
+
+3. **python-audit-log (audit-compliance/)** - Audit logging patterns
+   - **Location:** `external/audit-compliance/python-audit-log/`
+   - **Adapt For:** python-best-practices skill - audit trail enforcement
+
+**Deliverable:** Development tools that will build ALL subsequent components
+
+**Once Complete:** Use these tools to build Priorities 2-4
+
+---
+
+### Priority 2: Shared Foundation (Week 3)
+
+**Phase in Docs:** Phase 1 (Shared Foundation)
 **Goals:** decimal-precision-enforcer, audit-trail-enforcer, /setup command
+**Built Using:** Priority 1 development tools
 
 #### Primary Repos to Study:
 1. **stockholm (precision-currency/)** - Decimal precision patterns
@@ -148,9 +217,11 @@ external/
 
 ---
 
-### Phase 2: Data Extraction (Week 2-3)
+### Priority 3a: Data Extraction (Week 4-5)
 
+**Phase in Docs:** Phase 2 (Data Extraction)
 **Goals:** Databricks/Adaptive extraction, validation agents
+**Built Using:** Priority 1 development tools
 
 #### Primary Repos to Study:
 1. **great-expectations (data-warehouse/)** - Data validation framework
@@ -218,9 +289,11 @@ external/
 
 ---
 
-### Phase 3: Account Reconciliation (Week 4)
+### Priority 3b: Account Reconciliation (Week 6)
 
+**Phase in Docs:** Phase 3 (Account Reconciliation)
 **Goals:** Fuzzy account matching, reconciliation workflow
+**Built Using:** Priority 1 development tools
 
 #### Primary Repos to Study:
 1. **splink (reconciliation/)** - Probabilistic record linkage
@@ -301,9 +374,11 @@ external/
 
 ---
 
-### Phase 4: Reporting (Week 5-6)
+### Priority 3c: Reporting (Week 7-8)
 
+**Phase in Docs:** Phase 4 (Reporting)
 **Goals:** Excel report generation with formatting
+**Built Using:** Priority 1 development tools
 
 #### Primary Repos to Study:
 1. **XlsxWriter (reporting-automation/)** - Excel generation
@@ -399,9 +474,11 @@ external/
 
 ---
 
-### Phase 5: Google Integration (Week 7-9)
+### Priority 3d: Google Integration (Week 9-11)
 
+**Phase in Docs:** Phase 5 (Google Workspace Integration)
 **Goals:** Google Slides/Sheets updates with OAuth
+**Built Using:** Priority 1 development tools
 
 #### Primary Repos to Study:
 1. **google-api-python-client (api-integration/)** - Google Workspace APIs
@@ -446,9 +523,11 @@ external/
 
 ---
 
-### Phase 6: Forecast Maintenance (Week 10-11)
+### Priority 3e: Forecast Maintenance (Week 12-13)
 
+**Phase in Docs:** Phase 6 (Forecast Maintenance)
 **Goals:** Rolling forecast updates, assumption tracking
+**Built Using:** Priority 1 development tools
 
 #### Primary Repos to Study:
 1. **FinanceToolkit (financial-modeling/)** - Financial ratios and calculations
@@ -518,9 +597,9 @@ external/
 
 ---
 
-### Phase 7: Development Workflows (Week 12-13)
+### ~~Phase 7: Development Workflows~~ → SEE PRIORITY 1 ABOVE ⭐
 
-**Goals:** Script generation, validation, TDD enforcement
+**Note:** This section originally appeared here but has been **MOVED TO PRIORITY 1** (top of document) as it must be implemented FIRST.
 
 #### Primary Repos to Study:
 1. **hypothesis (data-validation/)** - Property-based testing
@@ -553,13 +632,16 @@ external/
    - **Pattern:** Schema-based testing for DataFrames
    - **Adapt For:** Validate script inputs/outputs
 
-**Deliverable:** TDD workflow with >95% coverage
+**Deliverable:** TDD workflow with >95% coverage (moved to Priority 1)
 
 ---
 
-### Phase 8: Orchestration (Week 14)
+### Priority 4: Orchestration (Week 14)
 
+**Phase in Docs:** Phase 8 (Orchestration)
 **Goals:** Full monthly close workflow
+**Built Using:** Priority 1 development tools
+**Runtime Dependencies:** ALL Priority 3 components
 
 #### Primary Repos to Study:
 1. **prefect (etl-pipelines/)** - Python workflow orchestration
@@ -788,31 +870,45 @@ visualization = [
 
 ---
 
-## Integration Priority by Phase
+## Integration Priority by Implementation Order
 
-### Immediate (Phase 1 - Week 1):
+### Priority 1: Development Workflows (Week 1-2) ⭐ FIRST
+1. **hypothesis** - Property-based testing patterns
+2. **typeguard** - Runtime type checking
+3. **python-audit-log** - Audit trail patterns
+
+### Priority 2: Shared Foundation (Week 3)
 1. **stockholm** - Decimal precision patterns
 2. **py-money** - Currency validation
-3. **python-audit-log** - Audit trail patterns
-4. **typeguard** - Runtime type checking
 
-### Short-term (Phase 2-4 - Week 2-6):
+### Priority 3: Production Infrastructure (Week 4-13)
+
+**Priority 3a (Week 4-5): Data Extraction**
 1. **pandera** - DataFrame validation
 2. **great-expectations** - Data quality checks
 3. **tenacity** - Retry logic
-4. **XlsxWriter** - Excel generation
-5. **gspread** - Google Sheets
 
-### Medium-term (Phase 5-6 - Week 7-11):
+**Priority 3b (Week 6): Account Reconciliation**
+1. **splink** - Probabilistic record linkage
+2. **dedupe** - ML-based fuzzy matching
+3. **duckdb** - Local SQL analysis
+
+**Priority 3c (Week 7-8): Reporting**
+1. **XlsxWriter** - Excel generation
+2. **great-tables** - Table formatting
+
+**Priority 3d (Week 9-11): Google Integration**
 1. **google-api-python-client** - Google Workspace APIs
-2. **FinanceToolkit** - Financial ratios
-3. **mplfinance** - Visualization
-4. **splink/dedupe** - Fuzzy matching
+2. **gspread** - Google Sheets automation
 
-### Long-term (Phase 7-8 - Week 12-14):
-1. **hypothesis** - Property-based testing
-2. **prefect** - Orchestration
-3. **dbt-core** - SQL patterns
+**Priority 3e (Week 12-13): Forecast Maintenance**
+1. **FinanceToolkit** - Financial ratios
+2. **pyxirr** - IRR/NPV calculations
+3. **mplfinance** - Financial visualization
+
+### Priority 4: Orchestration (Week 14)
+1. **prefect** - Workflow orchestration
+2. **dbt-core** - SQL transformation patterns
 
 ---
 
@@ -831,30 +927,41 @@ For each cloned repo, extract:
 
 ## Proof of Concept Priorities
 
-### POC 1: Decimal Precision Enforcement (Phase 1)
+### POC 1: Property-Based Test Generation (Priority 1) ⭐ FIRST
+**Goal:** Validate automated test generation with edge cases
+**Repos:** hypothesis, typeguard
+**Test:** Generate comprehensive test suite for variance calculation
+**Why First:** Validates dev tools work before building other components
+
+### POC 2: Decimal Precision Enforcement (Priority 2)
 **Goal:** Validate that all financial calculations use Decimal
 **Repos:** stockholm, py-money, typeguard
 **Test:** Create variance calculation with float rejection
+**Depends On:** POC 1 (test generation)
 
-### POC 2: Fuzzy Account Matching (Phase 3)
+### POC 3: Fuzzy Account Matching (Priority 3b)
 **Goal:** Match Databricks accounts to Adaptive accounts
 **Repos:** splink, dedupe, duckdb
 **Test:** 100-account sample dataset with 80%+ match accuracy
+**Depends On:** POC 1 (test framework), POC 2 (precision enforcement)
 
-### POC 3: Excel Report Generation (Phase 4)
+### POC 4: Excel Report Generation (Priority 3c)
 **Goal:** Generate formatted variance report
 **Repos:** XlsxWriter, great-tables
 **Test:** Multi-tab report with conditional formatting
+**Depends On:** POC 1, POC 2
 
-### POC 4: Google Workspace Integration (Phase 5)
+### POC 5: Google Workspace Integration (Priority 3d)
 **Goal:** Update Slides and Sheets via API
 **Repos:** google-api-python-client, gspread
 **Test:** OAuth flow + batch updates
+**Depends On:** POC 1, POC 2
 
-### POC 5: Workflow Orchestration (Phase 8)
+### POC 6: Workflow Orchestration (Priority 4)
 **Goal:** End-to-end monthly close
 **Repos:** prefect
 **Test:** 5-step workflow with error handling
+**Depends On:** All Priority 3 POCs complete
 
 ---
 
