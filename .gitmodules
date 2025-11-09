@@ -16,3 +16,21 @@
 [submodule "external/py-money"]
 	path = external/py-money
 	url = https://github.com/vimeo/py-money.git
+[submodule "external/claude-code/wshobson-agents"]
+	path = external/claude-code/wshobson-agents
+	url = https://github.com/wshobson/agents
+[submodule "external/claude-code/claude-code-spec-workflow"]
+	path = external/claude-code/claude-code-spec-workflow
+	url = https://github.com/Pimzino/claude-code-spec-workflow
+[submodule "external/claude-code/claude-code-skill-factory"]
+	path = external/claude-code/claude-code-skill-factory
+	url = https://github.com/alirezarezvani/claude-code-skill-factory
+[submodule "external/claude-code/awesome-claude-code"]
+	path = external/claude-code/awesome-claude-code
+	url = https://github.com/hesreallyhim/awesome-claude-code
+[submodule "external/claude-code/awesome-claude-code-subagents"]
+	path = external/claude-code/awesome-claude-code-subagents
+	url = https://github.com/VoltAgent/awesome-claude-code-subagents
+[submodule "external/claude-code/anthropics-skills"]
+	path = external/claude-code/anthropics-skills
+	url = https://github.com/anthropics/skills
