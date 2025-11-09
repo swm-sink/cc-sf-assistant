@@ -311,19 +311,23 @@ For each file:
 
 ### 2.3 Validated Template Recommendations
 
-**Source:** `/home/user/cc-sf-assistant/specs/commands-and-agents/multi-agent-analysis.md`
+**Source:** Multi-agent analysis + External pattern research (116 agents, 12-factor principles)
 
-**Final Recommendations (3 templates):**
+**Expanded Recommendations (6 templates):**
 
-| Template | Score | Use When | Lines | Sections |
-|----------|-------|----------|-------|----------|
-| **COMMAND_RPIV_TEMPLATE.md** | 9.8/10 | Complex workflows (variance, consolidation) | ~250 | 8 |
-| **COMMAND_VALIDATION_TEMPLATE.md** | 8.6/10 | Systematic checks (docs, config, data) | ~200 | 6 |
-| **COMMAND_BATCH_PROCESSING_TEMPLATE.md** | 8.4/10 | Multiple files/tasks | ~230 | 7 |
+| Template | Score | Use When | Lines | Sections | Unique Features |
+|----------|-------|----------|-------|----------|-----------------|
+| **COMMAND_RPIV_TEMPLATE.md** | 9.8/10 | Complex workflows (variance, consolidation, audits) | ~250 | 8 | 4 checkpoints, research-first, human-in-loop |
+| **COMMAND_VALIDATION_TEMPLATE.md** | 8.6/10 | Systematic checks (docs, config, data quality) | ~200 | 6 | No checkpoints, ✅⚠️❌ reporting, read-only |
+| **COMMAND_BATCH_PROCESSING_TEMPLATE.md** | 8.4/10 | Multiple files/departments/accounts | ~230 | 7 | Per-item errors, progress tracking, summary |
+| **COMMAND_DATA_TRANSFORMATION_TEMPLATE.md** | 7.8/10 | ETL pipelines, data migration, format conversion | ~220 | 7 | Load → Transform → Validate → Output, data quality gates |
+| **COMMAND_ORCHESTRATION_TEMPLATE.md** | 7.5/10 | Multi-agent coordination, workflow dependencies | ~240 | 8 | Dependency graph, state management, agent coordination |
+| **COMMAND_REPORTING_TEMPLATE.md** | 7.2/10 | Analytics, dashboards, executive summaries | ~210 | 7 | Aggregate → Analyze → Format → Distribute, multi-format output |
 
-**Dropped Templates:**
-- DATA_PROCESSING (overlap with RPIV)
-- REPORTING (can build from RPIV)
+**Rationale for Expansion:**
+- **Data Transformation:** Distinct from RPIV (no research phase, focus on data pipeline quality)
+- **Orchestration:** Manages multi-agent workflows with dependency tracking (workflow-orchestrator pattern)
+- **Reporting:** Unique aggregation and formatting logic, multiple distribution channels
 
 ---
 
@@ -481,20 +485,23 @@ Work with:
 
 ### 3.4 Validated Template Recommendations
 
-**Source:** Multi-agent analysis
+**Source:** Multi-agent analysis + External validation (116 production agents)
 
-**Final Recommendations (3 templates):**
+**Expanded Recommendations (6 templates):**
 
-| Template | Score | Use When | Lines | Tool Tier |
-|----------|-------|----------|-------|-----------|
-| **AGENT_REVIEWER_TEMPLATE.md** | 8.4/10 | Code review, validation, compliance | ~270 | Read-only |
-| **AGENT_DOMAIN_SPECIALIST_TEMPLATE.md** | 8.2/10 | Financial expert, language specialist | ~300 | Full access |
-| **AGENT_RESEARCHER_TEMPLATE.md** | 7.0/10 | Codebase exploration, doc research | ~240 | Read + Web |
+| Template | Score | Use When | Lines | Tool Tier | Unique Features |
+|----------|-------|----------|-------|-----------|-----------------|
+| **AGENT_REVIEWER_TEMPLATE.md** | 8.4/10 | Code review, financial validation, compliance | ~270 | Read-only | Verification checklist, APPROVE/REJECT, structured output |
+| **AGENT_DOMAIN_SPECIALIST_TEMPLATE.md** | 8.2/10 | Financial expert, Python expert, domain knowledge | ~300 | Full access | 8-15 domain areas, comprehensive coverage, constrained expertise |
+| **AGENT_RESEARCHER_TEMPLATE.md** | 7.0/10 | Codebase exploration, documentation research | ~240 | Read + Web | Investigation structure, context queries, discovery focus |
+| **AGENT_ORCHESTRATOR_TEMPLATE.md** | 7.6/10 | Multi-agent coordination, workflow management | ~280 | Write (limited) | Task distribution, state tracking, agent coordination |
+| **AGENT_ANALYZER_TEMPLATE.md** | 7.4/10 | Data analysis, insights generation, pattern recognition | ~275 | Write + Bash | Transform data, generate insights, visualization recommendations |
+| **AGENT_GENERATOR_TEMPLATE.md** | 7.1/10 | Create code/docs/configs/CLI tools | ~265 | Full access | Template-based generation, validation of outputs, artifact creation |
 
-**Dropped Templates:**
-- CODE_WRITER (users prefer commands for implementation)
-- DOCUMENTATION (lower priority, similar to researcher)
-- LANGUAGE_SPECIALIST (redundant with domain specialist)
+**Rationale for Expansion:**
+- **Orchestrator:** Distinct from Domain Specialist (coordination focus, manages other agents/tasks - workflow-orchestrator/task-distributor pattern)
+- **Analyzer:** Transforms data and generates insights (data-analyst pattern, distinct from Researcher which discovers)
+- **Generator:** Creates new artifacts from templates (cli-developer/documentation-engineer pattern, distinct from Domain Specialist which has broader expertise)
 
 ---
 
@@ -614,31 +621,40 @@ Work with:
 │   └── templates/
 │       ├── COMMAND_RPIV_TEMPLATE.md            # ~250 lines, 8 sections
 │       ├── COMMAND_VALIDATION_TEMPLATE.md      # ~200 lines, 6 sections
-│       └── COMMAND_BATCH_PROCESSING_TEMPLATE.md # ~230 lines, 7 sections
+│       ├── COMMAND_BATCH_PROCESSING_TEMPLATE.md # ~230 lines, 7 sections
+│       ├── COMMAND_DATA_TRANSFORMATION_TEMPLATE.md # ~220 lines, 7 sections
+│       ├── COMMAND_ORCHESTRATION_TEMPLATE.md   # ~240 lines, 8 sections
+│       └── COMMAND_REPORTING_TEMPLATE.md       # ~210 lines, 7 sections
 ├── scripts/
 │   ├── generate_command.py                     # Orchestrator
 │   ├── validate_command_yaml.py                # YAML frontmatter
 │   ├── validate_command_naming.py              # Kebab-case, env prefix
-│   ├── validate_command_structure.py           # Required sections
+│   ├── validate_command_structure.py           # Required sections (6 templates)
 │   └── validate_command_usage.py               # Usage line syntax
 └── references/
     ├── rpiv-workflow-guide.md                  # Deep dive on RPIV pattern
     ├── validation-patterns.md                  # Systematic check patterns
-    └── batch-processing-guide.md               # Error handling, progress tracking
+    ├── batch-processing-guide.md               # Error handling, progress tracking
+    ├── data-transformation-guide.md            # ETL pipelines, data quality gates
+    ├── orchestration-guide.md                  # Multi-agent coordination, dependencies
+    └── reporting-guide.md                      # Aggregation, formatting, distribution
 ```
 
 **SKILL.md CSO Description:**
 ```yaml
-description: Use when creating slash commands, building workflows, need command scaffolding, want /env:command patterns, before writing .claude/commands/*.md, thinking "I need a command template", planning RPIV/validation/batch workflows - provides 3 specialized templates with validation for human-in-loop workflows
+description: Use when creating slash commands, building workflows, need command scaffolding, want /env:command patterns, before writing .claude/commands/*.md, thinking "I need a command template", planning RPIV/validation/batch/ETL/orchestration/reporting workflows - provides 6 specialized templates with validation for diverse workflow patterns
 ```
 
 **Template Characteristics:**
 
 | Template | Placeholders | Sections | Unique Features |
 |----------|--------------|----------|-----------------|
-| RPIV | `{{COMMAND_NAME}}`, `{{ARG_1}}`, `{{RESEARCH_STEP_1}}` | 8 | 4 checkpoints, progress table |
-| Validation | `{{CHECK_1_NAME}}`, `{{EXPECTED_RESULT_1}}` | 6 | ✅⚠️❌ format, no checkpoints |
-| Batch | `{{INPUT_DIR}}`, `{{PATTERN}}`, `{{LOOP_STEP_1}}` | 7 | Error log, summary report |
+| RPIV | `{{COMMAND_NAME}}`, `{{ARG_1}}`, `{{RESEARCH_STEP_1}}` | 8 | 4 checkpoints, research-first, progress table |
+| Validation | `{{CHECK_1_NAME}}`, `{{EXPECTED_RESULT_1}}` | 6 | ✅⚠️❌ format, no checkpoints, read-only |
+| Batch | `{{INPUT_DIR}}`, `{{PATTERN}}`, `{{LOOP_STEP_1}}` | 7 | Per-item errors, progress tracking, summary report |
+| Data Transformation | `{{SOURCE_FILE}}`, `{{TRANSFORM_1}}`, `{{QUALITY_CHECK_1}}` | 7 | Load → Transform → Validate → Output pipeline |
+| Orchestration | `{{AGENT_1}}`, `{{DEPENDENCY_1}}`, `{{STATE_VAR_1}}` | 8 | Dependency graph, multi-agent coordination, state tracking |
+| Reporting | `{{DATA_SOURCE}}`, `{{METRIC_1}}`, `{{FORMAT_1}}` | 7 | Aggregate → Analyze → Format → Distribute |
 
 **Validators:**
 
@@ -656,6 +672,9 @@ description: Use when creating slash commands, building workflows, need command 
    - RPIV: 8 sections (Header, STEP 1-4, Success Criteria, Example, Anti-Patterns)
    - Validation: 6 sections (Header, Checks, Report Format, Usage Example, Anti-Patterns)
    - Batch: 7 sections (Header, Discovery, Loop, Summary, Error Handling, Example, Anti-Patterns)
+   - Data Transformation: 7 sections (Header, Load, Transform, Validate, Output, Example, Anti-Patterns)
+   - Orchestration: 8 sections (Header, Dependency Graph, Agent Coordination, State Management, Execution, Success Criteria, Example, Anti-Patterns)
+   - Reporting: 7 sections (Header, Data Sources, Aggregation, Analysis, Formatting, Distribution, Example)
 
 4. **validate_command_usage.py**
    - Usage line present: `**Usage:** /command <arg1> [arg2]`
@@ -672,22 +691,28 @@ description: Use when creating slash commands, building workflows, need command 
 │   └── templates/
 │       ├── AGENT_REVIEWER_TEMPLATE.md          # ~270 lines, read-only
 │       ├── AGENT_DOMAIN_SPECIALIST_TEMPLATE.md # ~300 lines, full tools
-│       └── AGENT_RESEARCHER_TEMPLATE.md        # ~240 lines, read+web
+│       ├── AGENT_RESEARCHER_TEMPLATE.md        # ~240 lines, read+web
+│       ├── AGENT_ORCHESTRATOR_TEMPLATE.md      # ~280 lines, write (limited)
+│       ├── AGENT_ANALYZER_TEMPLATE.md          # ~275 lines, write+bash
+│       └── AGENT_GENERATOR_TEMPLATE.md         # ~265 lines, full access
 ├── scripts/
 │   ├── generate_agent.py                       # Orchestrator
 │   ├── validate_agent_yaml.py                  # YAML frontmatter
 │   ├── validate_agent_naming.py                # Kebab-case
-│   ├── validate_agent_structure.py             # Required sections
+│   ├── validate_agent_structure.py             # Required sections (6 templates)
 │   └── validate_agent_tools.py                 # Tool tier compliance
 └── references/
     ├── reviewer-patterns.md                    # Checklist design, output format
     ├── domain-specialist-guide.md              # Constrained expertise, comprehensive coverage
-    └── tool-permissions.md                     # Read-only vs read+web vs full
+    ├── researcher-patterns.md                  # Investigation structure, discovery focus
+    ├── orchestrator-patterns.md                # Multi-agent coordination, task distribution
+    ├── analyzer-patterns.md                    # Data transformation, insight generation
+    └── generator-patterns.md                   # Template-based creation, artifact validation
 ```
 
 **SKILL.md CSO Description:**
 ```yaml
-description: Use when creating agents, building subagents, need agent scaffolding, want @agent-name patterns, before writing .claude/agents/*.md, thinking "I need an agent template", planning reviewer/specialist/researcher agents - provides 3 specialized templates with tool tier validation for independent verification
+description: Use when creating agents, building subagents, need agent scaffolding, want @agent-name patterns, before writing .claude/agents/*.md, thinking "I need an agent template", planning reviewer/specialist/researcher/orchestrator/analyzer/generator agents - provides 6 specialized templates with tool tier validation for diverse agent patterns
 ```
 
 **Template Characteristics:**
@@ -697,6 +722,9 @@ description: Use when creating agents, building subagents, need agent scaffoldin
 | Reviewer | `{{AGENT_NAME}}`, `{{CHECK_1_NAME}}` | Read-only | 8 | Output format (CRITICAL/WARNING), APPROVE/REJECT |
 | Domain Specialist | `{{DOMAIN}}`, `{{AREA_1_NAME}}` | Full access | 12 | 8-15 domain areas, comprehensive checklists |
 | Researcher | `{{RESEARCH_FOCUS}}`, `{{QUERY_1}}` | Read + Web | 7 | Investigation structure, context queries |
+| Orchestrator | `{{AGENT_1}}`, `{{TASK_1}}`, `{{DEPENDENCY_1}}` | Write (limited) | 9 | Task distribution, state tracking, coordination |
+| Analyzer | `{{DATA_SOURCE}}`, `{{ANALYSIS_1}}`, `{{INSIGHT_1}}` | Write + Bash | 10 | Transform data, generate insights, visualizations |
+| Generator | `{{ARTIFACT_TYPE}}`, `{{TEMPLATE_1}}`, `{{VALIDATION_1}}` | Full access | 9 | Template-based creation, output validation |
 
 **Validators:**
 
@@ -711,15 +739,21 @@ description: Use when creating agents, building subagents, need agent scaffoldin
    - Location: `.claude/agents/` (global, not environment-specific)
 
 3. **validate_agent_structure.py**
-   - Reviewer: 8 sections (Role, When Invoked, Checklist, 5 domain areas, Output Format)
-   - Domain Specialist: 12 sections (Role, When Invoked, Checklist, 8-12 domain areas, Workflow, Integration)
-   - Researcher: 7 sections (Role, When Invoked, Focus Areas, Investigation Structure, Output Format)
+   - Reviewer: 8 sections (Role, When Invoked, Checklist, 5 domain areas, Output Format, Anti-Patterns)
+   - Domain Specialist: 12 sections (Role, When Invoked, Checklist, 8-12 domain areas, Workflow, Integration, Anti-Patterns)
+   - Researcher: 7 sections (Role, When Invoked, Focus Areas, Investigation Structure, Output Format, Anti-Patterns)
+   - Orchestrator: 9 sections (Role, When Invoked, Coordination Checklist, Task Distribution, State Management, Agent Integration, Output Format, Anti-Patterns)
+   - Analyzer: 10 sections (Role, When Invoked, Analysis Checklist, Data Processing, Statistical Methods, Visualization, Insights, Output Format, Anti-Patterns)
+   - Generator: 9 sections (Role, When Invoked, Generation Checklist, Template Management, Artifact Creation, Validation, Output Format, Anti-Patterns)
 
 4. **validate_agent_tools.py**
-   - Reviewer: `tools: [Read, Grep, Glob]` (exactly)
-   - Researcher: `tools: [Read, Grep, Glob, WebFetch, WebSearch]` (exactly)
-   - Domain Specialist: `tools: [Read, Write, Edit, Bash, Glob, Grep]` (exactly)
-   - Error if tools don't match template type
+   - Reviewer: `tools: [Read, Grep, Glob]` (exactly - read-only)
+   - Researcher: `tools: [Read, Grep, Glob, WebFetch, WebSearch]` (exactly - read + web)
+   - Domain Specialist: `tools: [Read, Write, Edit, Bash, Glob, Grep]` (exactly - full access)
+   - Orchestrator: `tools: [Read, Write, Edit, Glob, Grep]` (exactly - write limited, no Bash)
+   - Analyzer: `tools: [Read, Write, Edit, Bash, Glob, Grep]` (exactly - write + bash)
+   - Generator: `tools: [Read, Write, Edit, Bash, Glob, Grep]` (exactly - full access)
+   - Error if tools don't match template type exactly
 
 ---
 
@@ -882,10 +916,10 @@ def test_rpiv_template_generation():
 
 **Required Deliverables:**
 - [ ] SKILL.md (technique type, <200 lines)
-- [ ] 3 templates (RPIV, Validation, Batch Processing)
+- [ ] 6 templates (RPIV, Validation, Batch Processing, Data Transformation, Orchestration, Reporting)
 - [ ] 4 validators (yaml, naming, structure, usage)
 - [ ] 1 orchestrator (generate_command.py)
-- [ ] 3 reference guides (rpiv, validation, batch)
+- [ ] 6 reference guides (rpiv, validation, batch, data-transformation, orchestration, reporting)
 
 **Quality Gates:**
 - [ ] All validators pass on creating-commands SKILL.md
@@ -897,10 +931,10 @@ def test_rpiv_template_generation():
 
 **Required Deliverables:**
 - [ ] SKILL.md (technique type, <200 lines)
-- [ ] 3 templates (Reviewer, Domain Specialist, Researcher)
+- [ ] 6 templates (Reviewer, Domain Specialist, Researcher, Orchestrator, Analyzer, Generator)
 - [ ] 4 validators (yaml, naming, structure, tools)
 - [ ] 1 orchestrator (generate_agent.py)
-- [ ] 3 reference guides (reviewer, specialist, tools)
+- [ ] 6 reference guides (reviewer, specialist, researcher, orchestrator, analyzer, generator)
 
 **Quality Gates:**
 - [ ] All validators pass on creating-agents SKILL.md
@@ -985,6 +1019,369 @@ def test_rpiv_template_generation():
 - .claude/agents/code-reviewer.md (Reviewer example)
 - specs/commands-and-agents/research.md (command/agent patterns)
 - specs/commands-and-agents/multi-agent-analysis.md (template validation)
+
+---
+
+---
+
+## Appendix D: New Template Details (Expansion to 6 Templates Each)
+
+### D.1 Additional Command Templates
+
+**4. COMMAND_DATA_TRANSFORMATION_TEMPLATE.md (Score: 7.8/10)**
+
+**Use Cases:**
+- ETL pipelines (Extract, Transform, Load)
+- Data format conversions (CSV ↔ Excel ↔ JSON)
+- Data migration between systems
+- Data quality improvement workflows
+
+**Structure (7 sections):**
+```markdown
+# Data Transformation Command
+
+## Phase 1: Load Data
+- Validate source file format
+- Check schema/structure
+- Document data profile
+
+## Phase 2: Transform Data
+- Apply transformation rules
+- Handle edge cases (NULL, duplicates)
+- Track transformation metrics
+
+## Phase 3: Validate Output
+- Data quality checks
+- Completeness verification
+- Accuracy validation
+
+## Phase 4: Output
+- Write to target format
+- Generate audit trail
+- Create summary report
+```
+
+**Key Differentiators vs RPIV:**
+- No research phase (transformation rules are known)
+- Focus on data quality gates
+- Pipeline-oriented (Load → Transform → Validate → Output)
+- No human checkpoints (automated workflow)
+
+**External Validation:** data-analyst pattern (transformation focus)
+
+---
+
+**5. COMMAND_ORCHESTRATION_TEMPLATE.md (Score: 7.5/10)**
+
+**Use Cases:**
+- Multi-agent coordination workflows
+- Complex approval chains
+- Dependency-driven processes
+- State machine implementations
+
+**Structure (8 sections):**
+```markdown
+# Orchestration Command
+
+## Phase 1: Define Dependency Graph
+- List agents/tasks
+- Document dependencies
+- Define execution order
+
+## Phase 2: Initialize State
+- Set up state variables
+- Define transition rules
+- Create monitoring structure
+
+## Phase 3: Coordinate Execution
+- Invoke agents in order
+- Track state transitions
+- Handle failures gracefully
+
+## Phase 4: Aggregate Results
+- Collect outputs from all agents
+- Validate completion criteria
+- Generate consolidated report
+```
+
+**Key Differentiators vs RPIV:**
+- Manages multiple agents (not single workflow)
+- Dependency tracking (execution order based on dependencies)
+- State management (persistent state across agent invocations)
+- Coordination focus (vs research/implementation focus)
+
+**External Validation:** workflow-orchestrator, task-distributor patterns
+
+---
+
+**6. COMMAND_REPORTING_TEMPLATE.md (Score: 7.2/10)**
+
+**Use Cases:**
+- Executive dashboards
+- Financial reports (variance, P&L, balance sheet)
+- Analytics summaries
+- KPI tracking reports
+
+**Structure (7 sections):**
+```markdown
+# Reporting Command
+
+## Phase 1: Define Data Sources
+- Identify source files/databases
+- Document required metrics
+- Define aggregation rules
+
+## Phase 2: Aggregate Data
+- Load all data sources
+- Apply aggregation logic
+- Calculate derived metrics
+
+## Phase 3: Analyze Trends
+- Identify patterns
+- Calculate variances
+- Flag anomalies
+
+## Phase 4: Format Report
+- Apply formatting rules
+- Generate visualizations (tables, charts)
+- Add executive summaries
+
+## Phase 5: Distribute
+- Output to multiple formats (Excel, PDF, HTML)
+- Send to distribution list
+- Archive with timestamp
+```
+
+**Key Differentiators vs RPIV:**
+- Aggregation focus (combine multiple sources)
+- Multi-format output (Excel + PDF + HTML)
+- Distribution channels (email, shared drive, etc.)
+- No implementation phase (presentation-focused)
+
+**External Validation:** data-analyst, business-analyst patterns (reporting specialization)
+
+---
+
+### D.2 Additional Agent Templates
+
+**4. AGENT_ORCHESTRATOR_TEMPLATE.md (Score: 7.6/10)**
+
+**Use Cases:**
+- Coordinate multiple agents for complex tasks
+- Manage workflow dependencies
+- Task distribution and load balancing
+- Multi-step process management
+
+**Structure (9 sections):**
+```markdown
+# Agent Role
+You are a workflow orchestrator coordinating multiple agents...
+
+## When Invoked
+1. Query for workflow requirements
+2. Review available agents and capabilities
+3. Analyze dependencies and execution order
+4. Coordinate execution and aggregate results
+
+## Coordination Checklist
+- [ ] Dependency graph validated
+- [ ] Agent capabilities confirmed
+- [ ] State transitions defined
+- [ ] Failure handling planned
+- [ ] Results aggregation strategy clear
+
+## Task Distribution (8-10 strategies)
+- Priority scheduling
+- Load balancing
+- Capacity tracking
+- Failover handling
+
+## State Management (8-10 items)
+- State persistence
+- Transition validation
+- Rollback procedures
+
+## Agent Integration (8-10 patterns)
+- Agent discovery
+- Communication protocols
+- Result aggregation
+
+## Output Format
+**Orchestration Summary:**
+- Tasks completed: X/Y
+- Agents involved: [list]
+- Execution time: Xm Ys
+- State: [final state]
+```
+
+**Tool Tier:** Write (limited) - `[Read, Write, Edit, Glob, Grep]` (no Bash - coordination only)
+
+**Key Differentiators:**
+- Manages other agents (not domain expert)
+- Dependency tracking focus
+- State management required
+- Coordination over implementation
+
+**External Validation:** workflow-orchestrator (285 lines), task-distributor (285 lines)
+
+---
+
+**5. AGENT_ANALYZER_TEMPLATE.md (Score: 7.4/10)**
+
+**Use Cases:**
+- Business intelligence analysis
+- Data transformation and insights
+- Statistical analysis and pattern recognition
+- Visualization recommendations
+
+**Structure (10 sections):**
+```markdown
+# Agent Role
+You are a data analyzer generating insights from complex datasets...
+
+## When Invoked
+1. Query for business context and data sources
+2. Review data quality and availability
+3. Analyze patterns and statistical significance
+4. Deliver actionable insights with visualizations
+
+## Analysis Checklist
+- [ ] Data quality verified
+- [ ] Statistical significance confirmed
+- [ ] Patterns identified
+- [ ] Insights actionable
+- [ ] Visualizations appropriate
+
+## Data Processing (8-10 techniques)
+- Cleaning procedures
+- Transformation logic
+- Normalization methods
+- Feature engineering
+
+## Statistical Methods (8-10 methods)
+- Descriptive statistics
+- Correlation analysis
+- Regression modeling
+- Time series analysis
+
+## Visualization (8-10 types)
+- Chart selection
+- Dashboard design
+- Interactive graphics
+
+## Insights (8-10 types)
+- Trend identification
+- Anomaly detection
+- Forecasting
+
+## Output Format
+**Analysis Report:**
+- Executive Summary
+- Key Findings (3-5 insights)
+- Statistical Results
+- Visualization Recommendations
+- Action Items
+```
+
+**Tool Tier:** Write + Bash - `[Read, Write, Edit, Bash, Glob, Grep]` (full data processing)
+
+**Key Differentiators:**
+- Transforms data (not just discovers like Researcher)
+- Generates insights (analysis focus)
+- Visualization expertise
+- Statistical methods
+
+**External Validation:** data-analyst (285 lines), data-researcher (285 lines)
+
+---
+
+**6. AGENT_GENERATOR_TEMPLATE.md (Score: 7.1/10)**
+
+**Use Cases:**
+- Generate code from templates (CLI tools, APIs, scripts)
+- Create documentation (API docs, user guides)
+- Generate configuration files (YAML, JSON, TOML)
+- Scaffold new projects/components
+
+**Structure (9 sections):**
+```markdown
+# Agent Role
+You are a code/content generator creating artifacts from templates...
+
+## When Invoked
+1. Query for artifact requirements and constraints
+2. Review templates and examples
+3. Analyze validation criteria
+4. Generate artifacts with validation
+
+## Generation Checklist
+- [ ] Template selected appropriately
+- [ ] Placeholders replaced correctly
+- [ ] Validation rules applied
+- [ ] Output tested
+- [ ] Documentation included
+
+## Template Management (8-10 capabilities)
+- Template discovery
+- Placeholder identification
+- Conditional logic
+- Loop handling
+
+## Artifact Creation (8-10 types)
+- Code generation (CLI, API, scripts)
+- Documentation (Markdown, HTML)
+- Configuration (YAML, JSON)
+- Testing artifacts
+
+## Validation (8-10 checks)
+- Syntax validation
+- Schema compliance
+- Style checking
+- Functional testing
+
+## Output Format
+**Generation Report:**
+- Artifacts Created: [list with paths]
+- Template Used: [template name]
+- Validation Results: [pass/fail]
+- Usage Instructions: [how to use]
+```
+
+**Tool Tier:** Full access - `[Read, Write, Edit, Bash, Glob, Grep]` (create and test artifacts)
+
+**Key Differentiators:**
+- Creates new artifacts (not reviews existing)
+- Template-based approach
+- Validation of outputs
+- Multiple artifact types (code, docs, configs)
+
+**External Validation:** cli-developer (285 lines), documentation-engineer (285 lines), tooling-engineer (285 lines)
+
+---
+
+### D.3 Scoring Rationale
+
+**Command Template Scores:**
+- RPIV (9.8/10): Proven in production (variance-analysis.md), multi-agent consensus
+- Validation (8.6/10): Proven in production (sync-docs.md), clear use cases
+- Batch (8.4/10): High FP&A user demand, external validation
+- **Data Transformation (7.8/10):** Distinct from RPIV (no research), data-analyst pattern, FP&A ETL needs
+- **Orchestration (7.5/10):** Workflow-orchestrator pattern, multi-agent coordination unique
+- **Reporting (7.2/10):** Previously 6.4/10, upgraded with distinct aggregation/formatting/distribution focus
+
+**Agent Template Scores:**
+- Reviewer (8.4/10): Proven in production (code-reviewer.md), clear read-only pattern
+- Domain Specialist (8.2/10): 86% of 116 external agents use this pattern
+- Researcher (7.0/10): 8 external examples, distinct investigation focus
+- **Orchestrator (7.6/10):** Workflow-orchestrator/task-distributor patterns, coordination focus distinct from Domain Specialist
+- **Analyzer (7.4/10):** Data-analyst pattern, transformation + insights generation distinct from Researcher
+- **Generator (7.1/10):** CLI-developer/documentation-engineer patterns, template-based creation distinct from Domain Specialist
+
+**Expansion Justification:**
+- All 6 templates per skill score ≥7.0/10
+- Each template has unique use cases and differentiators
+- External validation from 116 production agents
+- FP&A-specific needs addressed (ETL, reporting, coordination)
 
 ---
 
