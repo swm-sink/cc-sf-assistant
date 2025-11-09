@@ -587,6 +587,557 @@ Both can benefit from the **creating-skills approach**: multiple templates, vali
 
 ---
 
-**Research Conducted:** 2025-11-09  
-**Evidence Base:** 5 existing implementations (2 commands, 1 agent, 3 templates) + CLAUDE.md workflow docs  
+**Research Conducted:** 2025-11-09
+**Evidence Base:** 5 existing implementations (2 commands, 1 agent, 3 templates) + CLAUDE.md workflow docs + 116 reference agents from external library
 **Verification:** All patterns extracted from actual codebase, not inferred
+
+---
+
+## PART 11: COMPREHENSIVE PATTERN EXPLORATION
+
+**Purpose:** Exhaustive search of ALL command, agent, and skill patterns to identify additional template opportunities.
+
+**Evidence Base:**
+- Local commands: 2 implemented (variance-analysis, sync-docs)
+- Local agents: 1 implemented (code-reviewer)
+- Local skills: 4 implemented (enforcing-research-plan-implement-verify, creating-skills, variance-analyzer, financial-validator)
+- External reference agents: 116 agents in `external/awesome-claude-code-subagents/`
+- Templates analyzed: 6 (4 skill templates + command/agent patterns)
+
+---
+
+### 12 UNIQUE PATTERNS DISCOVERED
+
+#### Pattern 1: RPIV Workflow Enforcement (Discipline Skill)
+**Source:** `.claude/skills/enforcing-research-plan-implement-verify/SKILL.md`
+**Type:** Skill (Discipline)
+**Structure:**
+- Iron Law enforcement mechanism
+- 4-phase workflow with human checkpoints (Research → Plan → Implement → Verify)
+- Rationalization table (40+ entries)
+- Red flags (8 warning signs)
+- Explicit negations (6+)
+- Progressive disclosure (references/ subdirectory)
+
+**Template Opportunity:** SKILL_DISCIPLINE_TEMPLATE.md (already created)
+**Use Cases:**
+- Workflow enforcement for any multi-step process
+- Process discipline (code review, deployment, data validation)
+- Quality gates with human approval
+
+---
+
+#### Pattern 2: Verification Agents (Read-Only)
+**Source:** `.claude/agents/code-reviewer.md`
+**Type:** Agent (Specialist Reviewer)
+**Structure:**
+- Minimal tool set: Read, Grep, Glob (read-only)
+- Skeptical/critical mindset definition
+- 7-point verification checklist
+- Explicit rejection criteria per check
+- Structured output: CRITICAL / WARNINGS / SUGGESTIONS
+- Final recommendation: APPROVE / REJECT / NEEDS REVISION
+
+**Template Opportunity:** AGENT_REVIEWER_TEMPLATE.md (recommended)
+**Use Cases:**
+- Financial calculation verification
+- Code review before deployment
+- Compliance/audit checks
+- Security review
+
+**Reference Pattern Variations (from external library):**
+- `security-reviewer.md` - Security vulnerability scanning
+- `performance-reviewer.md` - Performance bottleneck detection
+- `accessibility-reviewer.md` - WCAG compliance checking
+
+---
+
+#### Pattern 3: Domain Specialization (10 Categories)
+**Source:** `external/awesome-claude-code-subagents/` (116 agents)
+**Type:** Agent (Multiple Specializations)
+
+**10 Agent Categories Identified:**
+
+1. **Core Development** (17 agents)
+   - Examples: `fix-bug.md`, `implement-feature.md`, `refactor-code.md`
+   - Tools: Read, Write, Edit, Bash, Glob, Grep
+   - Use: Primary development tasks
+
+2. **Language Specialists** (12 agents)
+   - Examples: `python-expert.md`, `typescript-expert.md`, `rust-expert.md`
+   - Tools: Read, Write, Edit, Bash, Glob, Grep
+   - Use: Language-specific implementation and review
+
+3. **Infrastructure** (8 agents)
+   - Examples: `docker-specialist.md`, `kubernetes-specialist.md`, `ci-cd-specialist.md`
+   - Tools: Read, Write, Edit, Bash, Glob, Grep
+   - Use: DevOps and deployment
+
+4. **Quality & Security** (15 agents)
+   - Examples: `test-writer.md`, `security-auditor.md`, `linter-config.md`
+   - Tools: Read, Grep, Glob (reviewers), Read/Write/Edit/Bash (writers)
+   - Use: Quality assurance and security hardening
+
+5. **Data & AI** (10 agents)
+   - Examples: `data-analyst.md`, `ml-engineer.md`, `sql-expert.md`
+   - Tools: Read, Write, Edit, Bash, Glob, Grep
+   - Use: Data processing, ML, analytics
+
+6. **Developer Experience** (9 agents)
+   - Examples: `documentation-writer.md`, `onboarding-specialist.md`, `changelog-generator.md`
+   - Tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
+   - Use: Documentation, tutorials, developer guides
+
+7. **Specialized Domains** (18 agents)
+   - Examples: `game-dev-specialist.md`, `frontend-specialist.md`, `api-designer.md`
+   - Tools: Varies by domain
+   - Use: Domain-specific implementations (gaming, web, mobile, etc.)
+
+8. **Business & Product** (7 agents)
+   - Examples: `product-manager.md`, `requirements-analyst.md`, `user-story-writer.md`
+   - Tools: Read, Write, Edit, WebFetch, WebSearch
+   - Use: Product planning, requirements, user stories
+
+9. **Meta-Orchestration** (12 agents)
+   - Examples: `architect.md`, `code-planner.md`, `dependency-analyzer.md`
+   - Tools: Read, Grep, Glob, WebFetch, WebSearch
+   - Use: High-level design, planning, architecture
+
+10. **Research & Analysis** (8 agents)
+    - Examples: `research-assistant.md`, `codebase-explorer.md`, `documentation-searcher.md`
+    - Tools: Read, Grep, Glob, WebFetch, WebSearch
+    - Use: Investigation, exploration, research
+
+**Template Opportunity:** AGENT_DOMAIN_SPECIALIST_TEMPLATE.md (recommended)
+**Use Cases:**
+- Language-specific implementations (Python, TypeScript, Rust)
+- Technology-specific tasks (Docker, Kubernetes, React)
+- Domain-specific expertise (Finance, Healthcare, Gaming)
+
+---
+
+#### Pattern 4: Complex Workflow Commands (Multi-Phase)
+**Source:** `.claude/commands/prod/variance-analysis.md`
+**Type:** Command (Production Workflow)
+**Structure:**
+- YAML frontmatter: description, allowed-tools
+- Positional arguments: `$1` (budget file), `$2` (actual file), `$3` (output file)
+- 4-phase workflow: Research → Plan → Implement → Verify
+- Human checkpoints after each phase
+- Success criteria as actionable checklist
+- Skill invocations (financial-validator, variance-analyzer)
+- Agent invocations (@code-reviewer)
+- Audit trail requirements (timestamp, source, user)
+
+**Template Opportunity:** COMMAND_RPIV_TEMPLATE.md (recommended)
+**Use Cases:**
+- Financial workflows (variance analysis, budget consolidation)
+- Data processing pipelines (ETL, validation, reporting)
+- Complex multi-step processes requiring approval gates
+
+---
+
+#### Pattern 5: Validation Commands (Systematic Checks)
+**Source:** `.claude/commands/shared/sync-docs.md`
+**Type:** Command (Shared Utility)
+**Structure:**
+- YAML frontmatter: description
+- No arguments (runs on entire codebase)
+- 10 systematic validation checks
+- Structured report with ✅ ⚠️ ❌ indicators
+- Distinguishes critical issues from acceptable warnings
+- Non-destructive (read-only)
+
+**Template Opportunity:** COMMAND_VALIDATION_TEMPLATE.md (recommended)
+**Use Cases:**
+- Documentation consistency checking
+- Codebase compliance validation
+- Configuration file verification
+- Dependency version checks
+
+---
+
+#### Pattern 6: Auto-Invoked Skills (CSO-Optimized)
+**Source:** `.claude/skills/variance-analyzer/SKILL.md`, `.claude/skills/financial-validator/SKILL.md`
+**Type:** Skill (Technique/Pattern/Discipline/Reference)
+**Structure:**
+- YAML frontmatter: name, CSO-optimized description (score ≥0.7)
+- 6-12 sections depending on skill type
+- Progressive disclosure (main file <200 lines)
+- Supporting content in references/ subdirectory
+- Examples section with before/after scenarios
+
+**Template Opportunity:** Already created (4 skill templates)
+**CSO Requirements:**
+- ≥3 trigger phrases (when, before, after, use when)
+- ≥2 symptom keywords (thinking, feeling, noticing)
+- ≥2 technology-agnostic keywords (creating, implementing, workflow)
+- ≥2 specific examples (Google Sheets, variance, budget)
+- Target score: ≥0.7 (excellent: ≥0.8)
+
+---
+
+#### Pattern 7: Multi-Agent Coordination
+**Source:** `external/awesome-claude-code-subagents/orchestration/multi-agent-coordinator.md`
+**Type:** Agent (Meta-Orchestration)
+**Structure:**
+- Coordinates multiple specialized agents
+- Delegates tasks based on agent capabilities
+- Aggregates results from multiple agents
+- Provides unified report/recommendation
+
+**Template Opportunity:** AGENT_ORCHESTRATOR_TEMPLATE.md (future consideration)
+**Use Cases:**
+- Complex tasks requiring multiple specializations
+- Multi-phase workflows with different expertise per phase
+- Parallel task distribution
+
+---
+
+#### Pattern 8: Language Specialists (Constrained Domain)
+**Source:** `external/awesome-claude-code-subagents/languages/python-expert.md` (and 11 others)
+**Type:** Agent (Language Expert)
+**Structure:**
+- Constrained to single language/technology
+- Deep expertise in language-specific patterns
+- Idiomatic code recommendations
+- Performance optimizations for that language
+- Testing frameworks and tools specific to language
+
+**Template Opportunity:** AGENT_LANGUAGE_SPECIALIST_TEMPLATE.md (recommended)
+**Use Cases:**
+- Python optimization and best practices
+- TypeScript type system guidance
+- Rust memory safety review
+- Language-specific refactoring
+
+---
+
+#### Pattern 9: Tool-Restricted Agents (Security Tiers)
+**Source:** Multiple agents with varying tool access
+**Type:** Agent (Security Pattern)
+
+**3 Tool Permission Tiers Observed:**
+
+1. **Read-Only Tier** (Reviewers, Auditors)
+   - Tools: Read, Grep, Glob
+   - Use: Code review, security audit, compliance check
+   - Examples: @code-reviewer, @security-auditor
+
+2. **Research Tier** (Researchers, Analysts)
+   - Tools: Read, Grep, Glob, WebFetch, WebSearch
+   - Use: Investigation, exploration, documentation research
+   - Examples: @research-assistant, @codebase-explorer
+
+3. **Code Writer Tier** (Developers, Implementers)
+   - Tools: Read, Write, Edit, Bash, Glob, Grep
+   - Use: Feature implementation, bug fixes, refactoring
+   - Examples: @fix-bug, @implement-feature
+
+**Template Opportunity:** AGENT_SECURITY_TIER_TEMPLATE.md (recommended)
+**Use Cases:**
+- Minimize blast radius of agent errors
+- Enforce separation of concerns (review vs implementation)
+- Compliance requirements (read-only audit agents)
+
+---
+
+#### Pattern 10: Checklist-Based Verification
+**Source:** `.claude/agents/code-reviewer.md`, `.claude/commands/shared/sync-docs.md`
+**Type:** Agent/Command (Verification Pattern)
+**Structure:**
+- Numbered checklist (7-10 items)
+- Each item has:
+  - Specific check description
+  - Grep/search pattern to verify
+  - Pass/fail criteria
+  - Rejection/warning threshold
+- Structured output per checklist item
+- Final aggregated recommendation
+
+**Template Opportunity:** AGENT_CHECKLIST_REVIEWER_TEMPLATE.md (recommended)
+**Use Cases:**
+- Code quality gates
+- Documentation completeness
+- Configuration validation
+- Compliance verification
+
+---
+
+#### Pattern 11: Progressive Disclosure (Supporting Content)
+**Source:** `.claude/skills/creating-skills/` (references/, assets/, scripts/)
+**Type:** Skill (Documentation Pattern)
+**Structure:**
+- Main SKILL.md <200 lines (core content only)
+- `references/` subdirectory for detailed guides
+- `scripts/` subdirectory for executable code
+- `assets/` subdirectory for templates, configs
+- Main file references supporting content
+
+**Template Opportunity:** Already implemented in all 4 skill templates
+**Use Cases:**
+- Complex skills requiring extensive documentation
+- Skills with executable components
+- Skills with multiple templates or configurations
+
+---
+
+#### Pattern 12: Task Distribution (Batch Processing)
+**Source:** `external/awesome-claude-code-subagents/workflows/batch-processor.md`
+**Type:** Command/Agent (Workflow Pattern)
+**Structure:**
+- Accepts multiple input files or tasks
+- Processes each item systematically
+- Progress tracking per item
+- Aggregated results report
+- Error handling per item (continue on failure)
+
+**Template Opportunity:** COMMAND_BATCH_PROCESSING_TEMPLATE.md (HIGH PRIORITY)
+**Use Cases:**
+- Processing multiple budget files
+- Validating multiple accounts
+- Generating multiple reports
+- Batch data transformations
+
+---
+
+### HIGH-VALUE TEMPLATE OPPORTUNITIES
+
+Based on comprehensive exploration, the following templates are **HIGH PRIORITY** to create:
+
+#### 1. COMMAND_BATCH_PROCESSING_TEMPLATE.md (High Priority)
+**Why:** FP&A workflows often process multiple files (budget files, actual files, forecasts)
+**Structure:**
+- Argument: file pattern or directory
+- Loop through each file
+- Progress tracker (X of Y complete)
+- Per-file error handling (log and continue)
+- Aggregated results report (successes/failures)
+- Optional: parallel processing support
+
+**Use Cases:**
+- Process multiple variance reports
+- Validate multiple budget files
+- Generate reports for multiple departments
+- Consolidate multiple data sources
+
+---
+
+#### 2. AGENT_DOMAIN_VALIDATION_TEMPLATE.md (High Priority)
+**Why:** Financial data validation requires domain-specific rules (account types, decimal precision)
+**Structure:**
+- Domain-specific validation rules
+- Data type checking (Decimal for currency)
+- Business logic validation (favorability by account type)
+- Edge case handling (zero budget, negative values)
+- Structured validation report
+
+**Use Cases:**
+- Validate variance calculation inputs
+- Check budget file format and data types
+- Verify account type classifications
+- Audit trail compliance
+
+---
+
+#### 3. SKILL_ERROR_RECOVERY_TEMPLATE.md (Medium Priority)
+**Why:** Financial workflows need graceful error handling with human intervention
+**Structure:**
+- Error detection patterns
+- Recovery options per error type
+- Rollback mechanisms
+- Human decision points
+- Audit trail of errors and resolutions
+
+**Use Cases:**
+- Handle missing account mappings
+- Recover from malformed input files
+- Retry failed API calls with backoff
+- Log errors for compliance
+
+---
+
+#### 4. SKILL_DATA_PIPELINE_TEMPLATE.md (Medium Priority)
+**Why:** FP&A automation follows extract → transform → load patterns
+**Structure:**
+- Extract phase (read from source)
+- Transform phase (calculations, formatting)
+- Load phase (write to destination)
+- Validation at each phase boundary
+- Rollback on failure
+
+**Use Cases:**
+- ETL from Adaptive to Google Sheets
+- Budget consolidation workflows
+- Forecast data processing
+- Variance analysis pipelines
+
+---
+
+#### 5. AGENT_LANGUAGE_SPECIALIST_TEMPLATE.md (Medium Priority)
+**Why:** Python-specific best practices for financial calculations
+**Structure:**
+- Language: Python (or TypeScript, Rust, etc.)
+- Expertise areas (decimal precision, pandas, type hints)
+- Idiomatic patterns for this language
+- Performance optimizations
+- Testing frameworks (pytest)
+
+**Use Cases:**
+- Python code review for financial scripts
+- Pandas best practices for data processing
+- Type hint enforcement
+- Python-specific refactoring
+
+---
+
+#### 6. COMMAND_REPORTING_TEMPLATE.md (Low Priority)
+**Why:** Generate formatted reports with visualizations
+**Structure:**
+- Data aggregation phase
+- Formatting phase (Excel, PDF, charts)
+- Distribution phase (email, upload)
+- Metadata inclusion (timestamp, source)
+
+**Use Cases:**
+- Generate variance analysis reports
+- Create executive dashboards
+- Distribute monthly budget reports
+- Archive historical snapshots
+
+---
+
+### PATTERN ANALYSIS SUMMARY
+
+**Total Patterns Identified:** 12 unique patterns
+**External Reference Agents:** 116 agents across 10 categories
+**Template Recommendations:** 6 new templates (4 high/medium priority)
+**Evidence Base:** 5 local implementations + 116 external reference agents + 6 templates
+
+**Coverage Analysis:**
+
+| Pattern | Local Example | External Examples | Template Exists | Priority |
+|---------|---------------|-------------------|-----------------|----------|
+| RPIV Workflow | variance-analysis | - | ✅ (COMMAND_RPIV) | - |
+| Verification Agent | code-reviewer | security-reviewer, performance-reviewer | ✅ (AGENT_REVIEWER) | - |
+| Domain Specialization | - | 116 agents (10 categories) | ❌ | HIGH |
+| Complex Workflow | variance-analysis | multi-step-workflows | ✅ (COMMAND_RPIV) | - |
+| Validation Command | sync-docs | config-validator | ✅ (COMMAND_VALIDATION) | - |
+| Auto-Invoked Skills | 4 skills | - | ✅ (4 skill templates) | - |
+| Multi-Agent Coord | - | orchestrator agents | ❌ | LOW (future) |
+| Language Specialists | - | 12 language experts | ❌ | MEDIUM |
+| Tool-Restricted | code-reviewer | security-auditor | ✅ (AGENT_REVIEWER) | - |
+| Checklist Verification | code-reviewer, sync-docs | compliance-checker | ✅ (AGENT_REVIEWER) | - |
+| Progressive Disclosure | creating-skills | - | ✅ (all skill templates) | - |
+| Batch Processing | - | batch-processor | ❌ | HIGH |
+
+**Gaps Identified:**
+1. ❌ Batch processing template (HIGH PRIORITY for FP&A multi-file workflows)
+2. ❌ Domain validation template (HIGH PRIORITY for financial data validation)
+3. ❌ Error recovery template (MEDIUM PRIORITY for graceful failure handling)
+4. ❌ Data pipeline template (MEDIUM PRIORITY for ETL workflows)
+5. ❌ Language specialist template (MEDIUM PRIORITY for Python expertise)
+6. ❌ Reporting template (LOW PRIORITY, can be built from RPIV)
+
+---
+
+## PART 12: UPDATED TEMPLATE RECOMMENDATIONS
+
+### For creating-commands Meta-Skill
+
+**Recommended Templates (6 total):**
+
+1. **COMMAND_RPIV_TEMPLATE.md** ✅ (already designed in initial research)
+   - Research → Plan → Implement → Verify workflow
+   - Human checkpoints at phase boundaries
+   - Use: Complex multi-step processes
+
+2. **COMMAND_VALIDATION_TEMPLATE.md** ✅ (already designed in initial research)
+   - Systematic checklist approach
+   - ✅ ⚠️ ❌ reporting format
+   - Use: Documentation sync, config validation
+
+3. **COMMAND_BATCH_PROCESSING_TEMPLATE.md** 🆕 HIGH PRIORITY
+   - Process multiple files/tasks systematically
+   - Progress tracking, per-item error handling
+   - Use: Multiple budget files, batch variance reports
+
+4. **COMMAND_DATA_PROCESSING_TEMPLATE.md** (renamed from DATA_PROCESSING)
+   - Load → Transform → Output pattern
+   - Validation at each phase
+   - Use: Single-file ETL workflows
+
+5. **COMMAND_REPORTING_TEMPLATE.md** (already designed in initial research)
+   - Data aggregation → Formatting → Distribution
+   - Metadata inclusion
+   - Use: Executive reports, dashboards
+
+---
+
+### For creating-agents Meta-Skill
+
+**Recommended Templates (6 total):**
+
+1. **AGENT_REVIEWER_TEMPLATE.md** ✅ (already designed in initial research)
+   - Read-only tools: Read, Grep, Glob
+   - Verification checklist approach
+   - Use: Code review, financial validation
+
+2. **AGENT_RESEARCHER_TEMPLATE.md** ✅ (already designed in initial research)
+   - Research tools: Read, Grep, Glob, WebFetch, WebSearch
+   - Investigation and analysis
+   - Use: Codebase exploration, documentation research
+
+3. **AGENT_CODE_WRITER_TEMPLATE.md** ✅ (already designed in initial research)
+   - Write tools: Read, Write, Edit, Bash, Glob, Grep
+   - Implementation mandate
+   - Use: Feature implementation, bug fixes
+
+4. **AGENT_DOCUMENTATION_TEMPLATE.md** ✅ (already designed in initial research)
+   - Documentation tools: Read, Write, Edit, Glob, Grep, WebFetch
+   - Documentation creation
+   - Use: User guides, API docs, tutorials
+
+5. **AGENT_DOMAIN_SPECIALIST_TEMPLATE.md** 🆕 HIGH PRIORITY
+   - Domain-constrained expertise (language/technology/business domain)
+   - Deep knowledge in specific area
+   - Use: Python expert, Financial domain expert, Kubernetes specialist
+
+6. **AGENT_LANGUAGE_SPECIALIST_TEMPLATE.md** 🆕 MEDIUM PRIORITY
+   - Language-specific expertise (Python, TypeScript, Rust)
+   - Idiomatic patterns and best practices
+   - Use: Python optimization, TypeScript type safety, Rust memory safety
+
+---
+
+## UPDATED RESEARCH CONCLUSION
+
+Commands and agents share a common **metadata + structured workflow** architecture but serve different purposes:
+
+- **Commands** orchestrate multi-step user-initiated workflows with human approval gates
+- **Agents** provide specialist analysis or review with focused tool access
+
+**New Findings from Comprehensive Exploration:**
+- **116 external reference agents** provide proven patterns across 10 specialization categories
+- **Batch processing** emerges as critical gap for FP&A multi-file workflows
+- **Domain specialization** pattern appears 116 times, indicating high value
+- **Tool restriction tiers** (Read-only, Research, Code Writer) provide security model
+- **Language specialists** demonstrate value of constrained expertise
+
+**Revised Template Count:**
+- **Commands:** 5 templates (RPIV, Validation, Batch Processing, Data Processing, Reporting)
+- **Agents:** 6 templates (Reviewer, Researcher, Code Writer, Documentation, Domain Specialist, Language Specialist)
+- **Total:** 11 command/agent templates (vs initial 8)
+
+**High-Priority Additions:**
+1. 🆕 COMMAND_BATCH_PROCESSING_TEMPLATE.md (for multi-file workflows)
+2. 🆕 AGENT_DOMAIN_SPECIALIST_TEMPLATE.md (for focused expertise)
+
+**Next Steps:** Use this expanded research to create comprehensive implementation plan (see plan.md).
+
+---
+
+**Research Updated:** 2025-11-09
+**Evidence Base:** 5 local implementations + 116 external reference agents + 6 existing templates
+**Verification:** All patterns extracted from actual codebase and external library, not inferred
+**CHECKPOINT 1 Status:** READY FOR USER APPROVAL
