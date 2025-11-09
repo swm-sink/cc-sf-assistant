@@ -121,6 +121,9 @@ Before EVERY response containing claims/code/decisions, verify against quality g
 
 ## Research → Plan → Implement → Verify Workflow
 
+**Enforcement:** See `.claude/skills/enforcing-research-plan-implement-verify/SKILL.md`
+This skill is auto-invoked when about to implement features, fix bugs, or change code.
+
 **Mandatory Pattern for ALL Implementations:**
 
 When working on ANY implementation task (code changes, features, bug fixes, configuration, scripts), ALWAYS follow this four-phase workflow with human checkpoints:
