@@ -14,43 +14,37 @@ tags: [prod, fpa, variance, financial-analysis]
 
 ## Quick Start
 
-Run variance analysis:
-```
-/prod:variance-analyzer:analyze budget_2025.xlsx actuals_2025_10.xlsx
-```
-
-This skill provides:
-- Automated variance calculations with Decimal precision
+This skill provides automated variance analysis capabilities:
+- Decimal precision calculations
 - Favorability assessment by account type
 - Material variance flagging
-- Human approval checkpoints
-- Independent verification by code-reviewer agent
+- Auto-invoked when user mentions "variance", "budget vs actual", etc.
 
-## Available Workflows
+To execute variance analysis, use the slash command:
+```
+/variance-analysis budget_2025.xlsx actuals_2025_10.xlsx
+```
 
-### 1. Variance Analysis (Primary)
+## How This Skill Works
 
-**Command:** See `workflows/variance-analysis.md`
+**Auto-Invocation:** This skill is automatically invoked when you mention variance-related keywords in conversation.
 
-**What it does:**
-- Research → Plan → Implement → Verify workflow
+**Slash Command:** For explicit execution, use `/variance-analysis` (see `.claude/commands/prod/variance-analysis.md`)
+
+**Workflow:**
+- Research → Plan → Implement → Verify
 - Human checkpoints at each phase
 - Decimal precision enforcement
 - Material variance flagging (>10% or >$50K)
 - Excel output with 3 sheets (Executive Summary, Detailed, Material Only)
 
-**Invocation:**
-```
-/prod:variance-analyzer:analyze <budget_file> <actual_file> [output_file]
-```
-
 ## Progressive Disclosure
 
-**For basic usage:** Run the command above
+**For basic usage:** Mention "variance analysis" in conversation or use `/variance-analysis`
 
-**For detailed workflow documentation:** See `workflows/variance-analysis.md`
+**For detailed workflow:** See `.claude/commands/prod/variance-analysis.md`
 
-**For variance formulas and edge cases:** See `context/` directory (to be created)
+**For variance formulas and edge cases:** See `references/` directory (to be created)
 
 ## Dependencies
 

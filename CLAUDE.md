@@ -181,11 +181,11 @@ See `.claude/skills/financial-validator/` for comprehensive test suite including
 - Approval gates (user reviews before proceeding)
 - Depends on core + integrations
 
-**4. User Interface (.claude/skills/{env}/{skill-name}/workflows/)**
-- Skill workflows hide complexity from non-technical users
+**4. User Interface (.claude/commands/)**
+- Slash commands hide complexity from non-technical users
 - Interactive prompts for file paths, date ranges
 - Human-friendly error messages
-- Example: `/prod:variance-analyzer:analyze budget.xlsx actuals.xlsx`
+- Example: `/variance-analysis budget.xlsx actuals.xlsx`
 
 ### External Dependencies Strategy
 
@@ -279,9 +279,9 @@ See `.claude/skills/financial-validator/` for comprehensive test suite including
 - `spec.md` - Business requirements (WHAT to build) - Single source of truth
 - `plan.md` - Technical planning (HOW to build) - Implementation guide
 - `CLAUDE.md` - Behavioral rules (HOW Claude operates) - This file
-- `.claude/skills/{env}/{skill-name}/SKILL.md` - Auto-invoked capabilities (variance-analyzer, financial-validator)
-- `.claude/skills/{env}/{skill-name}/workflows/` - Skill workflows (/prod:variance-analyzer:analyze, etc.)
-- `.claude/agents/` - Specialized subagents (code-reviewer, data-analyst)
+- `.claude/skills/{skill-name}/SKILL.md` - Auto-invoked capabilities (variance-analyzer, financial-validator)
+- `.claude/commands/{env}/{command}.md` - Slash commands (/variance-analysis, /sync-docs, etc.)
+- `.claude/agents/{env}/{agent}.md` - Specialized subagents (code-reviewer, data-analyst)
 - `scripts/` - Pre-written validated calculation scripts
 - `tests/` - Verification test suite
 

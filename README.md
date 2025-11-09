@@ -41,20 +41,18 @@ cc-sf-assistant/
 │   │   ├── dev/            # script-generator, script-validator, code-reviewer
 │   │   ├── prod/           # finance-reviewer, data-validator, reconciler
 │   │   └── shared/         # research-agent
-│   ├── skills/             # Skills with embedded workflows
-│   │   ├── dev/            # Development skills
-│   │   │   └── {skill-name}/
-│   │   │       ├── SKILL.md          # Main skill file
-│   │   │       ├── workflows/        # Commands/workflows
-│   │   │       └── context/          # Progressive disclosure
-│   │   ├── prod/           # Production skills
-│   │   │   └── variance-analyzer/
-│   │   │       ├── SKILL.md          # Variance analysis skill
-│   │   │       └── workflows/
-│   │   │           └── variance-analysis.md
-│   │   └── shared/         # Shared utilities
-│   │       └── workflows/
-│   │           └── sync-docs.md
+│   ├── commands/           # Slash commands (explicit invocation)
+│   │   ├── dev/            # /create-script, /validate-script
+│   │   ├── prod/           # /variance-analysis, /monthly-close
+│   │   └── shared/         # /sync-docs, /help
+│   ├── skills/             # Auto-invoked capabilities
+│   │   ├── variance-analyzer/
+│   │   │   ├── SKILL.md          # Auto-invoked for variance keywords
+│   │   │   ├── scripts/          # Python calculation scripts (future)
+│   │   │   └── references/       # Documentation (future)
+│   │   └── financial-validator/
+│   │       ├── SKILL.md          # Decimal precision enforcement
+│   │       └── references/       # Edge cases, formulas
 │   ├── templates/          # Templates for creating skills/commands/agents
 │   └── hooks/              # Quality gates (pre-commit, stop.sh)
 │
@@ -125,18 +123,19 @@ poetry run pytest
 ### Using Claude Code
 
 ```bash
-# Production workflows (execute pre-written scripts)
-/prod:variance-analyzer:analyze budget.xlsx actuals.xlsx
-/prod:monthly-close november
-/prod:consolidate data/departments/
+# Slash commands (explicit invocation)
+/variance-analysis budget.xlsx actuals.xlsx     # Production workflow
+/monthly-close november                         # Monthly close
+/consolidate data/departments/                  # Consolidation
 
-# Development workflows (generate new scripts)
-/dev:create-script "Calculate YoY revenue growth by department"
-/dev:validate-script scripts/core/yoy_growth.py
+/create-script "Calculate YoY revenue growth"   # Dev workflow
+/validate-script scripts/core/yoy_growth.py     # Validation
 
-# Shared utilities
-/shared:help
-/shared:sync-docs  # Validate documentation consistency
+/sync-docs                                      # Documentation consistency
+
+# Skills (auto-invoked by keywords)
+# Just mention "variance analysis" or "budget vs actual" in conversation
+# Claude automatically invokes the variance-analyzer skill
 ```
 
 ---

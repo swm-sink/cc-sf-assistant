@@ -152,44 +152,36 @@ cc-sf-assistant/
 
 ## Using Claude Code
 
-### Production Workflows
+### Slash Commands (Explicit Invocation)
 
-Execute pre-written, validated scripts via skill workflows:
+Execute workflows via slash commands:
 
 ```bash
-# Variance analysis (prod:variance-analyzer:analyze workflow)
-/prod:variance-analyzer:analyze budget_2025.xlsx actuals_nov.xlsx
+# Production workflows
+/variance-analysis budget_2025.xlsx actuals_nov.xlsx
+/monthly-close november
+/consolidate data/departments/
 
-# Monthly close
-/prod:monthly-close november
+# Development workflows
+/create-script "Calculate YoY revenue growth by department"
+/validate-script scripts/core/yoy_growth.py
+/review-code scripts/core/variance.py
 
-# Consolidate department data
-/prod:consolidate data/departments/
+# Shared utilities
+/sync-docs                          # Validate documentation consistency
+/help                               # Get help
 ```
 
-### Development Workflows
+### Skills (Auto-Invoked)
 
-Generate new scripts when needed:
-
-```bash
-# Create new analysis script
-/dev:create-script "Calculate YoY revenue growth by department"
-
-# Validate existing script
-/dev:validate-script scripts/core/yoy_growth.py
-
-# Review code
-/dev:review-code scripts/core/variance.py
-```
-
-### Shared Utilities
+Skills are automatically invoked when you mention keywords:
 
 ```bash
-# Get help
-/shared:help
+# Just type in conversation:
+"Can you run a variance analysis on budget_2025.xlsx and actuals_nov.xlsx?"
 
-# Validate documentation consistency (shared workflow)
-/shared:sync-docs
+# Claude automatically invokes the variance-analyzer skill
+# No slash command needed!
 ```
 
 ---
