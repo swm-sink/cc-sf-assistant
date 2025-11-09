@@ -28,6 +28,53 @@
 
 ---
 
+## Integration Strategy - HYBRID APPROACH
+
+**Decision (November 2025):** Use REST API now, evaluate MCP migration later
+
+### Phase 1-4: REST API (Direct Integration)
+
+**Implementation:**
+- **Google Sheets:** gspread library (6.1.2 via pip) - battle-tested, 13K+ stars
+- **Google Slides:** google-api-python-client - official Google library
+- **Google Drive:** google-api-python-client for file management
+
+**Rationale:**
+- ✅ Production-ready stability for non-technical users
+- ✅ Extensive documentation and community support
+- ✅ Validate workflows before committing to architecture
+- ✅ Lower risk for initial deployment
+
+### Phase 5+: Evaluate MCP Migration
+
+**Model Context Protocol (MCP) Option:**
+- Anthropic's official Google Drive MCP server (read-only)
+- Community Google Workspace MCP servers (aaronsb, xing5)
+- "Code execution with MCP" approach (November 2025 - more efficient tokens)
+
+**Migration Triggers:**
+- MCP server ecosystem maturity confirmed
+- Community implementations reach production grade
+- Benefits (standardization, AI integration) outweigh migration costs
+
+**Fallback:** Keep REST API if MCP doesn't provide sufficient value
+
+### Service Account Restriction (Critical - April 2025)
+
+**BREAKING CHANGE:** Service accounts created after April 15, 2025 CANNOT access "My Drive"
+
+**Solution:** Domain-wide delegation (requires Google Workspace admin access)
+
+**Setup Required:**
+1. Create service account in Google Cloud Console
+2. Enable APIs: Sheets, Slides, Drive
+3. Google Workspace admin grants domain-wide delegation
+4. Share templates and folders with service account email
+
+**Alternative:** Use Shared Drives only (service accounts can access these)
+
+---
+
 ## API Capabilities Overview
 
 ### Google Sheets API

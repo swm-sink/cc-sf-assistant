@@ -10,9 +10,11 @@
 
 **Location:** `.claude/skills/shared/skill-creator/SKILL.md`
 
-**Purpose:** Generate new skills following Progressive Disclosure pattern with correct YAML frontmatter
+**Purpose:** Generate new skills following Progressive Disclosure pattern with correct YAML frontmatter and 2025 architecture
 
 **Auto-Invocation Trigger:** User requests "create a skill for..." or "I need a skill that..."
+
+**Architecture Note (November 2025):** Commands are now INSIDE skills at `.claude/skills/{env}/{skill-name}/workflows/`, not standalone in `.claude/commands/`. Skills provide reusable expertise, commands are workflows that use that expertise.
 
 ### Workflow
 
@@ -20,6 +22,7 @@
    - Skill name (kebab-case)
    - Description (for auto-invocation detection)
    - Target environment (dev/prod/shared)
+   - Does this skill need commands (user-triggered workflows)?
    - Tool permissions needed (Read, Edit, Write, Bash, etc.)
    - Complexity estimate (simple/medium/complex)
 
@@ -28,23 +31,38 @@
    - Search existing skills for similar patterns
    - Review Progressive Disclosure best practices
    - Check Claude Sonnet 4.5 capabilities
+   - **Sources:**
+     - https://docs.claude.com/en/docs/claude-code/skills
+     - https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/
+     - https://danielmiessler.com/blog/when-to-use-skills-vs-commands-vs-agents
 
 3. **Generate Spec:**
    - Present skill specification to user
-   - Include: name, description, workflow, tool permissions, complexity
+   - Include: name, description, workflows (commands), context files, tool permissions
    - User approval checkpoint
 
 4. **Implement:**
-   - Create directory: `.claude/skills/{env}/{skill-name}/`
+   - Create directory structure:
+     ```
+     .claude/skills/{env}/{skill-name}/
+     ├── SKILL.md                   # Main skill file (routing logic)
+     ├── workflows/                 # Commands go here
+     │   ├── command1.md
+     │   └── command2.md
+     └── context/                   # Supporting context files
+         ├── formulas.md
+         └── edge-cases.md
+     ```
    - Generate SKILL.md with YAML frontmatter
-   - If complex: Create subdirectories (scripts/, references/, templates/)
-   - If simple: Keep SKILL.md concise (<200 lines)
+   - Create workflows/ directory if skill needs commands
+   - Create context/ directory for Progressive Disclosure
 
 5. **Validate:**
    - Verify YAML frontmatter syntax
    - Check description clarity for auto-invocation
-   - Ensure Progressive Disclosure (split if >200 lines)
+   - Ensure Progressive Disclosure (SKILL.md <200 lines, details in context/)
    - Test auto-invocation detection
+   - Verify workflows/ commands have correct syntax
 
 6. **Document:**
    - Add skill to README.md
@@ -102,9 +120,11 @@ For detailed information, see:
 
 **Location:** `.claude/skills/shared/command-creator/SKILL.md`
 
-**Purpose:** Generate slash commands with human checkpoints and $ARGUMENTS placeholders
+**Purpose:** Generate workflow commands (within skills) with human checkpoints and $ARGUMENTS placeholders
 
-**Auto-Invocation Trigger:** User requests "create a command for..." or "I need a /command that..."
+**Auto-Invocation Trigger:** User requests "create a command for..." or "I need a /command that..." or "create a workflow for..."
+
+**Architecture Note (November 2025):** Commands are workflows within skills, not standalone files. They live in `.claude/skills/{env}/{skill-name}/workflows/` and are invoked as `/{env}:{skill-name}:{workflow-name}`
 
 ### Workflow
 
@@ -127,10 +147,12 @@ For detailed information, see:
    - User approval checkpoint
 
 4. **Implement:**
-   - Create file: `.claude/commands/{env}/{command-name}.md`
+   - Identify or create parent skill (commands must belong to a skill)
+   - Create file: `.claude/skills/{env}/{skill-name}/workflows/{command-name}.md`
    - Generate YAML frontmatter + workflow
    - Add $ARGUMENTS placeholders
    - Insert human approval checkpoints
+   - Update parent SKILL.md to reference new workflow
 
 5. **Validate:**
    - Verify YAML frontmatter
@@ -140,8 +162,9 @@ For detailed information, see:
 
 6. **Document:**
    - Add to README.md usage section
+   - Update parent SKILL.md's "Available Workflows" section
    - Update QUICK_START.md if user-facing
-   - Commit: `feat: add /{env}:{command-name} command`
+   - Commit: `feat: add /{env}:{skill-name}:{workflow-name} workflow`
 
 ### Template Generation
 
@@ -154,9 +177,11 @@ allowed-tools: [Read, Write, Bash]
 
 # {Command Title}
 
-**Usage:** `/{env}:{command-name} $ARG1 $ARG2`
+**Usage:** `/{env}:{skill-name}:{workflow-name} $ARG1 $ARG2`
 
 **Purpose:** {One sentence}
+
+**Parent Skill:** See `.claude/skills/{env}/{skill-name}/SKILL.md`
 
 ## Workflow
 
@@ -191,7 +216,12 @@ Output:
 ## Example
 
 ```bash
-/{env}:{command-name} budget.xlsx actuals.xlsx
+/{env}:{skill-name}:{workflow-name} budget.xlsx actuals.xlsx
+```
+
+**Real Example:**
+```bash
+/prod:variance-analyzer:analyze budget_2025.xlsx actuals_nov_2025.xlsx
 ```
 ```
 

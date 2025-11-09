@@ -58,13 +58,17 @@ python-dotenv==1.0.1             # Environment configuration
 pyyaml==6.0.1                    # Config file parsing
 typing-extensions==4.9.0         # Extended type hints
 
-# Development & Testing
+# Development & Testing (Modernized - November 2025)
 pytest==7.4.3                    # Testing framework
 pytest-cov==4.1.0                # Coverage reporting
-black==23.12.1                   # Code formatting
-mypy==1.7.1                      # Static type checking
-ruff==0.1.9                      # Fast linting
+mypy==1.8.0                      # Static type checking
+ruff==0.14.4                     # Fast linting, formatting, security (replaces Black, Flake8, isort, bandit)
 ```
+
+**Tools Modernization Note:**
+- Ruff (v0.14.4) replaces: Black, Flake8, isort, bandit, pyupgrade
+- 200x faster than traditional tools
+- Single tool for linting, formatting, import sorting, security checks
 
 ### Version Management
 
@@ -766,6 +770,137 @@ class TestVarianceAnalysisEndToEnd:
 Run before every commit:
 ```bash
 python .claude/skills/financial-validator/scripts/validate_precision.py
+```
+
+### Production-Level Testing Patterns
+
+**Research Sources (November 2025):**
+- **FinancePy** (GitHub - domokane/FinancePy) - Derivatives pricing library with comprehensive test coverage
+- **PreciseMoney** (GitHub - ListfulAl/PreciseMoney) - Decimal precision enforcement patterns
+- **pytest best practices** (pytest.org, pytest-with-eric.com)
+
+**Test Architecture:**
+```
+tests/
+├── unit/                           # Fast, isolated tests
+│   ├── test_variance.py           # Decimal precision, edge cases
+│   ├── test_consolidation.py
+│   └── test_favorability.py
+│
+├── integration/                    # API integrations
+│   ├── test_adaptive_client.py    # Requires credentials, use @pytest.mark.integration
+│   ├── test_databricks_client.py
+│   └── test_gsheets_writer.py
+│
+├── e2e/                           # End-to-end workflows
+│   ├── test_variance_workflow.py  # Full variance analysis
+│   └── test_post_close_workflow.py
+│
+├── fixtures/                       # Shared test data
+│   ├── conftest.py                # pytest fixtures
+│   ├── sample_data.py             # 50-account sample data
+│   └── mock_api_responses.py      # Mock Adaptive/Databricks responses
+│
+└── pytest.ini                      # pytest configuration
+```
+
+**pytest.ini Configuration:**
+```ini
+[pytest]
+testpaths = tests
+python_files = test_*.py
+python_classes = Test*
+python_functions = test_*
+markers =
+    integration: Integration tests requiring external services
+    e2e: End-to-end workflow tests
+    slow: Slow tests (>1 second)
+    unit: Fast unit tests (default)
+addopts =
+    -v
+    --strict-markers
+    --cov=scripts
+    --cov-report=term-missing
+    --cov-report=html
+    --cov-fail-under=95
+    --tb=short
+```
+
+**Test Fixtures Pattern (from FinancePy):**
+```python
+# tests/fixtures/conftest.py
+import pytest
+from decimal import Decimal
+from pathlib import Path
+
+@pytest.fixture
+def sample_budget_data():
+    """Realistic 50-account budget data."""
+    return {
+        "4000": {"name": "Subscription Revenue", "amount": Decimal("2500000.00")},
+        "4010": {"name": "Premium Features", "amount": Decimal("450000.00")},
+        # ... 48 more accounts (see data/samples/README.md)
+    }
+
+@pytest.fixture
+def sample_actuals_with_variances():
+    """Actuals with material variances for testing."""
+    return {
+        "4000": {"amount": Decimal("2875000.00")},  # +15% FAVORABLE
+        "7030": {"amount": Decimal("420000.00")},   # +40% UNFAVORABLE
+        # ... includes edge cases (zero budget, negatives, NULL)
+    }
+
+@pytest.fixture
+def temp_excel_file(tmp_path):
+    """Create temporary Excel file for testing."""
+    file_path = tmp_path / "test_variance.xlsx"
+    # Create Excel file with sample data
+    return file_path
+```
+
+**Decimal Precision Testing (from PreciseMoney):**
+```python
+# tests/unit/test_decimal_precision.py
+import pytest
+from decimal import Decimal
+
+def test_variance_uses_decimal_not_float():
+    """Ensure Decimal type enforcement."""
+    actual = Decimal('115000.00')
+    budget = Decimal('100000.00')
+
+    result = calculate_variance(actual, budget, 'revenue')
+
+    assert isinstance(result.variance, Decimal)
+    assert isinstance(result.percentage, Decimal)
+
+def test_float_rejection():
+    """Float types must be rejected."""
+    with pytest.raises(TypeError, match="must be Decimal"):
+        calculate_variance(115000.00, Decimal('100000.00'), 'revenue')
+```
+
+**Test Invocation Commands:**
+```bash
+# Run all tests with coverage (enforced by pre-commit)
+pytest --cov=scripts --cov-fail-under=95
+
+# Run only unit tests (fast feedback)
+pytest tests/unit/ -v
+
+# Run excluding integration tests (local development)
+pytest -m "not integration"
+
+# Run integration tests only (requires credentials)
+pytest -m integration
+
+# Run E2E tests (full workflows)
+pytest -m e2e
+
+# Generate HTML coverage report
+pytest --cov=scripts --cov-report=html
+open htmlcov/index.html
 ```
 
 ---
@@ -1802,7 +1937,9 @@ data/
   - Material variances (>10% and >$50k)
   - Immaterial variances (<10% or <$50k)
 
-**Pre-Commit Hook Implementation:**
+**Pre-Commit Hook Implementation (Modernized - November 2025):**
+
+**Research Source:** Ruff (astral-sh/ruff-pre-commit) - Replaces Black, Flake8, isort, bandit, and more. 200x faster than traditional tools.
 
 ```bash
 # .git/hooks/pre-commit (created automatically)
@@ -1814,17 +1951,14 @@ echo "Running pre-commit quality checks..."
 echo "✓ Running tests..."
 poetry run pytest --cov=scripts --cov-fail-under=95 || { echo "❌ Tests failed or coverage <95%"; exit 1; }
 
-# Run mypy
+# Run mypy (type checking - Ruff doesn't do this yet)
 echo "✓ Running type checks..."
 poetry run mypy scripts/ || { echo "❌ Type check failed"; exit 1; }
 
-# Run ruff
-echo "✓ Running linter..."
-poetry run ruff check scripts/ || { echo "❌ Linting failed"; exit 1; }
-
-# Run bandit (security)
-echo "✓ Running security checks..."
-poetry run bandit -r scripts/ || { echo "❌ Security check failed"; exit 1; }
+# Run Ruff - linting + formatting + security checks
+echo "✓ Running Ruff (linting, formatting, security)..."
+poetry run ruff check scripts/ || { echo "❌ Ruff check failed"; exit 1; }
+poetry run ruff format --check scripts/ || { echo "❌ Ruff format failed"; exit 1; }
 
 # Check for versioned filenames
 echo "✓ Checking for versioned filenames..."
@@ -1836,6 +1970,14 @@ fi
 echo "✅ All quality checks passed"
 exit 0
 ```
+
+**Tools Replaced:**
+- ❌ **bandit** → ✅ **Ruff** (includes security checks via `ruff check`)
+- ❌ **black** → ✅ **Ruff** (includes formatting via `ruff format`)
+- ❌ **isort** → ✅ **Ruff** (includes import sorting)
+- ❌ **flake8** → ✅ **Ruff** (includes linting)
+- ✅ **mypy** (kept - Ruff doesn't do type checking yet)
+- ✅ **pytest** (kept - testing framework)
 
 **Installation:**
 ```bash
