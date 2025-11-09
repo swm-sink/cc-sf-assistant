@@ -121,9 +121,9 @@ Before EVERY response containing claims/code/decisions, verify against quality g
 
 ## Research → Plan → Implement → Verify Workflow
 
-**Mandatory Pattern for Complex Tasks:**
+**Mandatory Pattern for ALL Implementations:**
 
-When working on non-trivial implementation tasks (new features, meta-skills, architectural changes), ALWAYS follow this four-phase workflow with human checkpoints:
+When working on ANY implementation task (code changes, features, bug fixes, configuration, scripts), ALWAYS follow this four-phase workflow with human checkpoints:
 
 **Phase 1: RESEARCH**
 - Investigate WITHOUT writing code first
@@ -179,24 +179,32 @@ specs/
 - Google integration: `specs/google-workspace/research.md` → `specs/google-workspace/plan.md` + `specs/google-workspace/checklist.md`
 
 **Enforcement:**
-- ALL complex implementations must have research + plan + checklist documents in specs/{topic}/
+- ALL implementations must have research + plan + checklist documents in specs/{topic}/
+- No exceptions - this ensures high accuracy across all work
 - checklist.md tracks validation and alignment across all 4 phases
 - Update checklist.md status indicators (✅ 🔄 ⏳ ❌) as work progresses
 - Documents are READ-ONLY after user approval (create new versions if major changes needed)
 - Each checkpoint requires explicit user approval before proceeding
 - Atomic git commits after each phase completion
 
-**Keywords that Trigger This Workflow:**
-- "research", "investigate", "plan", "design", "implement", "build", "create new feature"
-- Major architectural changes
-- Meta-skills and code generation tasks
-- Integration work (Google, external systems)
+**What Requires This Workflow:**
+- **Code changes:** Any modification to .py, .js, .ts, .sh files (scripts/, .claude/, etc.)
+- **Configuration changes:** YAML, JSON, TOML, environment files
+- **Logic changes:** Formulas, calculations, validation rules, workflows
+- **New features:** Skills, commands, agents, utilities
+- **Bug fixes:** ANY fix that changes behavior or logic
+- **Refactoring:** Code restructuring, optimization, cleanup
+- **Integration work:** External systems, APIs, databases
+- **Meta-skills:** Code generation, templates, validation
+- **Architecture changes:** Directory structure, patterns, conventions
 
-**When NOT to Use This Workflow:**
-- Trivial edits (typo fixes, formatting)
-- Documentation updates
-- Simple bug fixes with clear solution
-- Tasks explicitly marked as "quick fix"
+**Rare Exceptions (Non-Implementation Changes Only):**
+- **Pure markdown documentation:** Typo fixes in .md files that contain NO code blocks or formulas
+- **Comment-only changes:** Fixing typos in code comments (NOT docstrings, NOT formula explanations)
+- **Whitespace-only formatting:** Pure indentation/line break changes with ZERO logic impact
+- **Commit message corrections:** Updating git commit messages only
+
+**CRITICAL:** When in doubt, USE the workflow. The overhead of research/plan is far less costly than deploying incorrect financial logic. For FP&A systems, accuracy trumps speed.
 
 ---
 
