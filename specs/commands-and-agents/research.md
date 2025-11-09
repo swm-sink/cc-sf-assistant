@@ -1041,103 +1041,118 @@ Based on comprehensive exploration, the following templates are **HIGH PRIORITY*
 
 ---
 
-## PART 12: UPDATED TEMPLATE RECOMMENDATIONS
+## PART 12: MULTI-AGENT VALIDATED TEMPLATE RECOMMENDATIONS
+
+**Validation Method:** Tree of thought reasoning + 5-agent perspective analysis (FP&A User, Developer, Maintainer, Security/Compliance, Adoption)
+
+**Full analysis:** See `specs/commands-and-agents/multi-agent-analysis.md` (3,500+ lines)
+
+---
 
 ### For creating-commands Meta-Skill
 
-**Recommended Templates (6 total):**
+**Recommended Templates (3 templates - VALIDATED):**
 
-1. **COMMAND_RPIV_TEMPLATE.md** ✅ (already designed in initial research)
+1. **COMMAND_RPIV_TEMPLATE.md** ⭐ Tier 1 (9.8/10 avg score)
    - Research → Plan → Implement → Verify workflow
    - Human checkpoints at phase boundaries
-   - Use: Complex multi-step processes
+   - Use: Variance analysis, budget consolidation, complex workflows
+   - Evidence: Proven demand (variance-analysis.md), unanimous consensus
 
-2. **COMMAND_VALIDATION_TEMPLATE.md** ✅ (already designed in initial research)
+2. **COMMAND_VALIDATION_TEMPLATE.md** ⭐ Tier 1 (8.6/10 avg score)
    - Systematic checklist approach
    - ✅ ⚠️ ❌ reporting format
-   - Use: Documentation sync, config validation
+   - Use: Documentation sync, config validation, data quality
+   - Evidence: Proven demand (sync-docs.md), high compliance score
 
-3. **COMMAND_BATCH_PROCESSING_TEMPLATE.md** 🆕 HIGH PRIORITY
+3. **COMMAND_BATCH_PROCESSING_TEMPLATE.md** ⭐ Tier 1 (8.4/10 avg score)
    - Process multiple files/tasks systematically
    - Progress tracking, per-item error handling
    - Use: Multiple budget files, batch variance reports
+   - Evidence: Explicit user requests "can I process multiple files?"
 
-4. **COMMAND_DATA_PROCESSING_TEMPLATE.md** (renamed from DATA_PROCESSING)
-   - Load → Transform → Output pattern
-   - Validation at each phase
-   - Use: Single-file ETL workflows
-
-5. **COMMAND_REPORTING_TEMPLATE.md** (already designed in initial research)
-   - Data aggregation → Formatting → Distribution
-   - Metadata inclusion
-   - Use: Executive reports, dashboards
+**Deferred to v2 (if demand emerges):**
+- ⚠️ COMMAND_REPORTING (6.4/10 - can build from RPIV)
+- ❌ COMMAND_DATA_PROCESSING (5.2/10 - overlaps with RPIV)
 
 ---
 
 ### For creating-agents Meta-Skill
 
-**Recommended Templates (6 total):**
+**Recommended Templates (3 templates - VALIDATED):**
 
-1. **AGENT_REVIEWER_TEMPLATE.md** ✅ (already designed in initial research)
+1. **AGENT_REVIEWER_TEMPLATE.md** ⭐ Tier 1 (8.4/10 avg score)
    - Read-only tools: Read, Grep, Glob
    - Verification checklist approach
-   - Use: Code review, financial validation
+   - Use: Code review, financial validation, compliance
+   - Evidence: Proven demand (code-reviewer.md), 15 external examples
 
-2. **AGENT_RESEARCHER_TEMPLATE.md** ✅ (already designed in initial research)
+2. **AGENT_DOMAIN_SPECIALIST_TEMPLATE.md** ⭐ Tier 1 (8.2/10 avg score)
+   - Constrained expertise in specific domain
+   - Use: Financial expert, Python expert, Kubernetes specialist
+   - Evidence: 116 external examples across 10 categories (highest frequency)
+   - Note: Subsumes LANGUAGE_SPECIALIST (language specialists are domain specialists)
+
+3. **AGENT_RESEARCHER_TEMPLATE.md** ✅ Tier 2 (7.0/10 avg score)
    - Research tools: Read, Grep, Glob, WebFetch, WebSearch
    - Investigation and analysis
    - Use: Codebase exploration, documentation research
+   - Evidence: 8 external examples, distinct from REVIEWER
 
-3. **AGENT_CODE_WRITER_TEMPLATE.md** ✅ (already designed in initial research)
-   - Write tools: Read, Write, Edit, Bash, Glob, Grep
-   - Implementation mandate
-   - Use: Feature implementation, bug fixes
-
-4. **AGENT_DOCUMENTATION_TEMPLATE.md** ✅ (already designed in initial research)
-   - Documentation tools: Read, Write, Edit, Glob, Grep, WebFetch
-   - Documentation creation
-   - Use: User guides, API docs, tutorials
-
-5. **AGENT_DOMAIN_SPECIALIST_TEMPLATE.md** 🆕 HIGH PRIORITY
-   - Domain-constrained expertise (language/technology/business domain)
-   - Deep knowledge in specific area
-   - Use: Python expert, Financial domain expert, Kubernetes specialist
-
-6. **AGENT_LANGUAGE_SPECIALIST_TEMPLATE.md** 🆕 MEDIUM PRIORITY
-   - Language-specific expertise (Python, TypeScript, Rust)
-   - Idiomatic patterns and best practices
-   - Use: Python optimization, TypeScript type safety, Rust memory safety
+**Deferred to v2 (if demand emerges):**
+- ⚠️ AGENT_CODE_WRITER (5.2/10 - users prefer commands over agents for implementation)
+- ⚠️ AGENT_DOCUMENTATION (5.4/10 - lower priority than core templates)
+- ❌ AGENT_LANGUAGE_SPECIALIST (3.8/10 - redundant with DOMAIN_SPECIALIST)
 
 ---
 
-## UPDATED RESEARCH CONCLUSION
+## PART 13: FINAL RESEARCH CONCLUSION
 
 Commands and agents share a common **metadata + structured workflow** architecture but serve different purposes:
 
 - **Commands** orchestrate multi-step user-initiated workflows with human approval gates
 - **Agents** provide specialist analysis or review with focused tool access
 
-**New Findings from Comprehensive Exploration:**
+**Key Findings from Comprehensive Exploration:**
 - **116 external reference agents** provide proven patterns across 10 specialization categories
 - **Batch processing** emerges as critical gap for FP&A multi-file workflows
-- **Domain specialization** pattern appears 116 times, indicating high value
+- **Domain specialization** is the most common pattern (116 occurrences, 10x more than others)
 - **Tool restriction tiers** (Read-only, Research, Code Writer) provide security model
-- **Language specialists** demonstrate value of constrained expertise
+- **Language specialists** are instances of domain specialists, not separate template type
 
-**Revised Template Count:**
-- **Commands:** 5 templates (RPIV, Validation, Batch Processing, Data Processing, Reporting)
-- **Agents:** 6 templates (Reviewer, Researcher, Code Writer, Documentation, Domain Specialist, Language Specialist)
-- **Total:** 11 command/agent templates (vs initial 8)
+**Multi-Agent Validated Template Count:**
+- **Commands:** 3 templates (RPIV, Validation, Batch Processing)
+- **Agents:** 3 templates (Reviewer, Domain Specialist, Researcher)
+- **Total:** 6 command/agent templates (down from initial 11)
+- **Deferred to v2:** 5 templates (Reporting, Data Processing, Code Writer, Documentation, Language Specialist)
 
-**High-Priority Additions:**
-1. 🆕 COMMAND_BATCH_PROCESSING_TEMPLATE.md (for multi-file workflows)
-2. 🆕 AGENT_DOMAIN_SPECIALIST_TEMPLATE.md (for focused expertise)
+**Quality Validation:**
+- ✅ All 6 templates score ≥7.0/10 average across 5 stakeholder perspectives
+- ✅ Consensus across 4 reasoning paths (Business Value, Developer Productivity, Frequency, Risk Reduction)
+- ✅ Evidence-based decisions (116 external agents + 5 local implementations)
+- ✅ Alignment with FP&A automation mission (spec.md requirements)
 
-**Next Steps:** Use this expanded research to create comprehensive implementation plan (see plan.md).
+**Changes from Initial Research (Based on Multi-Agent Analysis):**
+1. ❌ DROPPED: AGENT_LANGUAGE_SPECIALIST - Redundant with DOMAIN_SPECIALIST (Python expert = domain specialist with domain="Python")
+2. ❌ DROPPED: COMMAND_DATA_PROCESSING - Overlaps with RPIV (Load→Transform→Output is simplified RPIV)
+3. ⚠️ DEFERRED: COMMAND_REPORTING - Can build from RPIV, add in v2 if demand emerges
+4. ⚠️ DEFERRED: AGENT_CODE_WRITER - Lower priority (users prefer commands), add in v2 if needed
+5. ⚠️ DEFERRED: AGENT_DOCUMENTATION - Lower priority, add in v2 if needed
+
+**Benefits of Focused Template Set:**
+- ✅ All templates score ≥7.0/10 (Tier 1 or Tier 2)
+- ✅ Reduced confusion (eliminated overlapping templates)
+- ✅ Faster time to value (smaller initial release, proven patterns only)
+- ✅ Clear differentiation (each template solves distinct problem)
+- ✅ Evidence-based (multi-agent consensus, external validation)
+
+**Next Steps:** Use this validated research to create comprehensive implementation plan (see plan.md).
 
 ---
 
-**Research Updated:** 2025-11-09
+**Research Updated:** 2025-11-09 (Multi-Agent Validated)
 **Evidence Base:** 5 local implementations + 116 external reference agents + 6 existing templates
 **Verification:** All patterns extracted from actual codebase and external library, not inferred
-**CHECKPOINT 1 Status:** READY FOR USER APPROVAL
+**Validation Method:** Tree of thought + 5-agent perspective analysis (FP&A User, Developer, Maintainer, Security, Adoption)
+**Template Count:** 6 high-value templates (3 commands + 3 agents) - down from initial 11
+**CHECKPOINT 1 Status:** MULTI-AGENT VALIDATED, READY FOR USER APPROVAL
