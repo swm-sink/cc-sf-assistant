@@ -151,9 +151,9 @@ tags: [meta, code-generation, infrastructure]
 ```
 
 **When to Activate:**
-- User says: "create a new skill for..."
-- User mentions: "skill that auto-invokes when..."
-- Keywords: "skill-creator", "generate skill", "new capability"
+- **Creation:** User says: "create a new skill for...", "skill that auto-invokes when...", "generate skill"
+- **Iteration:** User says: "update skill {name}", "improve {skill-name}", "add to {skill-name} skill"
+- Keywords: "skill-creator", "skill-updater", "modify skill", "enhance skill"
 
 **Workflow:**
 
@@ -253,7 +253,53 @@ tags: [meta, code-generation, infrastructure]
 - [ ] No duplicate skill name
 - [ ] All 4 checkpoints passed
 
-**Tools:** Read, Write, Glob, Grep, Bash (mkdir, ls)
+---
+
+**ITERATION WORKFLOW (skill-updater capability):**
+
+When user requests updating an existing skill:
+
+**STEP 1 - RESEARCH:**
+1. Read existing skill: `.claude/skills/{skill-name}/SKILL.md`
+2. Parse current YAML frontmatter and content
+3. Identify what user wants to change (description, triggers, instructions, examples)
+4. Present current state with proposed changes highlighted
+
+**CHECKPOINT 1:** User approves changes to make
+
+**STEP 2 - PLAN:**
+1. Show diff of proposed changes
+2. Validate changes don't break structure (YAML still valid, naming unchanged)
+3. Identify if new subdirectories needed
+4. Present plan
+
+**CHECKPOINT 2:** User approves plan
+
+**STEP 3 - IMPLEMENT:**
+1. Use Edit tool to modify SKILL.md
+2. Add new subdirectories if requested
+3. Update version number in YAML frontmatter
+4. Show complete updated content
+
+**CHECKPOINT 3:** User approves updated artifact
+
+**STEP 4 - VERIFY:**
+1. Run all validation functions (YAML, structure, content quality)
+2. Verify changes applied correctly
+3. Present validation report
+
+**CHECKPOINT 4:** User gives final approval
+
+**ITERATION SUCCESS CRITERIA:**
+- [ ] All validation gates still pass after update
+- [ ] Version number incremented
+- [ ] Changes applied as requested
+- [ ] No structural breakage
+- [ ] All 4 checkpoints passed
+
+---
+
+**Tools:** Read, Write, Edit, Glob, Grep, Bash (mkdir if new subdirs needed)
 
 **Anti-Patterns:**
 - ❌ Skip research phase
@@ -282,9 +328,9 @@ tags: [meta, code-generation, infrastructure]
 ```
 
 **When to Activate:**
-- User says: "create a new command for..."
-- User mentions: "slash command that..."
-- Keywords: "command-creator", "generate command", "/new-workflow"
+- **Creation:** User says: "create a new command for...", "slash command that...", "generate /command"
+- **Iteration:** User says: "update /command-name", "improve {command}", "modify /workflow"
+- Keywords: "command-creator", "command-updater", "generate command", "modify command"
 
 **Workflow:**
 
@@ -364,7 +410,54 @@ tags: [meta, code-generation, infrastructure]
 - [ ] No duplicate command name in subdirectory
 - [ ] All 4 checkpoints passed
 
-**Tools:** Read, Write, Glob, Grep, Bash (mkdir -p if subdir needed)
+---
+
+**ITERATION WORKFLOW (command-updater capability):**
+
+When user requests updating an existing command:
+
+**STEP 1 - RESEARCH:**
+1. Glob to find command file: `.claude/commands/**/{command-name}.md`
+2. Read existing command content
+3. Parse YAML frontmatter
+4. Identify what user wants to change (description, workflow steps, parameters)
+5. Present current state with proposed changes highlighted
+
+**CHECKPOINT 1:** User approves changes to make
+
+**STEP 2 - PLAN:**
+1. Show diff of proposed changes
+2. Validate changes don't break structure
+3. Ensure YAML still valid
+4. Present plan
+
+**CHECKPOINT 2:** User approves plan
+
+**STEP 3 - IMPLEMENT:**
+1. Use Edit tool to modify command file
+2. Update content as requested
+3. Maintain proper formatting
+4. Show complete updated content
+
+**CHECKPOINT 3:** User approves updated artifact
+
+**STEP 4 - VERIFY:**
+1. Run YAML validation
+2. Verify naming convention unchanged
+3. Check content quality (usage example, workflow steps)
+4. Present validation report
+
+**CHECKPOINT 4:** User gives final approval
+
+**ITERATION SUCCESS CRITERIA:**
+- [ ] All validation gates still pass after update
+- [ ] Changes applied as requested
+- [ ] No structural breakage
+- [ ] All 4 checkpoints passed
+
+---
+
+**Tools:** Read, Write, Edit, Glob, Grep, Bash (mkdir -p if subdir needed)
 
 **Anti-Patterns:**
 - ❌ Forget usage example
@@ -392,9 +485,9 @@ tags: [meta, code-generation, infrastructure]
 ```
 
 **When to Activate:**
-- User says: "create a new agent for..."
-- User mentions: "subagent that can..."
-- Keywords: "agent-creator", "generate agent", "specialized reviewer"
+- **Creation:** User says: "create a new agent for...", "subagent that can...", "generate agent"
+- **Iteration:** User says: "update agent {name}", "modify {agent} permissions", "improve {agent}"
+- Keywords: "agent-creator", "agent-updater", "generate agent", "modify agent"
 
 **Workflow:**
 
@@ -501,7 +594,59 @@ tags: [meta, code-generation, infrastructure]
 - [ ] No duplicate agent name in subdirectory
 - [ ] All 4 checkpoints passed
 
-**Tools:** Read, Write, Glob, Grep, Bash (mkdir -p if subdir needed)
+---
+
+**ITERATION WORKFLOW (agent-updater capability):**
+
+When user requests updating an existing agent:
+
+**STEP 1 - RESEARCH:**
+1. Glob to find agent file: `.claude/agents/**/{agent-name}.md`
+2. Read existing agent content
+3. Parse YAML frontmatter (current model, tools, description)
+4. Identify what user wants to change (tool permissions, model, instructions)
+5. Present current state with proposed changes highlighted
+
+**CHECKPOINT 1:** User approves changes to make
+
+**STEP 2 - PLAN:**
+1. Show diff of proposed changes
+2. Validate tool permission changes (security review)
+3. Ensure model choice is valid
+4. Check YAML schema compliance
+5. Present plan
+
+**CHECKPOINT 2:** User approves plan
+
+**STEP 3 - IMPLEMENT:**
+1. Use Edit tool to modify agent file
+2. Update YAML frontmatter if needed
+3. Update specialized instructions if needed
+4. Maintain proper formatting
+5. Show complete updated content
+
+**CHECKPOINT 3:** User approves updated artifact
+
+**STEP 4 - VERIFY:**
+1. Run YAML validation
+2. Verify tool permissions (no forbidden tools)
+3. Verify model is valid (sonnet/opus/haiku)
+4. Check naming convention unchanged
+5. Present validation report
+
+**CHECKPOINT 4:** User gives final approval
+
+**ITERATION SUCCESS CRITERIA:**
+- [ ] All validation gates still pass after update
+- [ ] Tool permissions secure (no Task tool)
+- [ ] Model choice appropriate
+- [ ] Changes applied as requested
+- [ ] No structural breakage
+- [ ] All 4 checkpoints passed
+
+---
+
+**Tools:** Read, Write, Edit, Glob, Grep, Bash (mkdir -p if subdir needed)
 
 **Anti-Patterns:**
 - ❌ Include Task tool (infinite recursion risk)
@@ -1569,24 +1714,38 @@ poetry add jsonschema
 
 ---
 
-## 13. Open Questions
+## 13. Implementation Decisions (APPROVED)
 
-**For user to decide:**
+**User decisions (2025-11-09):**
 
-1. **Git Automation:** Should meta-skills auto-commit generated artifacts, or always ask user first?
-   - Recommendation: Always ask (safer)
+1. **Git Automation:** ✅ **ALWAYS atomic commits for each task to enable rollbacks**
+   - Every task completion creates a commit
+   - Enables easy rollback if needed
+   - Maintains clear audit trail
 
-2. **Validation Strictness:** Should validation allow exceptions for advanced use cases, or enforce 100%?
-   - Recommendation: Enforce 100%, add override flag if needed later
+2. **Validation Strictness:** ✅ **Enforce 100% - no exceptions**
+   - All validation gates must pass
+   - No override flags or escape hatches
+   - Quality over convenience
 
-3. **Subdirectory Creation:** Should meta-skills always create scripts/, references/, assets/, or only on request?
-   - Recommendation: Ask user during CHECKPOINT 2 (Plan phase)
+3. **Subdirectory Creation:** ✅ **Ask user during CHECKPOINT 2 (Plan phase)**
+   - Present option to create scripts/, references/, assets/
+   - User decides which subdirectories needed
+   - Not all skills require all subdirectories
 
-4. **Tool Permissions:** Should meta-skills have Edit tool, or only Read + Write?
-   - Recommendation: Include Edit for future enhancement capability
+4. **Tool Permissions:** ✅ **Include Edit tool + iteration/improvement workflows**
+   - Meta-skills need Edit for updating existing artifacts
+   - Add iteration workflows to all meta-skills:
+     - `skill-updater` capability within skill-creator
+     - `command-updater` capability within command-creator
+     - `agent-updater` capability within agent-creator
+   - Support enhancement of existing artifacts, not just creation
 
-5. **Testing Priority:** Should we implement ALL validation functions before testing, or implement + test incrementally?
-   - Recommendation: Incremental (test skill-creator fully before moving to command-creator)
+5. **Testing Priority:** ✅ **Incremental implementation and testing**
+   - Build skill-creator fully → test → validate
+   - Then build command-creator → test → validate
+   - Then build agent-creator → test → validate
+   - Ensures quality before moving to next meta-skill
 
 ---
 

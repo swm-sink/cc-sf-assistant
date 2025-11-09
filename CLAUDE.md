@@ -119,6 +119,84 @@ Before EVERY response containing claims/code/decisions, verify against quality g
 
 ---
 
+## Research → Plan → Implement → Verify Workflow
+
+**Mandatory Pattern for Complex Tasks:**
+
+When working on non-trivial implementation tasks (new features, meta-skills, architectural changes), ALWAYS follow this four-phase workflow with human checkpoints:
+
+**Phase 1: RESEARCH**
+- Investigate WITHOUT writing code first
+- Read existing patterns, templates, similar implementations
+- Use Read, Glob, Grep tools to understand current state
+- Document findings with examples and references
+
+**CHECKPOINT 1:** Present research findings to user for approval before planning
+
+**Phase 2: PLAN**
+- Create detailed specification based on research
+- Document decisions, structure, validation approach
+- Show examples of what will be created
+- Identify dependencies and risks
+
+**CHECKPOINT 2:** Present plan to user for approval before implementation
+
+**Phase 3: IMPLEMENT**
+- Execute task-by-task with progress tracking
+- Follow plan exactly as approved
+- Use atomic operations with rollback capability
+- Create implementation-specific artifacts in proper directories
+
+**CHECKPOINT 3:** Present implementation to user for approval before verification
+
+**Phase 4: VERIFY**
+- Run validation functions (YAML, naming, structure)
+- Test generated artifacts
+- Present verification report with all quality gates
+
+**CHECKPOINT 4:** User gives final approval before completion
+
+**Directory Structure for Research & Planning:**
+```
+specs/
+├── spec.md                    # Main business requirements (WHAT to build)
+├── plan.md                    # Main technical plan (HOW to build)
+├── research/                  # Research artifacts (READ-ONLY after creation)
+│   ├── {topic}.md            # Research findings for specific topics
+│   └── ...
+└── plans/                     # Implementation plans (READ-ONLY after approval)
+    ├── {topic}.md            # Detailed implementation plans
+    └── ...
+```
+
+**Naming Convention:**
+- Research: `specs/research/{topic}.md` (kebab-case, descriptive)
+- Plans: `specs/plans/{topic}.md` (kebab-case, matches research topic)
+
+**Examples:**
+- Research meta-skills: `specs/research/meta-skills.md` → `specs/plans/meta-skills.md`
+- Research Google integration: `specs/research/google-workspace.md` → `specs/plans/google-workspace.md`
+
+**Enforcement:**
+- ALL complex implementations must have research + plan documents in specs/
+- Documents are READ-ONLY after user approval (create new versions if major changes needed)
+- Each checkpoint requires explicit user approval before proceeding
+- Atomic git commits after each phase completion
+
+**Keywords that Trigger This Workflow:**
+- "research", "investigate", "plan", "design", "implement", "build", "create new feature"
+- Major architectural changes
+- Meta-skills and code generation tasks
+- Integration work (Google, external systems)
+
+**When NOT to Use This Workflow:**
+- Trivial edits (typo fixes, formatting)
+- Documentation updates
+- Simple bug fixes with clear solution
+- Tasks explicitly marked as "quick fix"
+
+---
+
 ## Financial Domain Requirements
 
 **Precision & Accuracy:**
@@ -279,9 +357,11 @@ See `.claude/skills/financial-validator/` for comprehensive test suite including
 - `spec.md` - Business requirements (WHAT to build) - Single source of truth
 - `plan.md` - Technical planning (HOW to build) - Implementation guide
 - `CLAUDE.md` - Behavioral rules (HOW Claude operates) - This file
+- `specs/research/{topic}.md` - Research artifacts for specific topics (meta-skills, integrations, etc.)
+- `specs/plans/{topic}.md` - Implementation plans for specific topics (matches research/)
 - `.claude/skills/{skill-name}/SKILL.md` - Auto-invoked capabilities (variance-analyzer, financial-validator)
-- `.claude/commands/{env}/{command}.md` - Slash commands (/variance-analysis, /sync-docs, etc.)
-- `.claude/agents/{env}/{agent}.md` - Specialized subagents (code-reviewer, data-analyst)
+- `.claude/commands/{subdir}/{command}.md` - Slash commands (/variance-analysis, /sync-docs, etc.)
+- `.claude/agents/{subdir}/{agent}.md` - Specialized subagents (code-reviewer, data-analyst)
 - `scripts/` - Pre-written validated calculation scripts
 - `tests/` - Verification test suite
 
