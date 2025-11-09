@@ -31,15 +31,46 @@
 
 ### Command File Structure
 
-**YAML Frontmatter (Optional):**
+**YAML Frontmatter (REQUIRED per official docs):**
 ```yaml
 ---
-description: Brief description shown in command menu  # 60-100 chars ideal
-model: sonnet  # Optional: sonnet, opus, haiku, or inherit (defaults to user's selection)
-allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]  # Optional: restrict tools
-argument-hint: [file-path]  # Optional: hint shown in command menu
+description: Brief description of what the command does  # REQUIRED, max 1024 chars, shown in /help
+model: claude-3-5-sonnet-20241022  # Optional: specific model or sonnet/opus/haiku
+allowed-tools: [Read, Write, Edit, Bash, Glob, Grep]  # Optional: restrict tools available
+argument-hint: [file-path]  # Optional: hint about expected arguments shown in menu
+disable-model-invocation: false  # Optional: prevent auto-invocation (default: false)
 ---
 ```
+
+**Official Field Specifications (from docs.claude.com/claude-code/slash-commands):**
+
+1. **`description`** (REQUIRED)
+   - Brief description of what the command does
+   - Shows up in `/help` menu for discoverability
+   - Max 1024 characters
+   - Should explain both WHAT the command does and WHEN to use it
+
+2. **`allowed-tools`** (Optional)
+   - List of tools the command can use
+   - Examples: `Read, Grep, Glob, Bash, Edit, Write`
+   - Use for security (e.g., read-only commands: `[Read, Grep, Glob]`)
+
+3. **`model`** (Optional)
+   - Force command to use specific model
+   - Examples: `claude-3-5-sonnet-20241022`, `sonnet`, `opus`, `haiku`
+   - Defaults to user's current model selection if not specified
+
+4. **`argument-hint`** (Optional)
+   - Hint about expected arguments
+   - Format: `[arg1] [arg2]` or `<required-arg> [optional-arg]`
+   - Examples: `[issue-number] [priority]`, `<budget-file> <actual-file> [output-file]`
+
+5. **`disable-model-invocation`** (Optional)
+   - Boolean: `true` or `false`
+   - When `true`, prevents auto-invocation (must be manually called)
+   - Default: `false` (allows auto-invocation)
+
+**Source:** Anthropic official documentation (docs.claude.com/en/docs/claude-code/slash-commands, 2025)
 
 **Content Sections (Based on variance-analysis.md analysis):**
 
