@@ -161,21 +161,20 @@ When working on non-trivial implementation tasks (new features, meta-skills, arc
 specs/
 ├── spec.md                    # Main business requirements (WHAT to build)
 ├── plan.md                    # Main technical plan (HOW to build)
-├── research/                  # Research artifacts (READ-ONLY after creation)
-│   ├── {topic}.md            # Research findings for specific topics
-│   └── ...
-└── plans/                     # Implementation plans (READ-ONLY after approval)
-    ├── {topic}.md            # Detailed implementation plans
-    └── ...
+├── {topic}/                   # Topic-specific research and planning (READ-ONLY after approval)
+│   ├── research.md            # Research findings for this topic
+│   └── plan.md                # Detailed implementation plan for this topic
+└── ...
 ```
 
 **Naming Convention:**
-- Research: `specs/research/{topic}.md` (kebab-case, descriptive)
-- Plans: `specs/plans/{topic}.md` (kebab-case, matches research topic)
+- Topic directory: `specs/{topic}/` (kebab-case, descriptive)
+- Research artifact: `specs/{topic}/research.md`
+- Implementation plan: `specs/{topic}/plan.md`
 
 **Examples:**
-- Research meta-skills: `specs/research/meta-skills.md` → `specs/plans/meta-skills.md`
-- Research Google integration: `specs/research/google-workspace.md` → `specs/plans/google-workspace.md`
+- Meta-skills: `specs/meta-skills/research.md` → `specs/meta-skills/plan.md`
+- Google integration: `specs/google-workspace/research.md` → `specs/google-workspace/plan.md`
 
 **Enforcement:**
 - ALL complex implementations must have research + plan documents in specs/
@@ -357,8 +356,8 @@ See `.claude/skills/financial-validator/` for comprehensive test suite including
 - `spec.md` - Business requirements (WHAT to build) - Single source of truth
 - `plan.md` - Technical planning (HOW to build) - Implementation guide
 - `CLAUDE.md` - Behavioral rules (HOW Claude operates) - This file
-- `specs/research/{topic}.md` - Research artifacts for specific topics (meta-skills, integrations, etc.)
-- `specs/plans/{topic}.md` - Implementation plans for specific topics (matches research/)
+- `specs/{topic}/research.md` - Research artifacts for specific topics (meta-skills, integrations, etc.)
+- `specs/{topic}/plan.md` - Implementation plans for specific topics
 - `.claude/skills/{skill-name}/SKILL.md` - Auto-invoked capabilities (variance-analyzer, financial-validator)
 - `.claude/commands/{subdir}/{command}.md` - Slash commands (/variance-analysis, /sync-docs, etc.)
 - `.claude/agents/{subdir}/{agent}.md` - Specialized subagents (code-reviewer, data-analyst)
