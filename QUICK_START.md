@@ -154,11 +154,11 @@ cc-sf-assistant/
 
 ### Production Workflows
 
-Execute pre-written, validated scripts:
+Execute pre-written, validated scripts via skill workflows:
 
 ```bash
-# Variance analysis
-/prod:variance-analysis budget_2025.xlsx actuals_nov.xlsx
+# Variance analysis (prod:variance-analyzer:analyze workflow)
+/prod:variance-analyzer:analyze budget_2025.xlsx actuals_nov.xlsx
 
 # Monthly close
 /prod:monthly-close november
@@ -188,7 +188,7 @@ Generate new scripts when needed:
 # Get help
 /shared:help
 
-# Validate documentation consistency
+# Validate documentation consistency (shared workflow)
 /shared:sync-docs
 ```
 

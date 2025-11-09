@@ -41,14 +41,20 @@ cc-sf-assistant/
 │   │   ├── dev/            # script-generator, script-validator, code-reviewer
 │   │   ├── prod/           # finance-reviewer, data-validator, reconciler
 │   │   └── shared/         # research-agent
-│   ├── commands/
-│   │   ├── dev/            # /dev:create-script, /dev:validate-script
-│   │   ├── prod/           # /prod:monthly-close, /prod:variance-analysis
-│   │   └── shared/         # /shared:help, /shared:sync-docs
-│   ├── skills/
-│   │   ├── dev/            # python-best-practices, financial-script-generator
-│   │   ├── prod/           # variance-analyzer, account-mapper, report-generator
-│   │   └── shared/         # decimal-precision-enforcer, audit-trail-enforcer
+│   ├── skills/             # Skills with embedded workflows
+│   │   ├── dev/            # Development skills
+│   │   │   └── {skill-name}/
+│   │   │       ├── SKILL.md          # Main skill file
+│   │   │       ├── workflows/        # Commands/workflows
+│   │   │       └── context/          # Progressive disclosure
+│   │   ├── prod/           # Production skills
+│   │   │   └── variance-analyzer/
+│   │   │       ├── SKILL.md          # Variance analysis skill
+│   │   │       └── workflows/
+│   │   │           └── variance-analysis.md
+│   │   └── shared/         # Shared utilities
+│   │       └── workflows/
+│   │           └── sync-docs.md
 │   ├── templates/          # Templates for creating skills/commands/agents
 │   └── hooks/              # Quality gates (pre-commit, stop.sh)
 │
@@ -120,7 +126,7 @@ poetry run pytest
 
 ```bash
 # Production workflows (execute pre-written scripts)
-/prod:variance-analysis budget.xlsx actuals.xlsx
+/prod:variance-analyzer:analyze budget.xlsx actuals.xlsx
 /prod:monthly-close november
 /prod:consolidate data/departments/
 
