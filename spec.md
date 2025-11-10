@@ -165,10 +165,15 @@ We are building a **Claude Code-native FP&A automation system** that uses comman
 - Skills enforce quality standards (Decimal precision, audit trails) automatically
 - Together, these components ensure financial accuracy and auditability
 
-**Components to Build:** 44 total (10 exist, 34 to create)
-- 15 commands (3 exist, 12 to create)
-- 11 agents (1 exists, 10 to create)
-- 18 skills (6 exist, 12 to create)
+**Components to Build:** 35 total (10 exist, 25 to create)
+- 12 commands (3 exist, 9 to create)
+- 8 agents (1 exists, 7 to create)
+- 15 skills (6 exist, 9 to create)
+
+**Scope Refinement (2025-11-09):**
+- ✅ Databricks and Adaptive use SAME account naming → No reconciliation infrastructure needed
+- ✅ Focus on variance analysis and management reporting ONLY → No forecast maintenance
+- ⚠️ Materiality thresholds must be centralized config (no magic numbers)
 
 **Implementation Approach:** Research → Plan → Implement → Verify (RPIV workflow)
 
@@ -180,7 +185,7 @@ We are building a **Claude Code-native FP&A automation system** that uses comman
 
 ## 🔧 RESEQUENCED IMPLEMENTATION ORDER
 
-**⚠️ CRITICAL:** Stories are numbered sequentially (0.1, 0.2, ..., 0.8) for reference, but **implementation order is different**.
+**⚠️ CRITICAL:** Stories are numbered sequentially for reference, but **implementation order is different**.
 
 **ACTUAL IMPLEMENTATION SEQUENCE:**
 
@@ -193,22 +198,24 @@ Priority 2: SHARED FOUNDATION (Week 3)
   └─ Story 0.1: Shared Foundation Infrastructure
      Build quality enforcement that dev tools will use
 
-Priority 3: PRODUCTION INFRASTRUCTURE (Week 4-11)
-  └─ Story 0.2: Data Extraction Infrastructure
-  └─ Story 0.3: Account Reconciliation Infrastructure
-  └─ Story 0.4: Reporting Infrastructure
-  └─ Story 0.5: Google Workspace Integration Infrastructure
-  └─ Story 0.6: Forecast Maintenance Infrastructure
+Priority 3: PRODUCTION INFRASTRUCTURE (Week 4-9)
+  └─ Story 0.2: Data Extraction Infrastructure (Week 4-5)
+  └─ Story 0.4: Reporting Infrastructure (Week 6-7)
+  └─ Story 0.5: Google Workspace Integration Infrastructure (Week 8-9)
      Build business components using dev tools from Priority 1
 
-Priority 4: ORCHESTRATION (Week 12)
+Priority 4: ORCHESTRATION (Week 10)
   └─ Story 0.8: Orchestration Infrastructure
      Tie everything together in end-to-end workflow
 ```
 
-**Rationale:** We cannot efficiently build production components (Stories 0.2-0.6) without development tools (Story 0.7). Building dev infrastructure first ensures every subsequent component gets automated generation, comprehensive testing, and independent review.
+**Removed From Scope:**
+- ~~Story 0.3: Account Reconciliation~~ - Databricks & Adaptive use SAME account naming
+- ~~Story 0.6: Forecast Maintenance~~ - Focus on variance analysis and reporting only
 
-**Stories Listed Below:** Stories appear in numerical order (0.1-0.8) for organizational clarity, but **must be implemented in the priority order shown above**.
+**Rationale:** We cannot efficiently build production components without development tools (Story 0.7). Building dev infrastructure first ensures every subsequent component gets automated generation, comprehensive testing, and independent review.
+
+**Stories Listed Below:** Stories appear in numerical order for organizational clarity, but **must be implemented in the priority order shown above**.
 
 ---
 
@@ -231,17 +238,23 @@ Priority 4: ORCHESTRATION (Week 12)
 - [ ] `/setup` command guides users through initial project setup
 - [ ] Pre-commit hooks installed and enforce quality gates
 - [ ] Configuration directories created (credentials, workflow-state, logs)
+- [ ] **Centralized config management** (`config/thresholds.yaml`) **NO MAGIC NUMBERS**
+  - Materiality percentage threshold (default: 10%)
+  - Materiality absolute threshold (default: $50,000)
+  - All thresholds configurable, DRY principle enforced
 - [ ] All tests pass after setup
 
 **Components (Priority 2 - Week 3):**
 - `decimal-precision-enforcer` skill (shared) - **Built using /create-script from 0.7**
 - `audit-trail-enforcer` skill (shared) - **Built using /create-script from 0.7**
 - `/setup` command (shared) - **Built using development tools from 0.7**
+- `config/thresholds.yaml` - **Centralized configuration (NO MAGIC NUMBERS)**
 
 **Success Metrics:**
 - Setup time for new user: <30 minutes
 - 100% of financial code uses Decimal type (enforced automatically)
 - 100% of data transformations have audit trails (enforced automatically)
+- Zero hardcoded thresholds in code (all values from centralized config)
 
 ---
 
@@ -275,29 +288,26 @@ Priority 4: ORCHESTRATION (Week 12)
 
 ---
 
-#### Story 0.3: Account Reconciliation Infrastructure
+#### ~~Story 0.3: Account Reconciliation Infrastructure~~ ❌ REMOVED FROM SCOPE
 
-**As an** FP&A Analyst
-**I want** automated account reconciliation between Databricks and Adaptive
-**So that** I can match actuals to budget without manual mapping spreadsheets
+**Status:** NOT NEEDED - Databricks and Adaptive use SAME account naming conventions
 
-**Acceptance Criteria:**
-- [ ] `/reconcile-accounts` command matches accounts between data sources
-- [ ] Fuzzy matching suggests mappings for unmatched accounts
-- [ ] Reconciliation report shows matched/unmatched with confidence scores
-- [ ] Human approval required before saving mapping configuration
-- [ ] Mapping configuration persisted to `config/account_mapping.yaml`
-- [ ] 100% match required before proceeding to variance analysis
+**Original Intent:** Automated account reconciliation between Databricks and Adaptive with fuzzy matching
 
-**Components (Phase 3 - Week 4):**
-- `account-mapper` skill (prod)
-- `@account-reconciler` agent (prod)
-- `/reconcile-accounts` command (prod)
+**Why Removed:** User confirmed that both systems use identical account naming, eliminating the need for:
+- ~~`/reconcile-accounts` command~~
+- ~~`account-mapper` skill~~
+- ~~`@account-reconciler` agent~~
+- ~~Fuzzy matching logic~~
+- ~~Account mapping configuration~~
 
-**Success Metrics:**
-- [TO BE MEASURED] Time saved vs. manual reconciliation
-- >90% auto-matched accounts (fuzzy matching)
-- Zero undetected mismatches
+**Simplified Workflow:**
+```
+OLD: Extract Databricks → Extract Adaptive → Reconcile Accounts → Calculate Variance → Report
+NEW: Extract Databricks → Extract Adaptive → Calculate Variance → Report
+```
+
+**Impact:** Simplified data flow, faster implementation (removed 3 components, saved 1 week)
 
 ---
 
@@ -356,32 +366,32 @@ Priority 4: ORCHESTRATION (Week 12)
 
 ---
 
-#### Story 0.6: Forecast Maintenance Infrastructure
+#### ~~Story 0.6: Forecast Maintenance Infrastructure~~ ❌ REMOVED FROM SCOPE
 
-**As an** FP&A Analyst
-**I want** automated rolling forecast updates with assumption tracking
-**So that** forecasts stay current without manual period replacement
+**Status:** OUT OF SCOPE - Focus on variance analysis and management reporting ONLY
 
-**Acceptance Criteria:**
-- [ ] `/update-rolling-forecast` command replaces forecast with actuals for closed periods
-- [ ] Forecast window extended forward automatically
-- [ ] Forecast formulas preserved for future periods
-- [ ] `/track-forecast-assumptions` command documents assumption changes
-- [ ] Assumption change log includes timestamp, user, and rationale
-- [ ] Suggested assumption updates based on actual trends
+**Original Intent:** Automated rolling forecast updates with assumption tracking
 
-**Components (Phase 6 - Week 10-11):**
-- `forecast-updater` skill (prod)
-- `@forecast-validator` agent (prod)
-- `/update-rolling-forecast` command (prod)
-- `assumption-tracker` skill (prod)
-- `@assumption-analyzer` agent (prod)
-- `/track-forecast-assumptions` command (prod)
+**Why Removed:** User requested to focus exclusively on variance analysis and management reporting use cases. Rolling forecast maintenance is a separate future initiative.
 
-**Success Metrics:**
-- [TO BE MEASURED] Time saved vs. manual forecast updates
-- 100% of closed periods replaced correctly
-- Complete audit trail of assumption changes
+**Components NOT Being Built:**
+- ~~`/update-rolling-forecast` command~~
+- ~~`/track-forecast-assumptions` command~~
+- ~~`forecast-updater` skill~~
+- ~~`assumption-tracker` skill~~
+- ~~`@forecast-validator` agent~~
+- ~~`@assumption-analyzer` agent~~
+
+**Current Scope:**
+```
+FOCUS: Variance Analysis + Management Reporting
+- Extract actuals (Databricks) and budget (Adaptive)
+- Calculate variances with favorability logic
+- Generate Excel reports with professional formatting
+- Update Google Slides/Sheets dashboards
+```
+
+**Impact:** Reduced scope allows faster delivery of core use case (removed 6 components, saved 2 weeks)
 
 ---
 
@@ -435,13 +445,14 @@ Priority 4: ORCHESTRATION (Week 12)
 
 **Acceptance Criteria:**
 - [ ] `/prod:monthly-close` command orchestrates full post-close workflow
-- [ ] Workflow: Extract data → Reconcile accounts → Calculate variances → Generate reports → Update dashboards
+- [ ] **Simplified Workflow:** Extract Databricks actuals → Extract Adaptive budget → Calculate variances → Generate Excel reports → Update Google dashboards
 - [ ] Human checkpoints at each major phase
 - [ ] Error recovery with workflow state management (resume from failure)
 - [ ] Complete audit trail for entire workflow
 - [ ] Execution summary with time saved metrics
+- [ ] Load thresholds from centralized config (no hardcoded values)
 
-**Components (Phase 8 - Week 14):**
+**Components (Priority 4 - Week 10):**
 - `/prod:monthly-close` command (prod, orchestration)
 
 **Success Metrics:**

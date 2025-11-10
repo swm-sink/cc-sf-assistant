@@ -22,31 +22,42 @@ PRIORITY 1: Development Workflow Infrastructure (Week 1-2)
   └─ Enable automated component creation with TDD
 
 PRIORITY 2: Shared Foundation (Week 3)
-  └─ Build quality enforcement
-  └─ Story 0.1: decimal-precision-enforcer, audit-trail-enforcer
+  └─ Build quality enforcement + centralized config
+  └─ Story 0.1: decimal-precision-enforcer, audit-trail-enforcer, config/thresholds.yaml
   └─ Use dev tools from Priority 1 to build these
 
-PRIORITY 3: Production Infrastructure (Week 4-11)
-  └─ Stories 0.2-0.6: Data extraction, reconciliation, reporting, etc.
+PRIORITY 3: Production Infrastructure (Week 4-9)
+  └─ Story 0.2: Data Extraction (Databricks + Adaptive)
+  └─ Story 0.4: Reporting (Excel generation)
+  └─ Story 0.5: Google Integration (Slides + Sheets)
   └─ Use dev tools from Priority 1 to build all components
 
-PRIORITY 4: Orchestration (Week 12)
+PRIORITY 4: Orchestration (Week 10)
   └─ Story 0.8: /prod:monthly-close end-to-end workflow
 ```
 
+**Scope Refinement (2025-11-09):**
+- ❌ **Removed:** Account reconciliation (same naming conventions)
+- ❌ **Removed:** Forecast maintenance (out of scope)
+- ✅ **Added:** Centralized configuration management (NO MAGIC NUMBERS)
+
 **See:** [specs/meta-infrastructure/](specs/meta-infrastructure/) for comprehensive planning:
-- **[research.md](specs/meta-infrastructure/research.md)** - Research findings: 15 commands, 11 agents, 18 skills needed
+- **[research.md](specs/meta-infrastructure/research.md)** - Research findings (NEEDS UPDATE for reduced scope)
 - **[plan.md](specs/meta-infrastructure/plan.md)** - Implementation plan: RESEQUENCED to prioritize dev tools
 - **[checklist.md](specs/meta-infrastructure/checklist.md)** - Validation checklist tracking RPIV progress
 
 **Summary:**
-- **44 total components** to build (10 exist, 34 to create)
+- **35 total components** to build (10 exist, 25 to create) - **Reduced from 44**
+- **12 commands** (3 exist, 9 to create)
+- **8 agents** (1 exists, 7 to create)
+- **15 skills** (6 exist, 9 to create)
 - **RESEQUENCED ROLLOUT:** Dev workflows (FIRST) → Shared foundation → Production infrastructure → Orchestration
 - **RPIV workflow:** Research → Plan → Implement → Verify with human checkpoints
 - **External repos:** 24 repositories cloned with battle-tested patterns to leverage
+- **Simplified workflow:** Extract → Variance Analysis → Reporting (no reconciliation step)
 
 **Rationale for Dev-First:**
-- Cannot efficiently build 34 components manually
+- Cannot efficiently build 25 components manually
 - Dev infrastructure automates component creation, testing, validation
 - Ensures consistency and quality from day 1
 - Prevents costly financial calculation errors
