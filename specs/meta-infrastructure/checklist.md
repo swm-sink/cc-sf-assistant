@@ -39,20 +39,21 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 **Research Phase Checklist:**
 - ✅ Analyzed spec.md Epics 1-4 for infrastructure needs
-- ✅ Identified all required commands (15 total: 3 exist, 12 needed)
-- ✅ Identified all required agents (11 total: 1 exists, 10 needed)
-- ✅ Identified all required skills (18 total: 6 exist, 12 needed)
+- ✅ Identified all required commands (12 total: 3 exist, 9 needed) - Updated 2025-11-09
+- ✅ Identified all required agents (8 total: 1 exists, 7 needed) - Updated 2025-11-09
+- ✅ Identified all required skills (15 total: 6 exist, 9 needed) - Updated 2025-11-09
 - ✅ Mapped dependencies between components
 - ✅ Analyzed common patterns (RPIV, Human Approval, etc.)
 - ✅ Documented research findings in `research.md`
 - ✅ Human checkpoint 1: Research findings approved
+- ✅ SCOPE REFINEMENT (2025-11-09): Removed reconciliation + forecast (9 components)
 
 ---
 
 ### Phase 2: Plan ✅ COMPLETE
 
 **Planning Phase Checklist:**
-- ✅ Created phased rollout strategy (9 phases over 14 weeks)
+- ✅ Created phased rollout strategy (5 phases over 10 weeks) - Updated 2025-11-09
 - ✅ Defined implementation order based on dependencies
 - ✅ Documented per-component structure (skills, agents, commands)
 - ✅ Identified quality gates for each component type
@@ -61,16 +62,18 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 - ✅ Documented testing strategy per component
 - ✅ Documented plan in `plan.md`
 - ✅ Human checkpoint 2: Plan approved
+- ✅ SCOPE REFINEMENT (2025-11-09): Removed reconciliation (3) + forecast (6) = 9 components
 
 ---
 
 ### Phase 3: Implement ⏳ PENDING
 
-**Implementation Phase - Overall Progress:**
-- Total components to create: 34
+**Implementation Phase - Overall Progress (UPDATED 2025-11-09):**
+- Total components to create: 25 (reduced from 34)
 - Completed: 0
 - In progress: 0
-- Pending: 34
+- Pending: 25
+- Removed from scope: 9 (reconciliation + forecast)
 
 ---
 
@@ -78,15 +81,16 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 **⚠️ IMPLEMENT AFTER:** Phase 7 (Actual Priority 1) is complete.
 
-**Target:** 3 components (built using dev tools from Phase 7)
+**Target:** 4 components (built using dev tools from Phase 7) - Updated 2025-11-09
 
 | Component | Type | Status | Notes |
 |-----------|------|--------|-------|
 | `decimal-precision-enforcer` | Skill | ⏳ Pending | Blocks float usage |
 | `audit-trail-enforcer` | Skill | ⏳ Pending | Enforces audit logging |
 | `/setup` | Command | ⏳ Pending | Initial project setup |
+| `config/thresholds.yaml` | Config | ⏳ Pending | **NEW:** Centralized thresholds (NO MAGIC NUMBERS) |
 
-**Checkpoint:** All 3 components created and tested
+**Checkpoint:** All 4 components created and tested
 
 ---
 
@@ -107,17 +111,19 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 ---
 
-#### Phase 3: Account Reconciliation (Week 4)
+#### ~~Phase 3: Account Reconciliation~~ ❌ REMOVED FROM SCOPE (2025-11-09)
 
-**Target:** 3 components
+**Status:** NOT NEEDED - Databricks and Adaptive use SAME account naming conventions
+
+**Target:** ~~3 components~~ → 0 components
 
 | Component | Type | Status | Notes |
 |-----------|------|--------|-------|
-| `account-mapper` | Skill | ⏳ Pending | Fuzzy matching logic |
-| `@account-reconciler` | Agent | ⏳ Pending | Intelligent account matching |
-| `/reconcile-accounts` | Command | ⏳ Pending | Reconcile accounts workflow |
+| ~~`account-mapper`~~ | ~~Skill~~ | ❌ Removed | Not needed - same naming |
+| ~~`@account-reconciler`~~ | ~~Agent~~ | ❌ Removed | Not needed - same naming |
+| ~~`/reconcile-accounts`~~ | ~~Command~~ | ❌ Removed | Not needed - same naming |
 
-**Checkpoint:** All 3 components created and tested
+**Impact:** Saves 1 week development time, simpler user workflow
 
 ---
 
@@ -151,20 +157,22 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 ---
 
-#### Phase 6: Forecast Maintenance (Week 10-11)
+#### ~~Phase 6: Forecast Maintenance~~ ❌ REMOVED FROM SCOPE (2025-11-09)
 
-**Target:** 6 components
+**Status:** OUT OF SCOPE - Focus on variance analysis and management reporting ONLY
+
+**Target:** ~~6 components~~ → 0 components
 
 | Component | Type | Status | Notes |
 |-----------|------|--------|-------|
-| `forecast-updater` | Skill | ⏳ Pending | Rolling forecast logic |
-| `@forecast-validator` | Agent | ⏳ Pending | Validate forecast updates |
-| `/update-rolling-forecast` | Command | ⏳ Pending | Update forecast workflow |
-| `assumption-tracker` | Skill | ⏳ Pending | Track assumption changes |
-| `@assumption-analyzer` | Agent | ⏳ Pending | Suggest assumption updates |
-| `/track-forecast-assumptions` | Command | ⏳ Pending | Track assumptions workflow |
+| ~~`forecast-updater`~~ | ~~Skill~~ | ❌ Removed | Out of scope |
+| ~~`@forecast-validator`~~ | ~~Agent~~ | ❌ Removed | Out of scope |
+| ~~`/update-rolling-forecast`~~ | ~~Command~~ | ❌ Removed | Out of scope |
+| ~~`assumption-tracker`~~ | ~~Skill~~ | ❌ Removed | Out of scope |
+| ~~`@assumption-analyzer`~~ | ~~Agent~~ | ❌ Removed | Out of scope |
+| ~~`/track-forecast-assumptions`~~ | ~~Command~~ | ❌ Removed | Out of scope |
 
-**Checkpoint:** All 6 components created and tested
+**Impact:** Saves 2 weeks development time, clearer focus on core variance workflow
 
 ---
 
@@ -203,9 +211,9 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 ### Phase 4: Verify ⏳ PENDING
 
-**Verification Phase Checklist:**
-- ⏳ All 34 components pass quality gates
-- ⏳ End-to-end monthly close workflow tested
+**Verification Phase Checklist (UPDATED 2025-11-09):**
+- ⏳ All 25 components pass quality gates (reduced from 34)
+- ⏳ End-to-end monthly close workflow tested (simplified - no reconciliation)
 - ⏳ Independent verification by @code-reviewer (where applicable)
 - ⏳ Integration tests pass
 - ⏳ Documentation complete
@@ -227,19 +235,19 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 - [ ] Git commit with clear message
 - [ ] Human approval received
 
-**For Skills (12 to create):**
+**For Skills (9 to create) - Updated 2025-11-09:**
 - [ ] Auto-invocation triggers documented
 - [ ] References directory created (if needed)
 - [ ] Example usage provided
 - [ ] Anti-patterns documented
 
-**For Agents (10 to create):**
+**For Agents (7 to create) - Updated 2025-11-09:**
 - [ ] Tool permissions correct (Read-only vs Full Access)
 - [ ] Specialty clearly documented
 - [ ] Output format template provided
 - [ ] Validation checklist included (for validators)
 
-**For Commands (12 to create):**
+**For Commands (9 to create) - Updated 2025-11-09:**
 - [ ] Arguments documented with examples
 - [ ] Workflow pattern correctly applied (RPIV, Human Approval, etc.)
 - [ ] Human checkpoints clearly marked
@@ -252,18 +260,18 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 ### External Dependencies
 
-**Python Packages:**
+**Python Packages (UPDATED 2025-11-09):**
 - [ ] `xlsxwriter` added to pyproject.toml
 - [ ] `databricks-sql-connector` added to pyproject.toml
 - [ ] `google-api-python-client` added to pyproject.toml
 - [ ] `google-auth` added to pyproject.toml
 - [ ] `gspread` added to pyproject.toml
 - [ ] `gspread-dataframe` added to pyproject.toml
-- [ ] `rapidfuzz` added to pyproject.toml
+- ~~[ ] `rapidfuzz` added to pyproject.toml~~ ❌ Removed (no reconciliation needed)
 
-**Configuration Files:**
-- [ ] `config/account_mapping.yaml` created (template)
-- [ ] `config/fpa_config.yaml` created (thresholds, formatting)
+**Configuration Files (UPDATED 2025-11-09):**
+- ~~[ ] `config/account_mapping.yaml` created~~ ❌ Removed (no reconciliation needed)
+- [ ] **NEW:** `config/thresholds.yaml` created (materiality thresholds - NO MAGIC NUMBERS)
 - [ ] `config/credentials/.gitignore` created
 - [ ] `.git/hooks/pre-commit` created (quality gates)
 - [ ] `templates/variance_report.xlsx` created (example)
@@ -279,20 +287,20 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 ### End-to-End Workflow Tests
 
-**Test 1: Full Monthly Close (Happy Path)**
+**Test 1: Full Monthly Close (Happy Path) - UPDATED 2025-11-09:**
 - [ ] Extract Databricks actuals → Success
 - [ ] Extract Adaptive budget → Success
-- [ ] Reconcile accounts → 100% match
-- [ ] Calculate variances → All edge cases handled
+- ~~[ ] Reconcile accounts → 100% match~~ ❌ Removed (same naming - direct merge)
+- [ ] Calculate variances (direct merge) → All edge cases handled
 - [ ] Generate Excel report → Valid output
 - [ ] Update Google Slides → Preview approved, changes applied
 - [ ] Update Google Sheets → Data appended correctly
 - [ ] Audit trail complete → All steps logged
 
-**Test 2: Error Handling**
+**Test 2: Error Handling - UPDATED 2025-11-09:**
 - [ ] Databricks unavailable → Retry logic works
 - [ ] Adaptive API rate limit → Backoff works
-- [ ] Unmatched accounts → Reconciliation workflow triggered
+- ~~[ ] Unmatched accounts → Reconciliation workflow triggered~~ ❌ Removed (not applicable)
 - [ ] Division by zero → Handled gracefully (percentage = N/A)
 - [ ] Invalid data types → Validation blocks and reports
 
@@ -306,27 +314,28 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 ## Alignment Validation
 
-### Alignment with spec.md
+### Alignment with spec.md (UPDATED 2025-11-09)
 
 **Epic 1: Post-Close Variance Analysis**
 - ✅ Story 1.1 (Extract Databricks) → `/extract-databricks` command planned
 - ✅ Story 1.2 (Extract Adaptive) → `/extract-adaptive` command planned
-- ✅ Implicit reconciliation → `/reconcile-accounts` command planned
+- ~~✅ Implicit reconciliation → `/reconcile-accounts` command planned~~ ❌ REMOVED (same naming)
 
 **Epic 2: Variance Analysis Automation**
 - ✅ Story 2.1, 2.2, 2.3 → `/variance-analysis` command exists
+- ✅ **NEW:** Centralized thresholds → `config/thresholds.yaml` (NO MAGIC NUMBERS)
 
 **Epic 3: Management Reporting**
 - ✅ Story 3.1 (Excel) → `/generate-excel-report` command planned
 - ✅ Story 3.2 (Slides) → `/update-google-slides` command planned
 - ✅ Implicit Sheets → `/update-google-sheets` command planned
 
-**Epic 4: Rolling Forecast Maintenance**
-- ✅ Story 4.1 (Actuals integration) → `/update-rolling-forecast` command planned
-- ✅ Story 4.2 (Assumptions) → `/track-forecast-assumptions` command planned
+**~~Epic 4: Rolling Forecast Maintenance~~** ❌ REMOVED FROM SCOPE
+- ~~✅ Story 4.1 (Actuals integration) → `/update-rolling-forecast` command planned~~
+- ~~✅ Story 4.2 (Assumptions) → `/track-forecast-assumptions` command planned~~
 
 **Orchestration:**
-- ✅ Combined workflow → `/prod:monthly-close` command planned
+- ✅ Combined workflow → `/prod:monthly-close` command planned (simplified - no reconciliation)
 
 ---
 
@@ -376,9 +385,9 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 
 ## Success Criteria
 
-### Component-Level Success
+### Component-Level Success (UPDATED 2025-11-09)
 
-**All 34 Components:**
+**All 25 Components (reduced from 34):**
 - [ ] Created following templates
 - [ ] Pass quality gates
 - [ ] Tested with sample data
@@ -404,20 +413,21 @@ ACTUAL IMPLEMENTATION SEQUENCE:
 - [ ] Error messages helpful
 - [ ] Human checkpoints clear
 
-**Code Quality:**
+**Code Quality (UPDATED 2025-11-09):**
 - [ ] 100% of code uses Decimal for currency
 - [ ] >95% test coverage across all scripts
 - [ ] Zero financial calculation errors
 - [ ] All quality gates pass
+- [ ] **NEW:** Zero hardcoded magic numbers (all thresholds in config/thresholds.yaml)
 
 ---
 
 ## Risks & Mitigations
 
-**Risk 1: Complexity Overload**
-- **Impact:** 34 components to create may be overwhelming
-- **Mitigation:** Phased rollout, start with shared foundation
-- **Status:** ✅ Mitigated via plan.md phasing
+**Risk 1: Complexity Overload (UPDATED 2025-11-09)**
+- **Impact:** ~~34~~ 25 components to create may be overwhelming (reduced after scope refinement)
+- **Mitigation:** Phased rollout, start with development workflows first
+- **Status:** ✅ Mitigated via plan.md phasing + scope reduction
 
 **Risk 2: External API Changes**
 - **Impact:** Databricks/Adaptive/Google APIs may change

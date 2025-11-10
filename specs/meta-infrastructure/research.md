@@ -69,27 +69,19 @@ Analyze spec.md Epics 1-4 to identify:
 
 ---
 
-### Story 1.3: Account Reconciliation (Implicit Requirement)
+### ~~Story 1.3: Account Reconciliation~~ ❌ REMOVED FROM SCOPE
 
-**Required Infrastructure:**
+**Status:** NOT NEEDED - Databricks and Adaptive use SAME account naming conventions
 
-**Commands:**
-- `/reconcile-accounts` - Reconcile accounts between Databricks and Adaptive
-  - Arguments: `<databricks_file> <adaptive_file> [mapping_file]`
-  - Pattern: Human-in-loop approval for unmapped accounts
-  - Generates reconciliation report with suggested mappings
+**Rationale (2025-11-09):** User confirmed both systems use identical account naming, eliminating need for:
+- ~~`/reconcile-accounts` command~~
+- ~~`@account-reconciler` agent~~
+- ~~`account-mapper` skill~~
+- ~~Fuzzy matching logic~~
 
-**Agents:**
-- `@account-reconciler` - Intelligent account matching
-  - Tools: Read, Grep, Glob (read-only)
-  - Specialty: Fuzzy matching, pattern detection, mapping suggestions
-  - Uses account naming conventions to suggest matches
-
-**Skills:**
-- `account-mapper` - Auto-invoked for account mapping tasks
-  - Loads mapping configuration from `config/account_mapping.yaml`
-  - Flags unmatched accounts
-  - Suggests mappings based on naming patterns
+**Simplified Workflow:**
+- OLD: Extract Databricks → Extract Adaptive → Reconcile Accounts → Calculate Variance
+- NEW: Extract Databricks → Extract Adaptive → Calculate Variance (direct merge)
 
 ---
 
@@ -194,57 +186,21 @@ Analyze spec.md Epics 1-4 to identify:
 
 ---
 
-## Epic 4: Rolling Forecast Maintenance
+## ~~Epic 4: Rolling Forecast Maintenance~~ ❌ REMOVED FROM SCOPE
 
-### Story 4.1: Actuals Integration into Forecast
+**Status:** OUT OF SCOPE - Focus on variance analysis and management reporting ONLY
 
-**Required Infrastructure:**
+**Rationale (2025-11-09):** User requested to remove forecast maintenance to focus purely on variance analysis and reporting use case.
 
-**Commands:**
-- `/update-rolling-forecast` - Replace forecast with actuals for closed periods
-  - Arguments: `<forecast_file> <actuals_file> <output_file>`
-  - Pattern: Human Approval workflow
-  - Shows which periods will be replaced (preview)
-  - Extends forecast window forward
+**Components NOT Being Built:**
+- ~~`/update-rolling-forecast` command~~
+- ~~`/track-forecast-assumptions` command~~
+- ~~`forecast-updater` skill~~
+- ~~`assumption-tracker` skill~~
+- ~~`@forecast-validator` agent~~
+- ~~`@assumption-analyzer` agent~~
 
-**Agents:**
-- `@forecast-validator` - Validate forecast update logic
-  - Tools: Read, Grep, Glob (read-only)
-  - Specialty: Period matching, date range validation
-  - Ensures actuals are correctly substituted for forecast
-
-**Skills:**
-- `forecast-updater` - Auto-invoked for forecast updates
-  - Identifies closed periods (have actuals)
-  - Replaces forecast values with actuals
-  - Extends forecast window forward
-  - Preserves forecast formulas for future periods
-
----
-
-### Story 4.2: Assumption Recalibration Tracking
-
-**Required Infrastructure:**
-
-**Commands:**
-- `/track-forecast-assumptions` - Document assumption changes
-  - Arguments: `<forecast_period> [assumption_type]`
-  - Pattern: Reflection workflow
-  - Prompts user for assumption changes
-  - Stores in assumption change log
-
-**Agents:**
-- `@assumption-analyzer` - Suggest assumption updates based on actuals
-  - Tools: Read, Grep, Glob (read-only)
-  - Specialty: Trend analysis, variance pattern detection
-  - Suggests assumption recalibrations based on actual trends
-
-**Skills:**
-- `assumption-tracker` - Auto-invoked for assumption tracking
-  - Loads previous assumptions from log
-  - Compares actual trends to assumptions
-  - Generates suggested updates
-  - Logs changes with timestamp and user
+**Impact:** Reduced scope allows faster delivery (10 weeks vs 14 weeks), simpler architecture, clearer focus on core variance analysis workflow.
 
 ---
 
@@ -345,81 +301,87 @@ Analyze spec.md Epics 1-4 to identify:
 
 ### Commands Needed
 
-**Production (10 commands):**
+**Production (7 commands):**
 1. ✅ `/variance-analysis` - ALREADY CREATED
 2. ⏳ `/extract-databricks` - TO BE CREATED
 3. ⏳ `/extract-adaptive` - TO BE CREATED
-4. ⏳ `/reconcile-accounts` - TO BE CREATED
-5. ⏳ `/generate-excel-report` - TO BE CREATED
-6. ⏳ `/update-google-slides` - TO BE CREATED
-7. ⏳ `/update-google-sheets` - TO BE CREATED
-8. ⏳ `/update-rolling-forecast` - TO BE CREATED
-9. ⏳ `/track-forecast-assumptions` - TO BE CREATED
-10. ⏳ `/prod:monthly-close` - Orchestration command (combines multiple workflows)
+4. ⏳ `/generate-excel-report` - TO BE CREATED
+5. ⏳ `/update-google-slides` - TO BE CREATED
+6. ⏳ `/update-google-sheets` - TO BE CREATED
+7. ⏳ `/prod:monthly-close` - Orchestration command (combines multiple workflows)
+
+**~~Removed from Scope (3 commands):~~**
+- ~~`/reconcile-accounts`~~ - Not needed (same account naming)
+- ~~`/update-rolling-forecast`~~ - Out of scope (focus on variance analysis only)
+- ~~`/track-forecast-assumptions`~~ - Out of scope (focus on variance analysis only)
 
 **Development (3 commands):**
-11. ⏳ `/create-script` - TO BE CREATED
-12. ⏳ `/validate-script` - TO BE CREATED
-13. ⏳ `/review-code` - TO BE CREATED
+8. ⏳ `/create-script` - TO BE CREATED
+9. ⏳ `/validate-script` - TO BE CREATED
+10. ⏳ `/review-code` - TO BE CREATED
 
 **Shared (2 commands):**
-14. ✅ `/shared:sync-docs` - ALREADY CREATED
-15. ⏳ `/setup` - TO BE CREATED
+11. ✅ `/shared:sync-docs` - ALREADY CREATED
+12. ⏳ `/setup` - TO BE CREATED
 
-**Total:** 15 commands (3 created, 12 to be created)
+**Total:** 12 commands (3 created, 9 to be created) - **Reduced from 15**
 
 ---
 
 ### Agents Needed
 
-**Production (6 agents):**
+**Production (4 agents):**
 1. ✅ `@code-reviewer` - ALREADY CREATED
 2. ⏳ `@databricks-validator` - TO BE CREATED
 3. ⏳ `@adaptive-validator` - TO BE CREATED
-4. ⏳ `@account-reconciler` - TO BE CREATED
-5. ⏳ `@report-formatter` - TO BE CREATED
-6. ⏳ `@slides-previewer` - TO BE CREATED
-7. ⏳ `@forecast-validator` - TO BE CREATED
-8. ⏳ `@assumption-analyzer` - TO BE CREATED
+4. ⏳ `@report-formatter` - TO BE CREATED
+5. ⏳ `@slides-previewer` - TO BE CREATED
+
+**~~Removed from Scope (3 agents):~~**
+- ~~`@account-reconciler`~~ - Not needed (same account naming)
+- ~~`@forecast-validator`~~ - Out of scope (focus on variance analysis only)
+- ~~`@assumption-analyzer`~~ - Out of scope (focus on variance analysis only)
 
 **Development (3 agents):**
-9. ⏳ `@script-generator` - TO BE CREATED
-10. ⏳ `@test-generator` - TO BE CREATED
-11. ⏳ `@script-validator` - TO BE CREATED
+6. ⏳ `@script-generator` - TO BE CREATED
+7. ⏳ `@test-generator` - TO BE CREATED
+8. ⏳ `@script-validator` - TO BE CREATED
 
-**Total:** 11 agents (1 created, 10 to be created)
+**Total:** 8 agents (1 created, 7 to be created) - **Reduced from 11**
 
 ---
 
 ### Skills Needed
 
-**Production (9 skills):**
+**Production (6 skills):**
 1. ✅ `variance-analyzer` - ALREADY CREATED
 2. ✅ `financial-validator` - ALREADY CREATED
 3. ⏳ `databricks-extractor` - TO BE CREATED
 4. ⏳ `adaptive-extractor` - TO BE CREATED
-5. ⏳ `account-mapper` - TO BE CREATED
-6. ⏳ `excel-report-generator` - TO BE CREATED
-7. ⏳ `google-slides-updater` - TO BE CREATED
-8. ⏳ `google-sheets-updater` - TO BE CREATED
-9. ⏳ `forecast-updater` - TO BE CREATED
-10. ⏳ `assumption-tracker` - TO BE CREATED
+5. ⏳ `excel-report-generator` - TO BE CREATED
+6. ⏳ `google-slides-updater` - TO BE CREATED
+7. ⏳ `google-sheets-updater` - TO BE CREATED
+
+**~~Removed from Scope (3 skills):~~**
+- ~~`account-mapper`~~ - Not needed (same account naming)
+- ~~`forecast-updater`~~ - Out of scope (focus on variance analysis only)
+- ~~`assumption-tracker`~~ - Out of scope (focus on variance analysis only)
 
 **Development (2 skills):**
-11. ⏳ `python-best-practices` - TO BE CREATED
-12. ⏳ `test-suite-generator` - TO BE CREATED
+8. ⏳ `python-best-practices` - TO BE CREATED
+9. ⏳ `test-suite-generator` - TO BE CREATED
 
 **Shared (2 skills):**
-13. ⏳ `decimal-precision-enforcer` - TO BE CREATED
-14. ⏳ `audit-trail-enforcer` - TO BE CREATED
+10. ⏳ `decimal-precision-enforcer` - TO BE CREATED
+11. ⏳ `audit-trail-enforcer` - TO BE CREATED
 
 **Meta-Skills (Already Created):**
-15. ✅ `creating-commands` - ALREADY CREATED
-16. ✅ `creating-agents` - ALREADY CREATED
-17. ✅ `creating-skills` - ALREADY CREATED
-18. ✅ `enforcing-research-plan-implement-verify` - ALREADY CREATED
+12. ✅ `creating-commands` - ALREADY CREATED
+13. ✅ `creating-agents` - ALREADY CREATED
+14. ✅ `creating-skills` - ALREADY CREATED
+15. ✅ `enforcing-research-plan-implement-verify` - ALREADY CREATED
 
-**Total:** 18 skills (6 created, 12 to be created)
+**Total:** 15 skills (6 created, 9 to be created) - **Reduced from 18**
 
 ---
 
@@ -460,13 +422,13 @@ Analyze spec.md Epics 1-4 to identify:
 ├── audit-trail-enforcer (skill) - Logs extraction
 └── @databricks-validator (agent) - Validates query results
 
-/prod:monthly-close (orchestration command)
+/prod:monthly-close (orchestration command) - SIMPLIFIED WORKFLOW
 ├── /extract-databricks (command)
 ├── /extract-adaptive (command)
-├── /reconcile-accounts (command)
-├── /variance-analysis (command)
+├── /variance-analysis (command) - Direct merge (no reconciliation step)
 ├── /generate-excel-report (command)
 ├── /update-google-slides (command)
+├── /update-google-sheets (command)
 └── Multiple agents/skills from above
 ```
 
@@ -475,53 +437,9 @@ Analyze spec.md Epics 1-4 to identify:
 - All data transformations depend on `audit-trail-enforcer`
 - All command workflows should use RPIV pattern (enforced by `enforcing-research-plan-implement-verify`)
 
-### Implementation Priority
+### Implementation Priority (UPDATED 2025-11-09)
 
-**Phase 1: Core Shared Infrastructure (Week 1)**
-- `decimal-precision-enforcer` skill
-- `audit-trail-enforcer` skill
-- `/setup` command
-
-**Phase 2: Variance Analysis (Already Done)**
-- ✅ `/variance-analysis` command
-- ✅ `variance-analyzer` skill
-- ✅ `@code-reviewer` agent
-- ✅ `financial-validator` skill
-
-**Phase 3: Data Extraction (Week 2-3)**
-- `/extract-databricks` command
-- `/extract-adaptive` command
-- `databricks-extractor` skill
-- `adaptive-extractor` skill
-- `@databricks-validator` agent
-- `@adaptive-validator` agent
-
-**Phase 4: Account Reconciliation (Week 4)**
-- `/reconcile-accounts` command
-- `account-mapper` skill
-- `@account-reconciler` agent
-
-**Phase 5: Reporting (Week 5-6)**
-- `/generate-excel-report` command
-- `excel-report-generator` skill
-- `@report-formatter` agent
-
-**Phase 6: Google Integration (Week 7-9)**
-- `/update-google-slides` command
-- `/update-google-sheets` command
-- `google-slides-updater` skill
-- `google-sheets-updater` skill
-- `@slides-previewer` agent
-
-**Phase 7: Forecast Maintenance (Week 10-11)**
-- `/update-rolling-forecast` command
-- `/track-forecast-assumptions` command
-- `forecast-updater` skill
-- `assumption-tracker` skill
-- `@forecast-validator` agent
-- `@assumption-analyzer` agent
-
-**Phase 8: Development Workflows (Week 12-13)**
+**PRIORITY 1: Development Workflows (Week 1-2) ⭐ BUILD FIRST**
 - `/create-script` command
 - `/validate-script` command
 - `/review-code` command
@@ -531,8 +449,64 @@ Analyze spec.md Epics 1-4 to identify:
 - `@test-generator` agent
 - `@script-validator` agent
 
-**Phase 9: Orchestration (Week 14)**
-- `/prod:monthly-close` command (combines all prod workflows)
+**Rationale:** Build tools to build tools. All subsequent components use these dev workflows.
+
+---
+
+**PRIORITY 2: Shared Foundation + Centralized Config (Week 3)**
+- `decimal-precision-enforcer` skill
+- `audit-trail-enforcer` skill
+- `/setup` command
+- **NEW:** `config/thresholds.yaml` - Centralized materiality thresholds (NO MAGIC NUMBERS)
+
+**Existing Components:**
+- ✅ `/variance-analysis` command - ALREADY CREATED
+- ✅ `variance-analyzer` skill - ALREADY CREATED
+- ✅ `@code-reviewer` agent - ALREADY CREATED
+- ✅ `financial-validator` skill - ALREADY CREATED
+
+---
+
+**PRIORITY 3a: Data Extraction (Week 4-5)**
+- `/extract-databricks` command
+- `/extract-adaptive` command
+- `databricks-extractor` skill
+- `adaptive-extractor` skill
+- `@databricks-validator` agent
+- `@adaptive-validator` agent
+
+---
+
+**~~PRIORITY 3b: Account Reconciliation~~** ❌ REMOVED FROM SCOPE
+- User confirmed Databricks & Adaptive use SAME account naming
+
+---
+
+**PRIORITY 3b: Reporting (Week 6-7)** - Renumbered from old 3c
+- `/generate-excel-report` command
+- `excel-report-generator` skill
+- `@report-formatter` agent
+
+---
+
+**PRIORITY 3c: Google Integration (Week 8-9)** - Renumbered from old 3d
+- `/update-google-slides` command
+- `/update-google-sheets` command
+- `google-slides-updater` skill
+- `google-sheets-updater` skill
+- `@slides-previewer` agent
+
+---
+
+**~~PRIORITY 3d: Forecast Maintenance~~** ❌ REMOVED FROM SCOPE
+- User requested focus on variance analysis and management reporting ONLY
+
+---
+
+**PRIORITY 4: Orchestration (Week 10)**
+- `/prod:monthly-close` command (combines all prod workflows with simplified flow)
+
+**NEW TIMELINE:** 10 weeks total (reduced from 14 weeks)
 
 ---
 

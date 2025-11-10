@@ -48,11 +48,17 @@ Phase 8: Orchestration (Week 12)
 ## Overview
 
 Based on research findings (see `research.md`), we need to create:
-- **15 commands** (3 exist, 12 to create)
-- **11 agents** (1 exists, 10 to create)
-- **18 skills** (6 exist, 12 to create)
+- **12 commands** (3 exist, 9 to create)
+- **8 agents** (1 exists, 7 to create)
+- **15 skills** (6 exist, 9 to create)
 
-**Total:** 44 infrastructure components (10 exist, 34 to create)
+**Total:** 35 infrastructure components (10 exist, 25 to create)
+
+**SCOPE REFINEMENT (2025-11-09):**
+- ❌ Removed account reconciliation (3 components) - Same account naming between systems
+- ❌ Removed forecast maintenance (6 components) - Focus on variance analysis only
+- ✅ Added centralized configuration management - NO MAGIC NUMBERS, DRY principle
+- ⏱️ Reduced timeline from 14 weeks to 10 weeks (30% faster delivery)
 
 ---
 
@@ -210,7 +216,44 @@ Based on research findings (see `research.md`), we need to create:
 
 ---
 
-## Phase 2: Data Extraction (Week 2-3)
+### 1.4: Centralized Configuration Management (NEW 2025-11-09)
+
+**Purpose:** Enforce DRY principle - NO MAGIC NUMBERS in code
+
+**Files to Create:**
+- `config/thresholds.yaml` - Centralized materiality thresholds
+
+**Content:**
+```yaml
+# Materiality Thresholds Configuration
+# Updated: 2025-11-09
+# NO MAGIC NUMBERS - All thresholds configurable here
+
+materiality:
+  percentage_threshold: 0.10  # 10% variance threshold
+  absolute_threshold: 50000   # $50,000 absolute variance threshold
+
+# Future: Add other configurable thresholds as needed
+# - account_type_overrides
+# - department_specific_thresholds
+# - etc.
+```
+
+**Enforcement:**
+- All variance calculations MUST read from this config file
+- No hardcoded thresholds in code
+- `/setup` command validates config file exists
+- All components load thresholds at startup
+
+**Verification:**
+- Create config/thresholds.yaml
+- Update `/variance-analysis` command to load from config
+- Test with different threshold values
+- Confirm no hardcoded magic numbers in codebase
+
+---
+
+## Phase 2: Data Extraction (Week 4-5)
 
 ### Priority: HIGH (enables all downstream workflows)
 
@@ -370,156 +413,26 @@ When invoked to validate Databricks extraction:
 
 ---
 
-## Phase 3: Account Reconciliation (Week 4)
+## ~~Phase 3: Account Reconciliation~~ ❌ REMOVED FROM SCOPE (2025-11-09)
 
-### Priority: HIGH (required before variance analysis can run)
+**Status:** NOT NEEDED - Databricks and Adaptive use SAME account naming conventions
 
-**Goal:** Match accounts between Databricks (actuals) and Adaptive (budget).
+**Rationale:** User confirmed both systems use identical account naming, eliminating need for:
+- ~~`/reconcile-accounts` command~~
+- ~~`@account-reconciler` agent~~
+- ~~`account-mapper` skill~~
+- ~~Fuzzy matching logic~~
+- ~~`config/account_mapping.yaml`~~
 
-### 3.1: `account-mapper` Skill
+**Simplified Workflow:**
+- OLD: Extract Databricks → Extract Adaptive → Reconcile Accounts → Calculate Variance
+- NEW: Extract Databricks → Extract Adaptive → Calculate Variance (direct merge)
 
-**Pattern:** Technique skill
-
-**Auto-Invocation Triggers:**
-- Keywords: "account reconciliation", "account mapping", "unmatched accounts"
-- File patterns: `scripts/core/account_mapper.py`
-
-**Behavior:**
-```python
-# When invoked, provide:
-1. Load mapping configuration: config/account_mapping.yaml
-2. Fuzzy matching logic for unmapped accounts
-3. Suggest mappings based on naming patterns
-4. Generate reconciliation report:
-   - Matched accounts (count)
-   - Unmatched Databricks accounts (list)
-   - Unmatched Adaptive accounts (list)
-   - Suggested mappings with confidence scores
-
-# References:
-- Example: "7000 Sales Salaries" → "70-000 Salaries - Sales"
-- Use Levenshtein distance for similarity
-```
-
-**Files to Create:**
-- `.claude/skills/prod/account-mapper/SKILL.md`
-- `.claude/skills/prod/account-mapper/references/fuzzy-matching-examples.md`
-- `config/account_mapping.yaml` (template)
-
-**Dependencies:**
-- `fuzzywuzzy` or `rapidfuzz` package (add to pyproject.toml)
+**Impact:** Saves 1 week of development time, reduces complexity, simpler user workflow
 
 ---
 
-### 3.2: `@account-reconciler` Agent
-
-**Pattern:** Read-Only Researcher
-
-**Tools:** Read, Grep, Glob
-
-**Specialty:** Intelligent account matching with suggestions
-
-**Behavior:**
-```markdown
-## Reconciliation Analysis
-
-When invoked to reconcile accounts:
-
-1. **Load both account lists:**
-   - Databricks accounts from actuals file
-   - Adaptive accounts from budget file
-
-2. **Apply mapping configuration:**
-   - Load config/account_mapping.yaml
-   - Apply known mappings
-
-3. **Identify unmatched accounts:**
-   - Databricks accounts not in mapping
-   - Adaptive accounts not in mapping
-
-4. **Generate suggestions:**
-   - Use fuzzy matching (Levenshtein distance)
-   - Rank by confidence (0-100%)
-   - Provide top 3 suggestions per unmatched account
-
-5. **Format reconciliation report:**
-   - Matched: 45/50 accounts (90%)
-   - Unmatched Databricks (5): [list with suggestions]
-   - Unmatched Adaptive (3): [list with suggestions]
-
-## Output Format
-
-**RECONCILIATION REPORT:**
-
-Matched Accounts: 45/50 (90%)
-
-Unmatched Databricks Accounts (5):
-1. "7005 Digital Marketing" → Suggestions:
-   - "70-005 Marketing - Digital" (95% confidence)
-   - "70-050 Advertising - Digital" (78% confidence)
-   - "60-005 Marketing Expenses" (65% confidence)
-
-...
-
-**RECOMMENDATION:**
-- If >90% matched: APPROVE (minor manual fixes)
-- If 70-90% matched: NEEDS REVIEW (significant gaps)
-- If <70% matched: REJECT (likely data quality issue)
-```
-
-**Files to Create:**
-- `.claude/agents/prod/account-reconciler.md`
-
-**Dependencies:**
-- `account-mapper` skill (uses same fuzzy matching logic)
-
----
-
-### 3.3: `/reconcile-accounts` Command
-
-**Pattern:** Human Approval Workflow
-
-**Arguments:** `<databricks_file> <adaptive_file> [mapping_file]`
-
-**Workflow:**
-```markdown
-### STEP 1: Load and Analyze
-- Load Databricks actuals file
-- Load Adaptive budget file
-- Load mapping configuration (or use default)
-- Apply known mappings
-
-### STEP 2: Generate Reconciliation Report
-- Invoke @account-reconciler agent
-- Present reconciliation report with suggestions
-
-### STEP 3: Human Review and Decision
-**CHECKPOINT:** User reviews report and chooses:
-- Option A: Accept suggested mappings
-- Option B: Manual mapping (provide account pairs)
-- Option C: Abort and fix data quality issues
-
-### STEP 4: Update Mapping Configuration
-- If Option A or B: Update config/account_mapping.yaml
-- Save updated mapping
-- Re-run reconciliation to verify 100% match
-
-### STEP 5: Output
-- Generate final reconciliation report
-- Save matched accounts to output file
-- Log audit entry
-```
-
-**Files to Create:**
-- `.claude/commands/prod/reconcile-accounts.md`
-
-**Dependencies:**
-- `account-mapper` skill (auto-invoked)
-- `@account-reconciler` agent (manual invoke in Step 2)
-
----
-
-## Phase 4: Reporting (Week 5-6)
+## Phase 3: Reporting (Week 6-7)
 
 ### Priority: MEDIUM (depends on variance analysis being complete)
 
@@ -671,7 +584,7 @@ When invoked to validate Excel report:
 
 ---
 
-## Phase 5: Google Integration (Week 7-9)
+## Phase 4: Google Integration (Week 8-9)
 
 ### Priority: MEDIUM (nice-to-have, not critical path)
 
@@ -723,49 +636,21 @@ When invoked to validate Excel report:
 
 ---
 
-## Phase 6: Forecast Maintenance (Week 10-11)
+## ~~Phase 5: Forecast Maintenance~~ ❌ REMOVED FROM SCOPE (2025-11-09)
 
-### Priority: LOW (Phase 2 feature, not MVP)
+**Status:** OUT OF SCOPE - Focus on variance analysis and management reporting ONLY
 
-**Goal:** Update rolling forecasts with actuals and track assumption changes.
+**Rationale:** User requested to remove forecast maintenance to focus purely on variance analysis and reporting use case.
 
-### 6.1-6.4: Rolling Forecast Updater
+**Components NOT Being Built:**
+- ~~`/update-rolling-forecast` command~~
+- ~~`/track-forecast-assumptions` command~~
+- ~~`forecast-updater` skill~~
+- ~~`assumption-tracker` skill~~
+- ~~`@forecast-validator` agent~~
+- ~~`@assumption-analyzer` agent~~
 
-**Components:**
-- `forecast-updater` skill
-- `@forecast-validator` agent
-- `/update-rolling-forecast` command
-
-**Key Features:**
-- Identify closed periods (have actuals)
-- Replace forecast with actuals for closed periods
-- Extend forecast window forward
-- Preserve forecast formulas for future periods
-
-**Files to Create:**
-- `.claude/skills/prod/forecast-updater/SKILL.md`
-- `.claude/agents/prod/forecast-validator.md`
-- `.claude/commands/prod/update-rolling-forecast.md`
-
----
-
-### 6.5-6.7: Assumption Tracker
-
-**Components:**
-- `assumption-tracker` skill
-- `@assumption-analyzer` agent
-- `/track-forecast-assumptions` command
-
-**Key Features:**
-- Prompt user for assumption changes
-- Log changes with timestamp and user
-- Compare actual trends to assumptions
-- Suggest recalibrations
-
-**Files to Create:**
-- `.claude/skills/prod/assumption-tracker/SKILL.md`
-- `.claude/agents/prod/assumption-analyzer.md`
-- `.claude/commands/prod/track-forecast-assumptions.md`
+**Impact:** Reduces scope, allows faster delivery (10 weeks vs 14 weeks), clearer focus on core variance analysis workflow
 
 ---
 
@@ -926,27 +811,26 @@ When invoked to validate Excel report:
 
 ---
 
-## Phase 8: Orchestration (Week 14)
+## Phase 5: Orchestration (Week 10)
 
 ### Priority: LOW (combines all production workflows)
 
-**Goal:** Single command to run entire monthly close process.
+**Goal:** Single command to run entire monthly close process with SIMPLIFIED workflow (no reconciliation).
 
-### 8.1: `/prod:monthly-close` Command
+### 5.1: `/prod:monthly-close` Command
 
 **Pattern:** Orchestration Workflow
 
 **Arguments:** `<month> <year>`
 
-**Workflow:**
+**Workflow (UPDATED 2025-11-09 - Reconciliation step removed):**
 ```markdown
 ### Overview
 This command orchestrates the entire post-close workflow:
 1. Extract data (Databricks + Adaptive)
-2. Reconcile accounts
-3. Calculate variances
-4. Generate reports
-5. Update dashboards
+2. Calculate variances (direct merge - no reconciliation needed)
+3. Generate reports
+4. Update dashboards
 
 ### Execution Flow
 
@@ -955,21 +839,18 @@ This command orchestrates the entire post-close workflow:
 - Run: /extract-adaptive "FY 2025 Budget" <month> <year>
 - **CHECKPOINT 1:** Verify extraction successful
 
-**Phase 2: Account Reconciliation**
-- Run: /reconcile-accounts <databricks_file> <adaptive_file>
-- **CHECKPOINT 2:** Review reconciliation report, approve mappings
-
-**Phase 3: Variance Analysis**
+**Phase 2: Variance Analysis (SIMPLIFIED - no reconciliation)**
+- Merge Databricks and Adaptive data (same account naming)
 - Run: /variance-analysis <budget_file> <actuals_file>
-- **CHECKPOINT 3:** Review variance results
+- **CHECKPOINT 2:** Review variance results
 
-**Phase 4: Report Generation**
+**Phase 3: Report Generation**
 - Run: /generate-excel-report <variance_data_file>
 - Run: /update-google-slides <presentation_id> <variance_data_file> --preview
 - Run: /update-google-sheets <spreadsheet_id> <sheet_name> <variance_data_file>
-- **CHECKPOINT 4:** Review reports and dashboards
+- **CHECKPOINT 3:** Review reports and dashboards
 
-**Phase 5: Finalization**
+**Phase 4: Finalization**
 - Display summary:
   - Total accounts: 50
   - Material variances: 6
@@ -991,58 +872,64 @@ This command orchestrates the entire post-close workflow:
 
 ---
 
-## Implementation Order Summary
+## Implementation Order Summary (UPDATED 2025-11-09)
 
-**Week 1: Shared Foundation**
-1. `decimal-precision-enforcer` skill
-2. `audit-trail-enforcer` skill
-3. `/setup` command
+**CRITICAL:** Development Workflows FIRST, then all other phases
 
-**Week 2-3: Data Extraction**
-4. `databricks-extractor` skill
-5. `@databricks-validator` agent
-6. `/extract-databricks` command
-7. `adaptive-extractor` skill
-8. `@adaptive-validator` agent
-9. `/extract-adaptive` command
+**Week 1-2: Development Workflows (PRIORITY 1) ⭐ IMPLEMENT FIRST**
+1. `python-best-practices` skill
+2. `test-suite-generator` skill
+3. `@script-generator` agent
+4. `@test-generator` agent
+5. `@script-validator` agent
+6. `/create-script` command
+7. `/validate-script` command
+8. `/review-code` command
 
-**Week 4: Account Reconciliation**
-10. `account-mapper` skill
-11. `@account-reconciler` agent
-12. `/reconcile-accounts` command
+**Week 3: Shared Foundation (PRIORITY 2)**
+9. `decimal-precision-enforcer` skill
+10. `audit-trail-enforcer` skill
+11. `/setup` command
+12. `config/thresholds.yaml` - Centralized config (NO MAGIC NUMBERS)
 
-**Week 5-6: Reporting**
-13. `excel-report-generator` skill
-14. `@report-formatter` agent
-15. `/generate-excel-report` command
+**Week 4-5: Data Extraction (PRIORITY 3a)**
+13. `databricks-extractor` skill
+14. `@databricks-validator` agent
+15. `/extract-databricks` command
+16. `adaptive-extractor` skill
+17. `@adaptive-validator` agent
+18. `/extract-adaptive` command
 
-**Week 7-9: Google Integration**
-16. `google-slides-updater` skill
-17. `@slides-previewer` agent
-18. `/update-google-slides` command
-19. `google-sheets-updater` skill
-20. `/update-google-sheets` command
+**~~Week 6: Account Reconciliation~~** ❌ REMOVED FROM SCOPE
+- ~~`account-mapper` skill~~
+- ~~`@account-reconciler` agent~~
+- ~~`/reconcile-accounts` command~~
 
-**Week 10-11: Forecast Maintenance**
-21. `forecast-updater` skill
-22. `@forecast-validator` agent
-23. `/update-rolling-forecast` command
-24. `assumption-tracker` skill
-25. `@assumption-analyzer` agent
-26. `/track-forecast-assumptions` command
+**Week 6-7: Reporting (PRIORITY 3b) - Renumbered from old 3c**
+19. `excel-report-generator` skill
+20. `@report-formatter` agent
+21. `/generate-excel-report` command
 
-**Week 12-13: Development Workflows**
-27. `python-best-practices` skill
-28. `test-suite-generator` skill
-29. `@script-generator` agent
-30. `@test-generator` agent
-31. `@script-validator` agent
-32. `/create-script` command
-33. `/validate-script` command
-34. `/review-code` command
+**Week 8-9: Google Integration (PRIORITY 3c) - Renumbered from old 3d**
+22. `google-slides-updater` skill
+23. `@slides-previewer` agent
+24. `/update-google-slides` command
+25. `google-sheets-updater` skill
+26. `/update-google-sheets` command
 
-**Week 14: Orchestration**
-35. `/prod:monthly-close` command
+**~~Week 10-11: Forecast Maintenance~~** ❌ REMOVED FROM SCOPE
+- ~~`forecast-updater` skill~~
+- ~~`@forecast-validator` agent~~
+- ~~`/update-rolling-forecast` command~~
+- ~~`assumption-tracker` skill~~
+- ~~`@assumption-analyzer` agent~~
+- ~~`/track-forecast-assumptions` command~~
+
+**Week 10: Orchestration (PRIORITY 4)**
+27. `/prod:monthly-close` command (simplified workflow)
+
+**TOTAL:** 27 new components (reduced from 35 in original plan)
+**TIMELINE:** 10 weeks (reduced from 14 weeks - 30% faster delivery)
 
 ---
 
@@ -1200,11 +1087,12 @@ rapidfuzz = "^3.0"                  # Fuzzy account matching
 
 ### Project-Level Metrics
 
-- [ ] All 34 new components created
+- [ ] All 25 new components created (reduced from 34 after scope refinement)
 - [ ] 100% of components pass quality gates
-- [ ] End-to-end monthly close workflow executes successfully
+- [ ] End-to-end monthly close workflow executes successfully (simplified - no reconciliation)
 - [ ] User documentation complete
 - [ ] Setup time for new user: <30 minutes
+- [ ] Zero hardcoded magic numbers (all thresholds in config/thresholds.yaml)
 
 ---
 
