@@ -1,8 +1,14 @@
 # Meta-Infrastructure Dependency Flow Map
 
-**Version:** 1.0
-**Date:** 2025-11-09
-**Purpose:** Comprehensive dependency analysis for all 44 meta-infrastructure components
+**Version:** 1.1 (UPDATED for Scope Refinement)
+**Date:** 2025-11-09 (Updated after user feedback)
+**Purpose:** Comprehensive dependency analysis for all 35 meta-infrastructure components (reduced from 44)
+
+**SCOPE REFINEMENT (2025-11-09):**
+- ❌ Removed account reconciliation (3 components) - Same account naming between systems
+- ❌ Removed forecast maintenance (6 components) - Focus on variance analysis only
+- ✅ Added centralized configuration management - NO MAGIC NUMBERS
+- ⏱️ Timeline reduced from 14 to 10 weeks (30% faster)
 
 ---
 
@@ -20,12 +26,18 @@ Priority 2: Shared Foundation (Phase 1 in docs)
   └─ Depends on: Priority 1 tools to BUILD the components
   └─ Provides enforcement used by Priority 3
 
-Priority 3: Production Infrastructure (Phases 2-6 in docs)
+Priority 3: Production Infrastructure (Phases 2-5 in docs) - UPDATED 2025-11-09
   └─ Depends on: Priority 1 tools (to build), Priority 2 enforcement (to use)
   └─ Can be built in parallel once Priorities 1-2 complete
+  └─ Priority 3a: Data Extraction (Week 4-5)
+  └─ Priority 3b: Reporting (Week 6-7) - Renumbered from old 3c
+  └─ Priority 3c: Google Integration (Week 8-9) - Renumbered from old 3d
+  └─ ❌ REMOVED: Priority 3b (Account Reconciliation) - Same account naming
+  └─ ❌ REMOVED: Priority 3e (Forecast Maintenance) - Out of scope
 
-Priority 4: Orchestration (Phase 8 in docs)
+Priority 4: Orchestration (Phase 5 in docs) - UPDATED 2025-11-09
   └─ Depends on: All Priority 3 components to orchestrate
+  └─ Simplified workflow: NO reconciliation step
 ```
 
 ---
@@ -168,7 +180,9 @@ loguru = "^0.7.2"          # Audit logging
 
 ---
 
-## Priority 3: Production Infrastructure (Week 4-11)
+## Priority 3: Production Infrastructure (Week 4-9) - UPDATED 2025-11-09
+
+**SCOPE REFINEMENT:** Removed 9 components (Phases 3 & 6), reduced from Week 4-11 to Week 4-9
 
 ### Phase 2 (Data Extraction) - Week 4-5
 
@@ -220,31 +234,25 @@ great-expectations = "^0.18.0"  # Optional data quality
 
 ---
 
-### Phase 3 (Account Reconciliation) - Week 6
+### ~~Phase 3 (Account Reconciliation)~~ ❌ REMOVED FROM SCOPE (2025-11-09)
 
-#### 3.7 `account-mapper` Skill
-**Dependencies:**
-- **BUILD:** Priority 1 tools
-- **RUNTIME:** Priority 2 enforcement
-- **DATA:** Requires output from Phase 2 (databricks + adaptive extracts)
-**Python Packages:**
-- rapidfuzz (fuzzy matching)
-- duckdb (local SQL for matching)
+**Status:** NOT NEEDED - Databricks and Adaptive use SAME account naming conventions
 
-#### 3.8 `@account-reconciler` Agent
-**Dependencies:**
-- **BUILD:** Priority 1 tools
-- **RUNTIME:** `account-mapper` skill (3.7)
-**Python Packages:**
-- Same as 3.7
+**Components NOT Being Built (3 total):**
 
-#### 3.9 `/reconcile-accounts` Command
-**Dependencies:**
-- **BUILD:** Priority 1 tools
-- **RUNTIME:** 3.7, 3.8
-- **WORKFLOW:** Must run AFTER `/extract-databricks` and `/extract-adaptive`
-**Python Packages:**
-- Same as 3.7
+#### ~~3.7 `account-mapper` Skill~~ ❌ Removed
+**Rationale:** Same account naming eliminates need for fuzzy matching
+~~**Python Packages:** rapidfuzz (no longer needed)~~
+
+#### ~~3.8 `@account-reconciler` Agent~~ ❌ Removed
+**Rationale:** No reconciliation logic needed
+
+#### ~~3.9 `/reconcile-accounts` Command~~ ❌ Removed
+**Rationale:** Simplified workflow: Extract → Direct Merge → Calculate Variance
+
+**Simplified Workflow:**
+- OLD: Extract Databricks → Extract Adaptive → Reconcile Accounts → Calculate Variance
+- NEW: Extract Databricks → Extract Adaptive → Calculate Variance (direct merge)
 
 **Phase 3 Python Packages:**
 ```toml
@@ -333,28 +341,31 @@ gspread-dataframe = "^4.0.0"
 
 ---
 
-### Phase 6 (Forecast Maintenance) - Week 12-13
+### ~~Phase 6 (Forecast Maintenance)~~ ❌ REMOVED FROM SCOPE (2025-11-09)
 
-#### 3.19-3.24 Forecast Components
-**Dependencies:**
-- **BUILD:** Priority 1 tools
-- **RUNTIME:** Priority 2 enforcement
-- **DATA:** Requires historical actuals from Phase 2
-**Python Packages:**
-- pyxirr (IRR/NPV calculations)
-- pandas (time series)
+**Status:** OUT OF SCOPE - Focus on variance analysis and management reporting ONLY
 
-**Phase 6 Python Packages:**
-```toml
-# Financial Calculations (Priority 3 - Phase 6)
-pyxirr = "^0.10.0"         # IRR/NPV calculations
-```
+**Components NOT Being Built (6 total):**
 
-**Status:** ✅ INSTALLED
+#### ~~3.19-3.24 Forecast Components~~ ❌ Removed
+- ~~`forecast-updater` skill~~
+- ~~`@forecast-validator` agent~~
+- ~~`/update-rolling-forecast` command~~
+- ~~`assumption-tracker` skill~~
+- ~~`@assumption-analyzer` agent~~
+- ~~`/track-forecast-assumptions` command~~
+
+**Rationale:** User requested to focus purely on variance analysis and management reporting use case
+
+~~**Phase 6 Python Packages:** pyxirr (may still be used for other calculations)~~
+
+**Impact:** Saves 2 weeks development time, clearer focus on core variance workflow
 
 ---
 
-## Priority 4: Orchestration (Week 14)
+## Priority 4: Orchestration (Week 10) - UPDATED 2025-11-09
+
+**SIMPLIFIED WORKFLOW:** No reconciliation step - direct merge from extraction to variance
 
 ### Component Dependencies
 
@@ -362,17 +373,17 @@ pyxirr = "^0.10.0"         # IRR/NPV calculations
 **Type:** Orchestration workflow
 **Dependencies:**
 - **BUILD:** Priority 1 tools (`/create-script`)
-- **RUNTIME:** ALL Priority 3 commands:
+- **RUNTIME:** ALL Priority 3 commands (UPDATED 2025-11-09):
   - `/extract-databricks` (Phase 2)
   - `/extract-adaptive` (Phase 2)
-  - `/reconcile-accounts` (Phase 3)
+  - ~~`/reconcile-accounts` (Phase 3)~~ ❌ REMOVED (same account naming)
   - `/generate-excel-report` (Phase 4)
   - `/update-google-slides` (Phase 5)
   - `/update-google-sheets` (Phase 5)
-**Workflow Sequence:**
+**Workflow Sequence (UPDATED 2025-11-09 - Simplified):**
 1. Extract Databricks actuals
 2. Extract Adaptive budget
-3. Reconcile accounts
+3. ~~Reconcile accounts~~ ❌ REMOVED (direct merge - same account naming)
 4. Calculate variances
 5. Generate Excel report
 6. Update Google Slides
