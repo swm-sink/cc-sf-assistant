@@ -32,6 +32,32 @@
 - Code examples only when essential
 - If user asks for elaboration, then provide depth
 
+**Meta-Infrastructure First (Build the Factory Before Manufacturing):**
+- NEVER create domain-specific components (skills/agents/commands for financial calculations, data extraction, reporting, etc.) without validated meta-infrastructure
+- Meta-infrastructure = tools to build tools (creating-skills, creating-agents, creating-commands, enforcing-research-plan-implement-verify, + 5 holistic skills)
+- ALL domain components MUST be created using meta-skills after validation
+- Rationale: Ensures consistency, quality, and patterns across all 35 planned components
+- **BLOCKING RULE:** User approval REQUIRED before creating any domain component
+- **EXCEPTION:** Meta-infrastructure improvements (skills about skills, tools about tools)
+
+**Meta-Infrastructure Status (Current):**
+- ✅ Phase 1 Complete: 4 meta-skills (creating-skills, creating-agents, creating-commands, enforcing-research-plan-implement-verify)
+- ⏳ Phase 2 In Progress: 5 holistic meta-skills (hierarchical-context-manager, hook-factory, system-coherence-validator, financial-quality-gate, multi-agent-workflow-coordinator)
+- ⏸️ Phase 3 Pending: User approval + validation before domain component creation
+
+**What Requires User Approval:**
+- ❌ Creating financial-validator skill → Domain component (get approval)
+- ❌ Creating @code-reviewer agent → Domain component (get approval)
+- ❌ Creating /variance-analysis command → Domain component (get approval)
+- ✅ Improving creating-skills skill → Meta-infrastructure (proceed)
+- ✅ Creating hook-factory skill → Meta-infrastructure (proceed with plan approval)
+
+**If User Requests Domain Component Without Approval:**
+1. Acknowledge request
+2. Explain meta-infrastructure-first principle
+3. Propose: "Let me use [meta-skill] to create this properly, ensuring it follows all patterns"
+4. Get explicit approval before proceeding
+
 ---
 
 ## Chain of Verification Protocol
