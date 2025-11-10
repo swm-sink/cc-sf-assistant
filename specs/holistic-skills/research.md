@@ -557,6 +557,176 @@ results_C = Task("Generate report", deps=[results_B])
 - **Prerequisites:** Create 7 persistent agents using creating-agents skill BEFORE implementing coordinator
 - Reference: specs/holistic-skills/agent-orchestration-research.md
 
+**Q6: System Coherence Validator Enforcement Level**
+- ✅ YES - BLOCKING enforcement for critical violations
+- Rationale: Guarantees quality, prevents technical debt accumulation
+- Behavior: Critical violations (wrong tool tier, broken dependencies) → Creation fails immediately
+- Implementation: Like compiler error (must fix to continue)
+- Example: "Agent has full access but marked as reviewer → BLOCKED"
+
+**Q7: Hook Factory - Dev vs Prod Context** [CLARIFICATION NEEDED]
+- User intent: dev = development workflows, prod = FP&A workflows (NOT dev/prod environments)
+- Options provided below for user decision
+
+**Q8: Hierarchical Context Manager - Token Usage Monitoring**
+- ✅ CONDITIONAL YES - Use simple rule of thumb (character-based)
+- Rationale: Validate 70% reduction without over-engineering
+- Implementation: ~4 characters per token (simple estimation)
+- No complex token counting utilities, just character length tracking
+- Report: "Root CLAUDE.md: 17,000 chars (~4,250 tokens, 21% of 20K budget)"
+
+**Q9: Financial Quality Gate - Severity Levels**
+- ✅ NO - BLOCKING for everything (all quality gates are BLOCKING)
+- Rationale: Zero tolerance for financial precision violations
+- Implementation: ALL checks use exit code 2 (BLOCKING)
+- Float usage → BLOCKED
+- Missing audit trail → BLOCKED
+- Test coverage <80% → BLOCKED
+- Missing edge case tests → BLOCKED
+- Guarantees: No technical debt, full compliance, comprehensive testing
+
+**Q10: Implementation Sequencing**
+- ✅ NO - Meta-skills first, then agents/commands
+- Rationale: Validate meta-infrastructure before creating domain components
+- Sequence:
+  1. Implement 5 holistic meta-skills (Week 1-3)
+  2. Validate meta-infrastructure works holistically (Week 3)
+  3. Create 7 persistent agents using validated creating-agents (Week 4)
+  4. Create domain commands using validated creating-commands (Week 5)
+- Benefit: System Coherence Validator validates agents/commands as they're created
+
+---
+
+## Q7 Clarification - Hook Factory Context Options
+
+**What user meant:** Different hooks for different WORKFLOW CONTEXTS (not environments)
+
+### Option A: Separate Hooks by Workflow Type
+```
+.claude/hooks/
+├── development-workflows/     # For meta-infrastructure work
+│   ├── pre-tool-use-meta.sh   # Validates creating-skills, creating-agents, etc.
+│   └── stop-meta.sh           # Checks meta-skill quality
+└── fpa-workflows/             # For financial automation work
+    ├── pre-tool-use-fpa.sh    # Enforces Decimal, audit trails
+    └── stop-fpa.sh            # Financial quality gates
+```
+
+**When development-workflows/ hooks run:**
+- Working on .claude/skills/creating-skills/
+- Working on .claude/skills/hook-factory/
+- Creating meta-infrastructure
+
+**When fpa-workflows/ hooks run:**
+- Working on scripts/core/ (financial calculations)
+- Working on scripts/integrations/ (Databricks, Adaptive)
+- Creating financial domain components
+
+**Pros:**
+- Appropriate checks for context (meta vs. domain)
+- Meta-infrastructure: Check patterns, CSO, rationalization
+- FP&A workflows: Check Decimal, audit trails, test coverage
+- No false positives (Decimal check doesn't run on meta-skills)
+
+**Cons:**
+- How to detect context? (path-based? manual switching?)
+- Duplication (some checks shared)
+
+---
+
+### Option B: Unified Hooks with Context Detection
+```
+.claude/hooks/
+├── pre-tool-use.sh    # Detects workflow context, runs appropriate checks
+└── stop.sh            # Detects workflow context, runs appropriate checks
+```
+
+**Hook logic:**
+```bash
+if [[ "$file_path" == ".claude/skills/"* ]] || [[ "$file_path" == ".claude/agents/"* ]]; then
+    # Meta-infrastructure checks
+    check_cso_score
+    check_rationalization_proofing
+    check_tool_tier_enforcement
+elif [[ "$file_path" == "scripts/core/"* ]] || [[ "$file_path" == "scripts/integrations/"* ]]; then
+    # FP&A workflow checks
+    check_decimal_precision
+    check_audit_trails
+    check_test_coverage
+fi
+```
+
+**Pros:**
+- Single source of truth (no duplication)
+- Automatic context detection (path-based)
+- Simpler configuration
+
+**Cons:**
+- Complex conditional logic in hooks
+- Path detection fragile (what if structure changes?)
+
+---
+
+### Option C: Separate Hooks by Check Type (Recommended)
+```
+.claude/hooks/
+├── pre-tool-use-precision.sh     # Decimal enforcement (FP&A only)
+├── pre-tool-use-structure.sh     # File structure (both)
+├── stop-quality-meta.sh          # Meta-skill quality (meta only)
+└── stop-quality-fpa.sh           # Financial quality (FP&A only)
+```
+
+**Configuration in .claude/settings.json:**
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "paths": ["scripts/core/**/*.py", "scripts/integrations/**/*.py"],
+        "hooks": [{"command": ".claude/hooks/pre-tool-use-precision.sh"}]
+      },
+      {
+        "paths": ["**/*.py", "**/*.md"],
+        "hooks": [{"command": ".claude/hooks/pre-tool-use-structure.sh"}]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {"command": ".claude/hooks/stop-quality-meta.sh"},
+          {"command": ".claude/hooks/stop-quality-fpa.sh"}
+        ]
+      }
+    ]
+  }
+}
+```
+
+**How it works:**
+- Hooks self-detect if they should run (path-based)
+- precision.sh: Only runs on scripts/core, scripts/integrations
+- quality-meta.sh: Only runs when meta-skills modified
+- quality-fpa.sh: Only runs when FP&A code modified
+- structure.sh: Runs on everything
+
+**Pros:**
+- Granular control (each check is separate)
+- Path-based filtering (built into Claude Code settings)
+- Easy to enable/disable specific checks
+- No false positives
+
+**Cons:**
+- More hook files (but simpler individual hooks)
+- Settings.json configuration required
+
+---
+
+**Which option for Q7?**
+- **Option A:** Separate directories by workflow type
+- **Option B:** Unified hooks with context detection
+- **Option C:** Separate hooks by check type (granular, path-based)
+
 ---
 
 ## Next Steps (Planning Phase)
