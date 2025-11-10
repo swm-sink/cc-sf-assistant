@@ -520,6 +520,45 @@ results_C = Task("Generate report", deps=[results_B])
 
 ---
 
+## User Decisions (2025-11-10)
+
+**Q1: System Coherence Validator Scope**
+- ✅ YES - Validate EVERYTHING (existing 4 meta-skills + all future components)
+- Rationale: High confidence in entire foundation, no blind spots
+- Impact: Will validate creating-skills, creating-agents, creating-commands, enforcing-RPIV
+- Scope: Runs after ANY component creation (continuous validation)
+
+**Q2: Hook Factory Testing Framework**
+- ✅ YES - Include automated testing with mock events
+- Rationale: Critical for financial precision, can't afford hook failures
+- Requirements: Tailored for BOTH development and production use cases
+- Features: Mock PreToolUse/Stop/SessionStart, validate exit codes, timeout testing
+
+**Q3: Hierarchical Context Manager Migration**
+- ✅ YES - Complete immediate migration
+- Rationale: Clean architecture from day 1, all 35 components benefit
+- Scope: Refactor root CLAUDE.md + create 5-7 subdirectory CLAUDE.md files NOW
+- Impact: 70% token reduction, optimized context for all future work
+
+**Q4: Financial Quality Gate Implementation**
+- ✅ NO (= Hook + Skill combination, robust)
+- Rationale: Quality standards must be well-documented and referenceable
+- Structure: Hook invokes skill, skill documents standards with progressive disclosure
+- Benefit: Single source of truth for financial quality requirements
+
+**Q5: Multi-Agent Workflow Coordinator Auto-Invocation**
+- ✅ YES - Auto-invoke for parallelizable tasks
+- Rationale: Proactive optimization, automatic speedup
+- **Research Finding:** Temporary agents NOT viable (don't exist in Claude Code)
+- **Implementation:** HYBRID APPROACH
+  - Use persistent agents for: Validation (read-only), domain expertise, reusable work
+  - Use Task() for: Simple coordination, one-off calculations, aggregation
+  - Tool tier enforcement critical: Validators MUST be read-only agents (security)
+- **Prerequisites:** Create 7 persistent agents using creating-agents skill BEFORE implementing coordinator
+- Reference: specs/holistic-skills/agent-orchestration-research.md
+
+---
+
 ## Next Steps (Planning Phase)
 
 **CHECKPOINT 2: Detailed Implementation Plan**
