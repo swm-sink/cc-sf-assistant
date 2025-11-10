@@ -1,3 +1,11 @@
+---
+name: system-coherence-validator
+type: Discipline
+auto_invoke: true
+cso_score: 0.72
+created: 2025-11-10
+---
+
 # System Coherence Validator
 
 **Type:** Meta-Infrastructure Skill (Tools to Build Tools)
