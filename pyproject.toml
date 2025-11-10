@@ -36,6 +36,7 @@ pandera = "^0.17.0"
 
 # API Integration (Priority 3 - Phase 2: Data Extraction)
 tenacity = "^8.2.0"
+databricks-sql-connector = "^3.0.0"
 
 # Reconciliation (Priority 3 - Phase 3: Account Reconciliation)
 rapidfuzz = "^3.5.0"

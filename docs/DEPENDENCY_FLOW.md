@@ -270,7 +270,7 @@ rapidfuzz = "^3.5.0"       # Fuzzy string matching
 **Dependencies:**
 - **BUILD:** Priority 1 tools
 - **RUNTIME:** Priority 2 enforcement
-- **DATA:** Requires reconciled data from Phase 3
+- **DATA:** Requires variance data from Priority 3a (Data Extraction)
 **Python Packages:**
 - xlsxwriter (Excel generation)
 - great-tables (table formatting)
@@ -287,7 +287,7 @@ rapidfuzz = "^3.5.0"       # Fuzzy string matching
 **Dependencies:**
 - **BUILD:** Priority 1 tools
 - **RUNTIME:** 3.10, 3.11
-- **WORKFLOW:** Must run AFTER `/reconcile-accounts`
+- **WORKFLOW:** Must run AFTER data extraction (Priority 3a)
 **Python Packages:**
 - Same as 3.10
 
@@ -449,12 +449,10 @@ hypothesis = "^6.90.0"
 |-------------------|------------------------|-----------|---------------------|-----------------|
 | **Development Workflows** | Priority 1 (Week 1-2) | Manual (meta-skills) | None | pytest, mypy, ruff, hypothesis |
 | **Shared Foundation** | Priority 2 (Week 3) | Priority 1 tools | None | stockholm, typeguard, loguru |
-| **Data Extraction** | Priority 3a (Week 4-5) | Priority 1 tools | Priority 2 enforcement | tenacity, pydantic, pandera |
-| **Account Reconciliation** | Priority 3b (Week 6) | Priority 1 tools | Priority 2 + 3a | rapidfuzz, duckdb |
-| **Reporting** | Priority 3c (Week 7-8) | Priority 1 tools | Priority 2 + 3b | xlsxwriter, great-tables |
-| **Google Integration** | Priority 3d (Week 9-11) | Priority 1 tools | Priority 2 + 3b | google-api-python-client, gspread |
-| **Forecast Maintenance** | Priority 3e (Week 12-13) | Priority 1 tools | Priority 2 + 3a | pyxirr |
-| **Orchestration** | Priority 4 (Week 14) | Priority 1 tools | ALL Priority 3 | prefect (optional) |
+| **Data Extraction** | Priority 3a (Week 4-5) | Priority 1 tools | Priority 2 enforcement | tenacity, pydantic, pandera, databricks-sql-connector |
+| **Reporting** | Priority 3b (Week 6-7) | Priority 1 tools | Priority 2 + 3a | xlsxwriter, great-tables |
+| **Google Integration** | Priority 3c (Week 8-9) | Priority 1 tools | Priority 2 + 3a | google-api-python-client, gspread |
+| **Orchestration** | Priority 4 (Week 10) | Priority 1 tools | ALL Priority 3 | prefect (optional) |
 
 ---
 
@@ -521,28 +519,18 @@ poetry install --with orchestration  # Optional: Prefect
 - external/audit-compliance/python-audit-log/ - Centralized logging
 
 ### Priority 3 (Production Infrastructure)
-**Phase 2 (Data Extraction):**
+**Priority 3a (Data Extraction):**
 - external/data-validation/pandera/ - DataFrame validation
 - external/data-warehouse/great-expectations/ - Data quality
 - external/api-integration/tenacity/ - Retry logic
 
-**Phase 3 (Reconciliation):**
-- external/reconciliation/splink/ - Fuzzy matching
-- external/reconciliation/dedupe/ - ML matching
-- external/data-warehouse/duckdb/ - Local SQL
-
-**Phase 4 (Reporting):**
+**Priority 3b (Reporting):**
 - external/reporting-automation/XlsxWriter/ - Excel generation
 - external/reporting-automation/great-tables/ - Table formatting
 
-**Phase 5 (Google Integration):**
+**Priority 3c (Google Integration):**
 - external/api-integration/google-api-python-client/ - OAuth patterns
 - external/gspread/ - Sheets automation
-
-**Phase 6 (Forecast):**
-- external/financial-modeling/FinanceToolkit/ - Financial ratios
-- external/financial-modeling/pyxirr/ - IRR/NPV
-- external/financial-modeling/mplfinance/ - Visualization
 
 ### Priority 4 (Orchestration)
 **Primary Repos:**

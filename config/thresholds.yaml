@@ -1,0 +1,49 @@
+# Materiality Thresholds Configuration
+# Purpose: Centralized configuration for variance analysis thresholds
+# Enforcement: NO MAGIC NUMBERS - All variance calculations MUST read from this file
+#
+# Last Updated: 2025-11-10
+# Reference: spec.md Story 0.1, plan.md Section 1.4
+
+materiality:
+  # Percentage threshold for variance flagging
+  # Example: 0.10 = 10% variance triggers material flag
+  # Applies to: variance_percentage calculation in variance analysis
+  percentage_threshold: 0.10
+
+  # Absolute dollar threshold for variance flagging
+  # Example: 50000 = $50,000 variance triggers material flag
+  # Applies to: absolute variance amount in variance analysis
+  # Note: Must use Decimal type when loading (not float)
+  absolute_threshold: 50000
+
+# Variance Favorability Logic
+# Reference: spec.md Epic 2 - Account-type specific favorability
+favorability:
+  # Revenue and Asset accounts: Positive variance = favorable
+  revenue_favorable_when: "positive"  # Actual > Budget is good
+  asset_favorable_when: "positive"    # Actual > Budget is good
+
+  # Expense and Liability accounts: Negative variance = favorable
+  expense_favorable_when: "negative"  # Actual < Budget is good
+  liability_favorable_when: "negative"  # Actual < Budget is good
+
+# Data Extraction Settings
+extraction:
+  # Databricks query timeout (seconds)
+  databricks_timeout: 300
+
+  # Adaptive API retry settings
+  adaptive_retry_attempts: 3
+  adaptive_retry_backoff: 2  # Exponential backoff multiplier
+
+# Audit Trail Settings
+audit:
+  # Log all operations with these metadata fields
+  log_timestamp: true
+  log_user: true
+  log_source_file: true
+  log_operation: true
+
+  # Retention period for audit logs (days)
+  retention_days: 2555  # 7 years for SOX compliance

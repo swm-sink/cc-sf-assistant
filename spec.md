@@ -43,7 +43,7 @@ We are building a **Claude Code-native FP&A automation system** that uses comman
 
 3. THIRD: Production Infrastructure (Stories 0.2-0.6, 0.8)
    └─ Build business feature components using dev tools
-   └─ Data extraction, reconciliation, reporting, etc.
+   └─ Data extraction, variance analysis, reporting, etc.
    └─ Each created using the development infrastructure from Step 1
 ```
 
@@ -506,7 +506,6 @@ FOCUS: Variance Analysis + Management Reporting
 **Edge Cases to Handle:**
 - Databricks warehouse offline/unavailable (retry logic)
 - Query timeout on large datasets (async execution)
-- Account IDs not matching Adaptive chart of accounts (reconciliation report)
 - NULL amounts in source data (flag, don't drop)
 
 ---
@@ -523,19 +522,16 @@ FOCUS: Variance Analysis + Management Reporting
 - [ ] Pull budget data for specific month/year
 - [ ] Parse XML response format to structured data
 - [ ] Convert amounts to Decimal precision
-- [ ] Reconcile account lists (Databricks actuals vs Adaptive budget)
-- [ ] Flag unmatched accounts for review
+- [ ] Validate account naming consistency (same structure as Databricks)
 - [ ] Save extracted data locally
 
 **Success Metrics:**
-- Zero undetected account mismatches
 - Complete audit trail for budget extraction
-- Reconciliation report generated before analysis
+- Zero data precision errors (Decimal enforcement)
 
 **Edge Cases to Handle:**
 - API rate limits (exponential backoff retry)
 - Version not found (clear error message)
-- Account structure changes (reconciliation workflow)
 - Negative budget values (handle correctly for contra accounts)
 
 ---
@@ -933,8 +929,7 @@ Operating Expense Ratio = (Operating Expenses / Revenue) × 100
 
 **Optional Sheets:** [NEEDS CLARIFICATION]
 4. Visualizations / Charts
-5. Reconciliation Report
-6. Assumption Documentation
+5. Assumption Documentation
 
 **Retention:**
 - All generated reports must be timestamped and stored
@@ -1334,7 +1329,7 @@ This specification is grounded in industry research conducted November 2024-2025
 .claude/
 ├── agents/
 │   ├── dev/          # Development agents (script-generator, script-validator, code-reviewer)
-│   ├── prod/         # Production agents (finance-reviewer, data-validator, reconciler)
+│   ├── prod/         # Production agents (finance-reviewer, data-validator)
 │   └── shared/       # Shared utilities (research-agent)
 ├── commands/
 │   ├── dev/          # Development workflows (/create-script, /validate-script)

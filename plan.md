@@ -211,7 +211,7 @@ Following Anthropic best practices for Claude Code projects:
 
 1. **File Discovery**
 ```python
-# src/core/file_discovery.py
+# scripts/core/file_discovery.py
 from pathlib import Path
 from typing import List, Dict
 
@@ -332,7 +332,7 @@ def consolidate_departments(
 **Technical Approach:**
 
 ```python
-# src/core/variance_calculator.py
+# scripts/core/variance_calculator.py
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Tuple, Optional, Literal
 
@@ -411,7 +411,7 @@ def calculate_variance(
 **Technical Approach:**
 
 ```python
-# src/reporting/excel_report_builder.py
+# scripts/reporting/excel_report_builder.py
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, numbers
 from typing import Dict
@@ -494,7 +494,7 @@ fpa-automation-assistant/
 │       ├── stop.sh
 │       └── pre-commit.sh
 │
-├── src/                         # Implementation
+├── scripts/                     # Implementation
 │   ├── __init__.py
 │   ├── core/                    # Business logic
 │   │   ├── __init__.py

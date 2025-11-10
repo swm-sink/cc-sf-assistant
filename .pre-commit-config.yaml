@@ -1,0 +1,137 @@
+# Pre-commit hooks for FP&A Automation Assistant
+# Purpose: Quality gates to enforce financial precision, type safety, and code quality
+# Reference: spec.md Story 0.1, plan.md Priority 1
+#
+# Installation:
+#   pip install pre-commit
+#   pre-commit install
+#
+# Manual run:
+#   pre-commit run --all-files
+
+repos:
+  # Ruff - Fast Python linting and formatting (replaces flake8, black, isort)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      # Linter
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        name: Ruff Linter
+        description: Fast Python linter (replaces flake8, isort)
+
+      # Formatter
+      - id: ruff-format
+        name: Ruff Formatter
+        description: Fast Python formatter (replaces black)
+
+  # Mypy - Static type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        name: Mypy Type Checker
+        description: Static type checking for Python
+        additional_dependencies:
+          - types-python-dateutil
+          - types-requests
+          - pandas-stubs
+        args: [--strict, --ignore-missing-imports]
+        files: ^scripts/
+
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      # File checks
+      - id: check-yaml
+        name: Check YAML syntax
+        description: Validates YAML files (config, workflows)
+
+      - id: check-toml
+        name: Check TOML syntax
+        description: Validates TOML files (pyproject.toml)
+
+      - id: check-json
+        name: Check JSON syntax
+        description: Validates JSON files
+
+      - id: end-of-file-fixer
+        name: Fix end of files
+        description: Ensures files end with newline
+
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+        description: Removes trailing whitespace
+
+      - id: mixed-line-ending
+        name: Fix line endings
+        description: Ensures consistent line endings (LF)
+        args: [--fix=lf]
+
+      # Security checks
+      - id: check-added-large-files
+        name: Check for large files
+        description: Prevents accidental commits of large files
+        args: [--maxkb=1000]
+
+      - id: detect-private-key
+        name: Detect private keys
+        description: Prevents accidental commits of SSH keys
+
+      # Code quality
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+        description: Detects merge conflict markers
+
+      - id: check-case-conflict
+        name: Check filename case conflicts
+        description: Prevents case-sensitive filename issues
+
+      - id: check-docstring-first
+        name: Check docstring first
+        description: Ensures docstrings come before code
+        files: ^scripts/
+
+  # Financial Precision Validation (Custom)
+  # NOTE: This will be implemented as a local hook once scripts/validation/decimal_checker.py exists
+  # - repo: local
+  #   hooks:
+  #     - id: decimal-precision-check
+  #       name: Decimal Precision Validator
+  #       description: Ensures all currency calculations use Decimal (not float)
+  #       entry: python scripts/validation/decimal_checker.py
+  #       language: python
+  #       files: ^scripts/core/.*\.py$
+  #       pass_filenames: true
+
+  # Audit Trail Validation (Custom)
+  # NOTE: This will be implemented as a local hook once scripts/validation/audit_checker.py exists
+  # - repo: local
+  #   hooks:
+  #     - id: audit-trail-check
+  #       name: Audit Trail Validator
+  #       description: Ensures all data transformations log to audit trail
+  #       entry: python scripts/validation/audit_checker.py
+  #       language: python
+  #       files: ^scripts/workflows/.*\.py$
+  #       pass_filenames: true
+
+# Configuration for hooks
+default_language_version:
+  python: python3.11
+
+# Fail fast - stop on first failure
+fail_fast: false
+
+# Exclude patterns
+exclude: |
+  (?x)^(
+    external/.*|
+    \.venv/.*|
+    \.git/.*|
+    __pycache__/.*|
+    \.pytest_cache/.*|
+    \.mypy_cache/.*|
+    \.ruff_cache/.*
+  )$

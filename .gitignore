@@ -43,6 +43,11 @@ config/credentials/*
 !config/credentials/.gitkeep
 !config/credentials/README.md
 
+# Environment variables (contain sensitive API keys and secrets)
+.env
+.env.*
+!.env.example
+
 # Audit logs (contain sensitive data)
 config/audit.log
 config/audit-*.log
