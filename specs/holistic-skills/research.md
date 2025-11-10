@@ -564,9 +564,21 @@ results_C = Task("Generate report", deps=[results_B])
 - Implementation: Like compiler error (must fix to continue)
 - Example: "Agent has full access but marked as reviewer → BLOCKED"
 
-**Q7: Hook Factory - Dev vs Prod Context** [CLARIFICATION NEEDED]
-- User intent: dev = development workflows, prod = FP&A workflows (NOT dev/prod environments)
-- Options provided below for user decision
+**Q7: Hook Factory - Dev vs Prod Context**
+- ✅ OPTION A - Separate directories by workflow type
+- User intent: dev = development workflows (meta-infrastructure), prod = FP&A workflows (domain)
+- Structure:
+  ```
+  .claude/hooks/
+  ├── development-workflows/
+  │   ├── pre-tool-use-meta.sh
+  │   └── stop-meta.sh
+  └── fpa-workflows/
+      ├── pre-tool-use-fpa.sh
+      └── stop-fpa.sh
+  ```
+- Context detection: Path-based (automatic)
+- Rationale: Simplest approach, appropriate checks per context, no false positives
 
 **Q8: Hierarchical Context Manager - Token Usage Monitoring**
 - ✅ CONDITIONAL YES - Use simple rule of thumb (character-based)
