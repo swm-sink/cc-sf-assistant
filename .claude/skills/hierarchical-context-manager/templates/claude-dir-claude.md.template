@@ -1,0 +1,271 @@
+# .claude/ Meta-Infrastructure - Behavioral Overrides
+
+**Purpose:** Component-specific behavior for .claude/ directory (skills, agents, commands).
+
+**Inherits:** Root CLAUDE.md (all core principles apply)
+
+**Overrides:** This file takes precedence for .claude/** work
+
+---
+
+## CSO Optimization Requirements
+
+**Target Scores:**
+- **Critical components:** CSO ≥0.8 (Hook Factory, Financial Quality Gate)
+- **High priority components:** CSO ≥0.7 (other meta-skills, key agents)
+- **Standard components:** CSO ≥0.6 (remaining skills, agents, commands)
+
+**CSO Framework (4 Pillars):**
+1. **Trigger Phrases (40% weight):** Exact phrases users say
+2. **Symptoms (30% weight):** Problems this solves
+3. **Agnostic Keywords (20% weight):** Generic terms
+4. **Examples (10% weight):** Concrete usage examples
+
+**Calculation:**
+```
+CSO Score = (0.4 × trigger_score) + (0.3 × symptom_score) +
+            (0.2 × keyword_score) + (0.1 × example_score)
+```
+
+**Evidence:** Only 25% of existing meta-skills meet 0.8 threshold, hence tiered approach.
+
+---
+
+## Progressive Disclosure
+
+**SKILL.md / Agent / Command Size:**
+- Target: ≤200 lines for main file
+- Rationale: Claude processes smaller files faster, context efficiency
+
+**Structure:**
+```
+.claude/skills/skill-name/
+├── SKILL.md                # Main file (≤200 lines)
+├── README.md               # User-facing documentation
+├── references/             # Detailed documentation
+│   ├── patterns.md         # Design patterns
+│   ├── examples.md         # Extended examples
+│   └── edge-cases.md       # Edge case handling
+└── templates/              # Code templates (if applicable)
+```
+
+**References/ Guidelines:**
+- Each document ≤600 lines (keeps manageable)
+- Link from SKILL.md using relative links
+- Provide depth without bloating main file
+
+---
+
+## YAML Frontmatter Validation
+
+### Skills Frontmatter
+```yaml
+---
+name: skill-name
+type: Discipline | Technique | Pattern | Reference
+auto_invoke: true | false
+cso_score: 0.73  # Calculated score
+created: 2025-11-10
+---
+```
+
+**Required Fields:** name, type, auto_invoke, cso_score
+
+### Agents Frontmatter
+```yaml
+---
+name: agent-name
+tool_tier: read_only | read_web | full_access
+description: Brief description of agent purpose
+created: 2025-11-10
+---
+```
+
+**Required Fields:** name, tool_tier, description
+
+**Tool Tiers:**
+- `read_only`: Read, Glob, Grep, WebFetch only
+- `read_web`: read_only + WebSearch
+- `full_access`: All tools including Write, Edit, Bash
+
+### Commands Frontmatter
+```yaml
+---
+name: command-name
+workflow_type: RPIV | Human Approval | Reflection | Validation | Batch | Routing | ETL | Orchestration | Reporting
+description: Brief description of command purpose
+created: 2025-11-10
+---
+```
+
+**Required Fields:** name, workflow_type, description
+
+---
+
+## Naming Conventions
+
+**Files:**
+- Skills: `skill-name/SKILL.md` (kebab-case)
+- Agents: `agent-name.md` (kebab-case)
+- Commands: `command-name.md` (kebab-case)
+- Templates: `template-name.template` (kebab-case + .template extension)
+
+**Directories:**
+```
+.claude/
+├── skills/
+│   └── skill-name/                 # kebab-case
+├── agents/
+│   ├── validators/                 # group by function
+│   │   └── agent-name.md           # kebab-case
+│   └── generators/
+│       └── agent-name.md
+├── commands/
+│   ├── development-workflows/      # group by context (Q7 decision)
+│   │   └── command-name.md         # kebab-case
+│   └── fpa-workflows/
+│       └── command-name.md
+```
+
+---
+
+## Tool Tier Enforcement
+
+**Read-Only Agents (Validators):**
+- Use when: Validation, review, checking (no modifications)
+- Can use: Read, Glob, Grep, WebFetch
+- Cannot use: Write, Edit, Bash, NotebookEdit
+- Examples: @databricks-validator, @report-formatter
+
+**Full Access Agents (Generators):**
+- Use when: Code generation, file creation, script execution
+- Can use: All tools including Write, Edit, Bash
+- Requires: Careful validation before execution
+- Examples: @script-generator, @test-generator
+
+**Rationale:** Validators should not accidentally modify files (read-only prevents errors)
+
+---
+
+## Workflow Patterns
+
+**RPIV (Research → Plan → Implement → Verify):**
+- Use for: Feature implementation, complex changes
+- Checkpoints: User approval after each phase
+- Documents: specs/{topic}/research.md, plan.md, checklist.md
+
+**Human Approval:**
+- Use for: Potentially destructive operations, critical decisions
+- Pattern: Present options → User chooses → Execute
+- Examples: Delete files, merge conflicts, push to production
+
+**Validation:**
+- Use for: Quality gates, correctness checks
+- Pattern: Run validators → Report issues → Block if critical
+- Examples: Type checking, syntax validation, CSO scoring
+
+**Orchestration:**
+- Use for: Multi-step workflows coordinating multiple agents/skills
+- Pattern: Task planning → Agent invocation → Result aggregation
+- Examples: Multi-agent workflow coordinator
+
+---
+
+## Template Validation
+
+**When Creating Skills:**
+```bash
+# Validate SKILL.md
+- [ ] YAML frontmatter present and valid
+- [ ] Name matches directory name
+- [ ] Type is valid (Discipline, Technique, Pattern, Reference)
+- [ ] CSO score calculated and documented
+- [ ] Progressive disclosure (≤200 lines main file)
+- [ ] References/ directory exists (if needed)
+- [ ] Examples provided (minimum 3)
+```
+
+**When Creating Agents:**
+```bash
+# Validate agent.md
+- [ ] YAML frontmatter present and valid
+- [ ] Tool tier appropriate (read_only for validators)
+- [ ] Description clear and concise
+- [ ] Usage examples provided
+- [ ] Tool restrictions documented
+```
+
+**When Creating Commands:**
+```bash
+# Validate command.md
+- [ ] YAML frontmatter present and valid
+- [ ] Workflow type matches actual pattern
+- [ ] User-facing prompts clear
+- [ ] Error handling specified
+- [ ] Examples provided
+```
+
+---
+
+## Integration Testing
+
+**Test Skill Auto-Invoke:**
+```bash
+# Verify trigger phrases work
+echo "create hook" | grep -q "hook-factory"  # Should match
+
+# Verify CSO scoring
+python scripts/validation/cso-scorer.py .claude/skills/skill-name/SKILL.md
+```
+
+**Test Agent Tool Tier:**
+```bash
+# Verify read-only agent cannot Write
+# (Manual test: Try using Write tool in read-only agent, expect error)
+```
+
+**Test Command Workflow:**
+```bash
+# Verify command invocation
+/command-name arg1 arg2
+# Check expected behavior
+```
+
+---
+
+## Meta-Infrastructure Anti-Patterns
+
+**❌ Avoid:**
+- Bloated SKILL.md (>200 lines without references/)
+- Missing YAML frontmatter
+- Low CSO scores without justification
+- Wrong tool tier (full access for validators)
+- Inconsistent naming (camelCase, snake_case)
+- No examples
+- Duplication across components
+
+**✅ Prefer:**
+- Progressive disclosure (main file + references/)
+- Complete YAML frontmatter
+- CSO scores meeting targets (≥0.7 or ≥0.8)
+- Appropriate tool tiers (read_only for validators)
+- Consistent kebab-case naming
+- Comprehensive examples (3-5 minimum)
+- DRY principle (reference, don't duplicate)
+
+---
+
+## Quality Gates
+
+**Before Committing .claude/ Changes:**
+1. Run System Coherence Validator (when available)
+2. Verify YAML frontmatter valid
+3. Check CSO score meets target
+4. Ensure naming conventions followed
+5. Validate file structure (SKILL.md + references/ + templates/)
+6. Test auto-invoke (if applicable)
+
+---
+
+**Precedence:** This config overrides root CLAUDE.md for .claude/**
+**Inherits:** All root principles (DRY, chain of verification, RPIV workflow)

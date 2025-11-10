@@ -1,0 +1,217 @@
+# Python Scripts - Behavioral Overrides
+
+**Purpose:** Component-specific behavior for Python scripts in scripts/ directory.
+
+**Inherits:** Root CLAUDE.md (all core principles apply)
+
+**Overrides:** This file takes precedence for scripts/** work
+
+---
+
+## Type Safety Enforcement
+
+**Mypy Strict Mode:**
+- Type hints on ALL functions (parameters, returns, exceptions)
+- Use typing module: `Optional`, `List`, `Dict`, `Literal`, etc.
+- No `Any` types without justification (mark with `# type: ignore` + comment)
+- Docstrings must document parameter types and return types
+
+**Example:**
+```python
+from typing import Optional, List
+from decimal import Decimal
+
+def calculate_variance(
+    actual: Decimal,
+    budget: Decimal,
+    account_type: Literal['revenue', 'expense']
+) -> tuple[Decimal, Optional[float], str]:
+    """Calculate variance with percentage and favorability.
+
+    Args:
+        actual: Actual amount (Decimal for precision)
+        budget: Budget amount (Decimal for precision)
+        account_type: Account classification
+
+    Returns:
+        Tuple of (variance, variance_pct, favorability)
+        - variance: Actual - Budget
+        - variance_pct: Percentage variance (None if budget is zero)
+        - favorability: 'Favorable' or 'Unfavorable'
+
+    Raises:
+        ValueError: If account_type not 'revenue' or 'expense'
+    """
+    # Implementation
+    pass
+```
+
+---
+
+## Financial Precision Requirements
+
+**Decimal Type Mandatory:**
+- ALL currency calculations use `from decimal import Decimal`
+- NEVER use float or double for currency/percentages
+- Rationale: Float causes rounding errors (0.1 + 0.2 ≠ 0.3)
+
+**Rounding:**
+- Only at display/storage layer, NEVER intermediate calculations
+- Use `Decimal.quantize()` with `ROUND_HALF_UP` for currency
+
+**Example:**
+```python
+from decimal import Decimal, ROUND_HALF_UP
+
+# ✅ CORRECT
+budget = Decimal('100.00')
+actual = Decimal('150.00')
+variance = actual - budget  # Decimal('50.00')
+
+# Display rounding
+variance_display = variance.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+# ❌ WRONG
+budget = 100.0  # float causes precision errors
+actual = 150.0
+variance = actual - budget
+```
+
+---
+
+## Audit Trail Logging
+
+**Every Data Transformation Must Log:**
+- Timestamp (ISO 8601 format)
+- User (or 'system')
+- Source file(s)
+- Operation performed
+- Target file (if applicable)
+
+**Example:**
+```python
+import logging
+from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
+
+def transform_data(source_file: str, target_file: str) -> None:
+    """Transform data with audit logging."""
+    timestamp = datetime.now(timezone.utc).isoformat()
+    logger.info(
+        f"{timestamp} | {os.getenv('USER', 'system')} | "
+        f"transform_data | {source_file} → {target_file}"
+    )
+
+    # Transformation logic
+    pass
+```
+
+**Audit Log Location:** `config/audit.log`
+
+---
+
+## Error Handling Patterns
+
+**Explicit Exception Handling:**
+- Define custom exceptions for domain errors
+- User-friendly error messages (not stack traces for expected errors)
+- Log all errors with context
+
+**Example:**
+```python
+class InvalidAccountTypeError(ValueError):
+    """Raised when account type is not recognized."""
+    pass
+
+def calculate_favorability(
+    variance: Decimal,
+    account_type: str
+) -> str:
+    """Determine favorability based on account type."""
+    if account_type not in ('revenue', 'expense', 'asset', 'liability'):
+        raise InvalidAccountTypeError(
+            f"Unknown account type '{account_type}'. "
+            f"Expected: revenue, expense, asset, or liability"
+        )
+
+    # Logic
+    pass
+```
+
+---
+
+## Performance Considerations
+
+**Chunking for Large Datasets:**
+- If dataset >1000 rows, consider chunking
+- Use `pandas.read_csv(chunksize=1000)` or similar
+- Document performance expectations
+
+**Example:**
+```python
+import pandas as pd
+
+def process_large_file(file_path: str, chunksize: int = 1000) -> None:
+    """Process large CSV in chunks to manage memory."""
+    for chunk in pd.read_csv(file_path, chunksize=chunksize):
+        process_chunk(chunk)
+```
+
+**Performance Expectations:**
+- Document expected runtime (mark [TO BE MEASURED] until tested)
+- Profile before optimizing (no premature optimization)
+- Measure after optimization changes
+
+---
+
+## Script-Specific Anti-Patterns
+
+**❌ Avoid:**
+- Float for currency calculations
+- Silent failures (always raise or log errors)
+- Magic numbers (use config/thresholds.yaml)
+- Modifying input data in-place (return new data)
+- Missing type hints
+- No docstrings
+- Unlogged data transformations
+
+**✅ Prefer:**
+- Decimal for all financial calculations
+- Explicit error handling with custom exceptions
+- Configuration files for thresholds
+- Pure functions (no side effects)
+- Complete type hints
+- Comprehensive docstrings
+- Audit trail for all transformations
+
+---
+
+## Testing Requirements
+
+**Unit Tests:**
+- Test edge cases (zero division, NULL values, negative amounts)
+- Test Decimal precision (assert to 2+ decimal places)
+- Test error conditions (invalid inputs)
+
+**Example:**
+```python
+from decimal import Decimal
+
+def test_calculate_variance_zero_budget():
+    """Test variance calculation when budget is zero."""
+    actual = Decimal('100.00')
+    budget = Decimal('0.00')
+    variance, variance_pct, favorability = calculate_variance(
+        actual, budget, 'revenue'
+    )
+
+    assert variance == Decimal('100.00')
+    assert variance_pct is None  # Cannot calculate percentage
+    assert favorability == 'Favorable'
+```
+
+---
+
+**Precedence:** This config overrides root CLAUDE.md for scripts/**
+**Inherits:** All root principles (DRY, chain of verification, RPIV workflow)

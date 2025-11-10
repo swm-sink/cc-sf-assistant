@@ -1,0 +1,341 @@
+# Tests - Behavioral Overrides
+
+**Purpose:** Component-specific behavior for tests/ directory (unit tests, integration tests, test fixtures).
+
+**Inherits:** Root CLAUDE.md (all core principles apply)
+
+**Overrides:** This file takes precedence for tests/** work
+
+---
+
+## Edge Case Coverage Requirements
+
+**Mandatory Edge Cases for Financial Code:**
+1. **Zero Division:** Budget = 0, Actual > 0 (show N/A or handle gracefully)
+2. **Negative Values:** Revenue reversals, expense credits
+3. **NULL/Missing Data:** Unmatched accounts, missing columns
+4. **Large Numbers:** Billions (ensure no overflow)
+5. **Precision Boundaries:** Very small Decimals (0.001, 0.01)
+
+**Example:**
+```python
+def test_variance_calculation_zero_budget():
+    """Test variance calculation when budget is zero."""
+    actual = Decimal('100.00')
+    budget = Decimal('0.00')
+
+    variance, variance_pct, favorability = calculate_variance(
+        actual, budget, 'revenue'
+    )
+
+    assert variance == Decimal('100.00')
+    assert variance_pct is None  # Cannot calculate percentage
+    assert favorability == 'Favorable'
+```
+
+---
+
+## Financial Precision Test Cases
+
+**Decimal Accuracy Tests:**
+- Assert to 2+ decimal places for currency
+- Use `Decimal` in test assertions (not float)
+- Test rounding behavior explicitly
+
+**Example:**
+```python
+from decimal import Decimal
+
+def test_decimal_precision_maintained():
+    """Verify Decimal precision through calculations."""
+    amount1 = Decimal('0.1')
+    amount2 = Decimal('0.2')
+    result = amount1 + amount2
+
+    assert result == Decimal('0.3')  # NOT 0.30000000000000004
+
+def test_rounding_applied_correctly():
+    """Verify rounding uses ROUND_HALF_UP."""
+    from decimal import ROUND_HALF_UP
+
+    value = Decimal('10.555')
+    rounded = value.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    assert rounded == Decimal('10.56')  # Rounds up at .5
+```
+
+**Float Detection Tests:**
+```python
+def test_no_float_in_currency_code():
+    """Verify code uses Decimal, not float."""
+    # Read source code
+    with open('scripts/core/variance.py') as f:
+        code = f.read()
+
+    # Check for float usage with currency keywords
+    import re
+    pattern = r'float\s*\([^)]*\b(currency|price|amount|revenue|expense|budget|actual)\b'
+    matches = re.findall(pattern, code)
+
+    assert len(matches) == 0, f"Float detected in currency code: {matches}"
+```
+
+---
+
+## Integration Test Patterns
+
+**Realistic Data Volumes:**
+- Test with representative dataset sizes (reference spec.md)
+- Example: 50-200 accounts (typical FP&A dataset)
+- Measure performance on realistic data
+
+**End-to-End Workflows:**
+```python
+def test_variance_report_generation_end_to_end():
+    """Test complete variance report workflow."""
+    # Setup: Create test data files
+    budget_file = 'tests/fixtures/budget.xlsx'
+    actuals_file = 'tests/fixtures/actuals.xlsx'
+
+    # Execute: Generate report
+    report = generate_variance_report(budget_file, actuals_file)
+
+    # Verify: Check report structure
+    assert 'Account' in report.columns
+    assert 'Budget' in report.columns
+    assert 'Actual' in report.columns
+    assert 'Variance' in report.columns
+    assert 'Variance %' in report.columns
+    assert 'Favorability' in report.columns
+
+    # Verify: Check calculations
+    first_row = report.iloc[0]
+    expected_variance = first_row['Actual'] - first_row['Budget']
+    assert first_row['Variance'] == expected_variance
+```
+
+---
+
+## Regression Test Expectations
+
+**When to Add Regression Tests:**
+- After fixing a bug (test that bug doesn't return)
+- After changing calculation logic (ensure same results)
+- After performance optimization (ensure accuracy maintained)
+
+**Example:**
+```python
+def test_variance_calculation_regression():
+    """Regression test: Ensure variance calculation unchanged."""
+    # Known good inputs/outputs from previous version
+    test_cases = [
+        {
+            'actual': Decimal('150.00'),
+            'budget': Decimal('100.00'),
+            'account_type': 'revenue',
+            'expected_variance': Decimal('50.00'),
+            'expected_pct': 50.0,
+            'expected_favorability': 'Favorable'
+        },
+        # Add more test cases
+    ]
+
+    for case in test_cases:
+        variance, variance_pct, favorability = calculate_variance(
+            case['actual'],
+            case['budget'],
+            case['account_type']
+        )
+
+        assert variance == case['expected_variance']
+        assert variance_pct == case['expected_pct']
+        assert favorability == case['expected_favorability']
+```
+
+---
+
+## Test Data Fixture Patterns
+
+**Fixture Location:**
+```
+tests/
+├── fixtures/
+│   ├── budget.xlsx                 # Sample budget data
+│   ├── actuals.xlsx                # Sample actuals data
+│   ├── expected_variance.xlsx      # Expected output
+│   └── edge_cases/
+│       ├── zero_budget.xlsx        # Edge case: budget = 0
+│       ├── negative_revenue.xlsx   # Edge case: reversals
+│       └── missing_accounts.xlsx   # Edge case: unmatched
+```
+
+**Fixture Best Practices:**
+- Use realistic account names (not "Account1", "Account2")
+- Include representative account types (revenue, expense, asset, liability)
+- Document fixture purpose in filename or README
+- Keep fixtures small (<100 rows preferred)
+
+**Example Fixture Creation:**
+```python
+import pandas as pd
+from decimal import Decimal
+
+def create_budget_fixture():
+    """Create sample budget fixture for testing."""
+    data = {
+        'Account': ['Revenue - Product Sales', 'Expense - Salaries', 'Expense - Marketing'],
+        'Budget': [Decimal('1000000.00'), Decimal('500000.00'), Decimal('100000.00')]
+    }
+    df = pd.DataFrame(data)
+    df.to_excel('tests/fixtures/budget.xlsx', index=False)
+```
+
+---
+
+## Assertion Precision
+
+**Decimal Assertions:**
+```python
+# ✅ CORRECT: Compare Decimals directly
+assert result == Decimal('10.00')
+
+# ✅ CORRECT: Use quantize for precision control
+assert result.quantize(Decimal('0.01')) == Decimal('10.00')
+
+# ❌ WRONG: Comparing Decimal to float
+assert result == 10.0  # Precision mismatch
+
+# ❌ WRONG: Converting to float for comparison
+assert float(result) == 10.0  # Loses precision
+```
+
+**Percentage Assertions:**
+```python
+# ✅ CORRECT: Use pytest.approx for floats
+import pytest
+assert variance_pct == pytest.approx(10.5, abs=0.01)
+
+# ✅ CORRECT: Or compare rounded values
+assert round(variance_pct, 2) == 10.5
+```
+
+---
+
+## Test Organization
+
+**Directory Structure:**
+```
+tests/
+├── unit/                           # Unit tests (pure functions)
+│   ├── test_variance.py            # Variance calculation tests
+│   ├── test_consolidation.py      # Account consolidation tests
+│   └── test_favorability.py       # Favorability logic tests
+├── integration/                    # Integration tests (workflows)
+│   ├── test_report_generation.py  # Full report workflow
+│   └── test_data_extraction.py    # API extraction workflow
+├── fixtures/                       # Test data
+│   └── ...
+└── conftest.py                     # Pytest configuration
+```
+
+**Naming Conventions:**
+- Test files: `test_*.py`
+- Test functions: `test_<function_name>_<scenario>()`
+- Fixtures: Descriptive names (not `data1.xlsx`)
+
+---
+
+## Pytest Configuration
+
+**conftest.py Example:**
+```python
+import pytest
+from decimal import Decimal
+
+@pytest.fixture
+def sample_budget():
+    """Sample budget data for testing."""
+    return {
+        'Revenue - Product Sales': Decimal('1000000.00'),
+        'Expense - Salaries': Decimal('500000.00'),
+        'Expense - Marketing': Decimal('100000.00')
+    }
+
+@pytest.fixture
+def sample_actuals():
+    """Sample actuals data for testing."""
+    return {
+        'Revenue - Product Sales': Decimal('1200000.00'),
+        'Expense - Salaries': Decimal('520000.00'),
+        'Expense - Marketing': Decimal('95000.00')
+    }
+```
+
+---
+
+## Test Coverage Requirements
+
+**Minimum Coverage Targets:**
+- **Core financial logic:** 100% coverage (scripts/core/)
+- **Workflows:** 80% coverage (scripts/workflows/)
+- **Integrations:** 60% coverage (scripts/integrations/)
+
+**Measure Coverage:**
+```bash
+pytest --cov=scripts --cov-report=html tests/
+open htmlcov/index.html
+```
+
+**Coverage Exceptions:**
+- Main blocks (`if __name__ == "__main__"`)
+- Type checking blocks (`if TYPE_CHECKING`)
+- Debugging code (temporary print statements)
+
+---
+
+## Testing Anti-Patterns
+
+**❌ Avoid:**
+- Testing implementation details (not behavior)
+- Brittle tests (break on minor refactors)
+- No edge case coverage
+- Using float for currency in tests
+- Large test fixtures (>1000 rows)
+- Slow integration tests (>10 seconds)
+- No regression tests after bugs fixed
+
+**✅ Prefer:**
+- Testing public interfaces (behavior)
+- Resilient tests (refactor-safe)
+- Comprehensive edge cases
+- Using Decimal in all financial tests
+- Small, focused test fixtures
+- Fast unit tests (<1 second)
+- Regression tests for all bugs
+
+---
+
+## Test Documentation
+
+**Docstrings Required:**
+```python
+def test_variance_calculation_zero_budget():
+    """Test variance calculation when budget is zero.
+
+    Edge Case: Division by zero when calculating percentage.
+    Expected: variance_pct should be None, not error.
+    """
+    # Test implementation
+```
+
+**Comments for Complex Assertions:**
+```python
+# Verify favorability logic: Revenue up = favorable
+assert favorability == 'Favorable', \
+    "Revenue increase should be favorable (not unfavorable)"
+```
+
+---
+
+**Precedence:** This config overrides root CLAUDE.md for tests/**
+**Inherits:** All root principles (DRY, chain of verification, RPIV workflow)
