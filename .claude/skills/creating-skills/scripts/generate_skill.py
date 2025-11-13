@@ -28,16 +28,16 @@ from typing import Dict, List, Any, Optional, Tuple
 
 # Template paths relative to this script
 SCRIPT_DIR = Path(__file__).parent
-TEMPLATE_DIR = SCRIPT_DIR.parent / 'assets' / 'templates'
+TEMPLATE_DIR = SCRIPT_DIR.parent / "assets" / "templates"
 
-SKILL_TYPES = ['technique', 'pattern', 'discipline', 'reference']
+SKILL_TYPES = ["technique", "pattern", "discipline", "reference"]
 
 VALIDATORS = [
-    'validate_yaml.py',
-    'validate_naming.py',
-    'validate_structure.py',
-    'validate_cso.py',
-    'validate_rationalization.py'
+    "validate_yaml.py",
+    "validate_naming.py",
+    "validate_structure.py",
+    "validate_cso.py",
+    "validate_rationalization.py",
 ]
 
 
@@ -82,10 +82,10 @@ def prompt_choice(prompt: str, choices: List[str], default: Optional[str] = None
 def select_template(skill_type: str) -> Path:
     """Select template based on skill type."""
     template_map = {
-        'technique': TEMPLATE_DIR / 'technique-template.md',
-        'pattern': TEMPLATE_DIR / 'pattern-template.md',
-        'discipline': TEMPLATE_DIR / 'discipline-template.md',
-        'reference': TEMPLATE_DIR / 'reference-template.md'
+        "technique": TEMPLATE_DIR / "technique-template.md",
+        "pattern": TEMPLATE_DIR / "pattern-template.md",
+        "discipline": TEMPLATE_DIR / "discipline-template.md",
+        "reference": TEMPLATE_DIR / "reference-template.md",
     }
 
     template_path = template_map.get(skill_type)
@@ -98,7 +98,7 @@ def select_template(skill_type: str) -> Path:
 
 def read_template(template_path: Path) -> str:
     """Read template file content."""
-    return template_path.read_text(encoding='utf-8')
+    return template_path.read_text(encoding="utf-8")
 
 
 def fill_placeholders(template_content: str, placeholders: Dict[str, str]) -> str:
@@ -119,7 +119,8 @@ def generate_skill_content(skill_type: str, skill_details: Dict[str, str]) -> st
 
     # Extract just the template structure (between ```markdown and ```)
     import re
-    pattern = r'```markdown\s*\n(.*?)\n```'
+
+    pattern = r"```markdown\s*\n(.*?)\n```"
     match = re.search(pattern, template_content, re.DOTALL)
 
     if not match:
@@ -142,9 +143,7 @@ def run_validator(validator_script: str, skill_path: Path) -> Tuple[int, Dict[st
 
     # Run validator
     result = subprocess.run(
-        [sys.executable, str(validator_path), str(skill_path)],
-        capture_output=True,
-        text=True
+        [sys.executable, str(validator_path), str(skill_path)], capture_output=True, text=True
     )
 
     # Parse JSON output from stdout
@@ -152,11 +151,11 @@ def run_validator(validator_script: str, skill_path: Path) -> Tuple[int, Dict[st
         validation_result = json.loads(result.stdout)
     except json.JSONDecodeError:
         validation_result = {
-            'validator': validator_script,
-            'passed': False,
-            'errors': [f'Failed to parse validator output: {result.stdout}'],
-            'warnings': [],
-            'info': {}
+            "validator": validator_script,
+            "passed": False,
+            "errors": [f"Failed to parse validator output: {result.stdout}"],
+            "warnings": [],
+            "info": {},
         }
 
     return result.returncode, validation_result
@@ -167,9 +166,9 @@ def validate_skill(skill_path: Path) -> Tuple[bool, List[Dict[str, Any]]]:
     all_results = []
     all_passed = True
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Running Validators")
-    print("="*60)
+    print("=" * 60)
 
     for validator in VALIDATORS:
         print(f"\nRunning {validator}...")
@@ -178,14 +177,14 @@ def validate_skill(skill_path: Path) -> Tuple[bool, List[Dict[str, Any]]]:
         all_results.append(result)
 
         if exit_code == 0:
-            print(f"  ✅ PASSED")
+            print("  ✅ PASSED")
         elif exit_code == 2:
-            print(f"  ⚠️  WARNINGS")
-            for warning in result.get('warnings', []):
+            print("  ⚠️  WARNINGS")
+            for warning in result.get("warnings", []):
                 print(f"     {warning}")
         else:
-            print(f"  ❌ FAILED")
-            for error in result.get('errors', []):
+            print("  ❌ FAILED")
+            for error in result.get("errors", []):
                 print(f"     {error}")
             all_passed = False
 
@@ -197,14 +196,14 @@ def create_skill_directory(skill_name: str) -> Path:
     # Find project root (where .claude/ directory is)
     current = Path.cwd()
     while current != current.parent:
-        claude_dir = current / '.claude'
+        claude_dir = current / ".claude"
         if claude_dir.exists() and claude_dir.is_dir():
             break
         current = current.parent
     else:
         raise FileNotFoundError("Cannot find .claude/ directory (not in Claude Code project?)")
 
-    skill_dir = claude_dir / 'skills' / skill_name
+    skill_dir = claude_dir / "skills" / skill_name
 
     if skill_dir.exists():
         raise FileExistsError(f"Skill directory already exists: {skill_dir}")
@@ -216,9 +215,9 @@ def create_skill_directory(skill_name: str) -> Path:
 
 def main() -> int:
     """Main entry point."""
-    print("="*60)
+    print("=" * 60)
     print("Skill Generator - Interactive Mode")
-    print("="*60)
+    print("=" * 60)
 
     # Collect skill details
     skill_name = prompt_user("Skill name (kebab-case)")
@@ -229,7 +228,9 @@ def main() -> int:
 
     skill_type = prompt_choice("Select skill type", SKILL_TYPES)
 
-    skill_title = prompt_user("Skill title (human-readable)", default=skill_name.replace('-', ' ').title())
+    skill_title = prompt_user(
+        "Skill title (human-readable)", default=skill_name.replace("-", " ").title()
+    )
 
     description = prompt_user("Description (CSO-optimized, ≥50 chars)")
 
@@ -245,10 +246,10 @@ def main() -> int:
 
     # Build placeholder map
     placeholders = {
-        'SKILL_NAME': skill_name,
-        'SKILL_TITLE': skill_title,
-        'CSO_OPTIMIZED_DESCRIPTION': description,
-        'ONE_SENTENCE_PURPOSE': one_sentence_purpose,
+        "SKILL_NAME": skill_name,
+        "SKILL_TITLE": skill_title,
+        "CSO_OPTIMIZED_DESCRIPTION": description,
+        "ONE_SENTENCE_PURPOSE": one_sentence_purpose,
     }
 
     print(f"\n{'='*60}")
@@ -264,8 +265,8 @@ def main() -> int:
         # Create temp directory
         print("\n2. Creating temporary directory...")
         with tempfile.TemporaryDirectory() as temp_dir:
-            temp_skill_path = Path(temp_dir) / 'SKILL.md'
-            temp_skill_path.write_text(skill_content, encoding='utf-8')
+            temp_skill_path = Path(temp_dir) / "SKILL.md"
+            temp_skill_path.write_text(skill_content, encoding="utf-8")
             print(f"   ✅ Temp skill: {temp_skill_path}")
 
             # Validate
@@ -287,7 +288,7 @@ def main() -> int:
             # Commit: Move to final location
             print("\n4. Committing skill to .claude/skills/...")
             skill_dir = create_skill_directory(skill_name)
-            final_skill_path = skill_dir / 'SKILL.md'
+            final_skill_path = skill_dir / "SKILL.md"
 
             shutil.copy(temp_skill_path, final_skill_path)
             print(f"   ✅ Skill created: {final_skill_path}")
@@ -296,21 +297,21 @@ def main() -> int:
         print(f"✅ SUCCESS: Skill '{skill_name}' created successfully")
         print(f"{'='*60}")
         print(f"\nLocation: .claude/skills/{skill_name}/SKILL.md")
-        print(f"\nNext steps:")
-        print(f"  1. Fill in remaining placeholders in SKILL.md")
-        print(f"  2. Create references/ subdirectory for supporting docs")
-        print(f"  3. Run validators again to verify completeness")
-        print(f"  4. Test skill by invoking it")
+        print("\nNext steps:")
+        print("  1. Fill in remaining placeholders in SKILL.md")
+        print("  2. Create references/ subdirectory for supporting docs")
+        print("  3. Run validators again to verify completeness")
+        print("  4. Test skill by invoking it")
 
         return 0
 
     except Exception as e:
         print(f"\n{'='*60}", file=sys.stderr)
-        print(f"❌ ERROR", file=sys.stderr)
+        print("❌ ERROR", file=sys.stderr)
         print(f"{'='*60}", file=sys.stderr)
         print(f"{e}", file=sys.stderr)
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

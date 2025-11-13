@@ -88,17 +88,17 @@ def generate_analysis(options: list[dict]) -> dict:
         analysis["clear_winner"] = margin > 1.5
 
         if analysis["clear_winner"]:
-            analysis["recommendation"] = (
-                f"Strongly recommend {options[0]['name']} with {margin:.1f} point advantage"
-            )
+            analysis[
+                "recommendation"
+            ] = f"Strongly recommend {options[0]['name']} with {margin:.1f} point advantage"
         elif margin > 0.5:
-            analysis["recommendation"] = (
-                f"Recommend {options[0]['name']} but consider {options[1]['name']} as viable alternative"
-            )
+            analysis[
+                "recommendation"
+            ] = f"Recommend {options[0]['name']} but consider {options[1]['name']} as viable alternative"
         else:
-            analysis["recommendation"] = (
-                f"Close decision between {options[0]['name']} and {options[1]['name']} - consider additional factors"
-            )
+            analysis[
+                "recommendation"
+            ] = f"Close decision between {options[0]['name']} and {options[1]['name']} - consider additional factors"
 
         # Find key differentiators
         top = options[0]

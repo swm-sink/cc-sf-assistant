@@ -17,16 +17,16 @@ import subprocess
 import tempfile
 import shutil
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 
 # Get script directory and project root
 SCRIPT_DIR = Path(__file__).parent.resolve()
-TEMPLATES_DIR = SCRIPT_DIR.parent / 'assets' / 'templates'
-AGENTS_DIR = Path('/home/user/cc-sf-assistant/.claude/agents')
+TEMPLATES_DIR = SCRIPT_DIR.parent / "assets" / "templates"
+AGENTS_DIR = Path("/home/user/cc-sf-assistant/.claude/agents")
 
 
-def prompt_input(message: str, default: str = '') -> str:
+def prompt_input(message: str, default: str = "") -> str:
     """Prompt user for input with optional default."""
     if default:
         user_input = input(f"{message} [{default}]: ").strip()
@@ -76,9 +76,9 @@ def prompt_list(message: str, min_count: int, max_count: int) -> List[str]:
 def load_template(template_type: str) -> str:
     """Load template content from file."""
     template_map = {
-        'domain-specialist': 'AGENT_DOMAIN_SPECIALIST_TEMPLATE.md',
-        'researcher': 'AGENT_READONLY_RESEARCHER_TEMPLATE.md',
-        'reviewer': 'AGENT_FULL_ACCESS_IMPLEMENTER_TEMPLATE.md'
+        "domain-specialist": "AGENT_DOMAIN_SPECIALIST_TEMPLATE.md",
+        "researcher": "AGENT_READONLY_RESEARCHER_TEMPLATE.md",
+        "reviewer": "AGENT_FULL_ACCESS_IMPLEMENTER_TEMPLATE.md",
     }
 
     template_file = TEMPLATES_DIR / template_map[template_type]
@@ -95,31 +95,31 @@ def generate_agent_content(template_type: str, params: Dict[str, Any]) -> str:
 
     # Replace placeholders
     replacements = {
-        '{{AGENT_NAME}}': params['name'],
-        '{{AGENT_TITLE}}': params['title'],
-        '{{DESCRIPTION}}': params['description'],
-        '{{DOMAIN}}': params.get('domain', params['name']),
-        '{{DOMAIN_FOCUS}}': params.get('domain_focus', params['description']),
-        '{{RESEARCH_FOCUS}}': params.get('research_focus', params['description']),
-        '{{REVIEW_FOCUS}}': params.get('review_focus', params['description'])
+        "{{AGENT_NAME}}": params["name"],
+        "{{AGENT_TITLE}}": params["title"],
+        "{{DESCRIPTION}}": params["description"],
+        "{{DOMAIN}}": params.get("domain", params["name"]),
+        "{{DOMAIN_FOCUS}}": params.get("domain_focus", params["description"]),
+        "{{RESEARCH_FOCUS}}": params.get("research_focus", params["description"]),
+        "{{REVIEW_FOCUS}}": params.get("review_focus", params["description"]),
     }
 
     # Replace area/check placeholders
-    for i, area in enumerate(params.get('areas', []), 1):
-        replacements[f'{{{{AREA_{i}_NAME}}}}'] = area
-        replacements[f'{{{{RESEARCH_AREA_{i}_NAME}}}}'] = area
-        replacements[f'{{{{REVIEW_AREA_{i}_NAME}}}}'] = area
+    for i, area in enumerate(params.get("areas", []), 1):
+        replacements[f"{{{{AREA_{i}_NAME}}}}"] = area
+        replacements[f"{{{{RESEARCH_AREA_{i}_NAME}}}}"] = area
+        replacements[f"{{{{REVIEW_AREA_{i}_NAME}}}}"] = area
 
         # Add placeholder bullets
         for j in range(1, 9):
-            replacements[f'{{{{AREA_{i}_BULLET_{j}}}}}'] = f'{area} capability {j}'
-            replacements[f'{{{{RESEARCH_AREA_{i}_BULLET_{j}}}}}'] = f'{area} investigation {j}'
-            replacements[f'{{{{REVIEW_AREA_{i}_BULLET_{j}}}}}'] = f'{area} verification {j}'
+            replacements[f"{{{{AREA_{i}_BULLET_{j}}}}}"] = f"{area} capability {j}"
+            replacements[f"{{{{RESEARCH_AREA_{i}_BULLET_{j}}}}}"] = f"{area} investigation {j}"
+            replacements[f"{{{{REVIEW_AREA_{i}_BULLET_{j}}}}}"] = f"{area} verification {j}"
 
-    for i, check in enumerate(params.get('checks', []), 1):
-        replacements[f'{{{{CHECKLIST_{i}}}}}'] = check
-        replacements[f'{{{{CHECK_{i}_NAME}}}}'] = check
-        replacements[f'{{{{CHECK_{i}_CRITERION}}}}'] = f'{check} passes'
+    for i, check in enumerate(params.get("checks", []), 1):
+        replacements[f"{{{{CHECKLIST_{i}}}}}"] = check
+        replacements[f"{{{{CHECK_{i}_NAME}}}}"] = check
+        replacements[f"{{{{CHECK_{i}_CRITERION}}}}"] = f"{check} passes"
 
     # Apply replacements
     content = template
@@ -131,61 +131,61 @@ def generate_agent_content(template_type: str, params: Dict[str, Any]) -> str:
 
 def run_validator(validator_name: str, file_path: Path) -> Dict[str, Any]:
     """Run a validator script and return results."""
-    validator_path = SCRIPT_DIR / f'{validator_name}.py'
+    validator_path = SCRIPT_DIR / f"{validator_name}.py"
 
     try:
         result = subprocess.run(
-            ['python', str(validator_path), str(file_path)],
+            ["python", str(validator_path), str(file_path)],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
         )
 
         # Parse JSON output from stdout
-        output_lines = result.stdout.strip().split('\n')
-        json_output = output_lines[0] if output_lines else '{}'
+        output_lines = result.stdout.strip().split("\n")
+        json_output = output_lines[0] if output_lines else "{}"
 
         validation_result = json.loads(json_output)
-        validation_result['exit_code'] = result.returncode
+        validation_result["exit_code"] = result.returncode
 
         return validation_result
 
     except subprocess.TimeoutExpired:
         return {
-            'validator': validator_name,
-            'passed': False,
-            'errors': ['Validator timed out'],
-            'warnings': [],
-            'info': {},
-            'exit_code': 1
+            "validator": validator_name,
+            "passed": False,
+            "errors": ["Validator timed out"],
+            "warnings": [],
+            "info": {},
+            "exit_code": 1,
         }
     except json.JSONDecodeError:
         return {
-            'validator': validator_name,
-            'passed': False,
-            'errors': ['Could not parse validator output'],
-            'warnings': [],
-            'info': {},
-            'exit_code': 1
+            "validator": validator_name,
+            "passed": False,
+            "errors": ["Could not parse validator output"],
+            "warnings": [],
+            "info": {},
+            "exit_code": 1,
         }
     except Exception as e:
         return {
-            'validator': validator_name,
-            'passed': False,
-            'errors': [f'Validator error: {str(e)}'],
-            'warnings': [],
-            'info': {},
-            'exit_code': 1
+            "validator": validator_name,
+            "passed": False,
+            "errors": [f"Validator error: {str(e)}"],
+            "warnings": [],
+            "info": {},
+            "exit_code": 1,
         }
 
 
 def validate_agent(file_path: Path) -> tuple[bool, List[Dict[str, Any]]]:
     """Run all validators on agent file. Returns (success, results)."""
     validators = [
-        'validate_agent_yaml',
-        'validate_agent_naming',
-        'validate_agent_structure',
-        'validate_agent_tools'
+        "validate_agent_yaml",
+        "validate_agent_naming",
+        "validate_agent_structure",
+        "validate_agent_tools",
     ]
 
     results = []
@@ -195,7 +195,7 @@ def validate_agent(file_path: Path) -> tuple[bool, List[Dict[str, Any]]]:
         result = run_validator(validator, file_path)
         results.append(result)
 
-        if not result['passed']:
+        if not result["passed"]:
             all_passed = False
 
     return all_passed, results
@@ -209,39 +209,30 @@ def main():
 
     # 1. Choose template type
     template_type = prompt_choice(
-        "Select agent template:",
-        ['domain-specialist', 'researcher', 'reviewer']
+        "Select agent template:", ["domain-specialist", "researcher", "reviewer"]
     )
 
     # 2. Basic information
     print("\n--- Basic Information ---")
     name = prompt_input("Agent name (kebab-case)", "fintech-analyst")
-    title = prompt_input("Agent title (human-readable)", name.replace('-', ' ').title())
+    title = prompt_input("Agent title (human-readable)", name.replace("-", " ").title())
     description = prompt_input(
-        "Description (100-150 chars)",
-        f"{title} providing expert analysis and recommendations"
+        "Description (100-150 chars)", f"{title} providing expert analysis and recommendations"
     )
 
     # 3. Template-specific prompts
-    params = {
-        'name': name,
-        'title': title,
-        'description': description
-    }
+    params = {"name": name, "title": title, "description": description}
 
-    if template_type == 'domain-specialist':
+    if template_type == "domain-specialist":
         print("\n--- Domain Specialist Configuration ---")
         domain = prompt_input("Domain (e.g., financial, python, data-analysis)", "financial")
-        domain_focus = prompt_input(
-            "Domain focus",
-            f"{domain} systems and best practices"
-        )
+        domain_focus = prompt_input("Domain focus", f"{domain} systems and best practices")
         areas = prompt_list("Domain expertise areas", 8, 15)
 
-        params['domain'] = domain
-        params['domain_focus'] = domain_focus
-        params['areas'] = areas
-        params['checks'] = [
+        params["domain"] = domain
+        params["domain_focus"] = domain_focus
+        params["areas"] = areas
+        params["checks"] = [
             "Requirements understood and validated",
             "Edge cases identified and handled",
             "Best practices applied",
@@ -249,20 +240,19 @@ def main():
             "Security considerations addressed",
             "Performance implications assessed",
             "Documentation complete",
-            "Tests cover critical paths"
+            "Tests cover critical paths",
         ]
 
-    elif template_type == 'researcher':
+    elif template_type == "researcher":
         print("\n--- Researcher Configuration ---")
         research_focus = prompt_input(
-            "Research focus",
-            "competitive intelligence and market analysis"
+            "Research focus", "competitive intelligence and market analysis"
         )
         areas = prompt_list("Research expertise areas", 8, 15)
 
-        params['research_focus'] = research_focus
-        params['areas'] = areas
-        params['checks'] = [
+        params["research_focus"] = research_focus
+        params["areas"] = areas
+        params["checks"] = [
             "Research questions clearly defined",
             "Multiple sources consulted and validated",
             "Findings cross-referenced for accuracy",
@@ -270,20 +260,17 @@ def main():
             "Confidence levels documented",
             "Gaps in information identified",
             "Recommendations are actionable",
-            "Methodology documented"
+            "Methodology documented",
         ]
 
-    elif template_type == 'reviewer':
+    elif template_type == "reviewer":
         print("\n--- Reviewer Configuration ---")
-        review_focus = prompt_input(
-            "Review focus",
-            "code quality, security, and compliance"
-        )
+        review_focus = prompt_input("Review focus", "code quality, security, and compliance")
         checks = prompt_list("Verification checks", 8, 8)
 
-        params['review_focus'] = review_focus
-        params['areas'] = checks  # For reviewer, checks become areas
-        params['checks'] = checks
+        params["review_focus"] = review_focus
+        params["areas"] = checks  # For reviewer, checks become areas
+        params["checks"] = checks
 
     # 4. Generate content
     print("\n--- Generating Agent ---")
@@ -301,16 +288,16 @@ def main():
         all_passed, results = validate_agent(temp_path)
 
         for result in results:
-            validator_name = result['validator']
-            status = '✅ PASS' if result['passed'] else '❌ FAIL'
+            validator_name = result["validator"]
+            status = "✅ PASS" if result["passed"] else "❌ FAIL"
             print(f"{validator_name}: {status}")
 
-            if result['errors']:
-                for error in result['errors']:
+            if result["errors"]:
+                for error in result["errors"]:
                     print(f"  ❌ {error}")
 
-            if result['warnings']:
-                for warning in result['warnings']:
+            if result["warnings"]:
+                for warning in result["warnings"]:
                     print(f"  ⚠️  {warning}")
 
         # 7. Commit or rollback
@@ -332,14 +319,14 @@ def main():
             print("❌ Agent generation rolled back.")
             print("\nErrors found:")
             for result in results:
-                if result['errors']:
+                if result["errors"]:
                     print(f"\n{result['validator']}:")
-                    for error in result['errors']:
+                    for error in result["errors"]:
                         print(f"  - {error}")
             return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         exit_code = main()
         sys.exit(exit_code)
@@ -349,5 +336,6 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"\nError: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

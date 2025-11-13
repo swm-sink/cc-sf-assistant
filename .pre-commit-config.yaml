@@ -1,0 +1,64 @@
+# Pre-commit hooks for FP&A Automation Project
+# Enforces code quality, test coverage, and financial precision standards
+#
+# Installation: poetry run pre-commit install
+# Manual run: poetry run pre-commit run --all-files
+# Bypass (DISCOURAGED): git commit --no-verify
+
+repos:
+  # Ruff - Fast Python linter and formatter (replaces black, flake8, isort)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      # Ruff linter with auto-fix
+      - id: ruff
+        args: ['--fix', '--exit-non-zero-on-fix']
+        types_or: [python, pyi]
+        exclude: '^external/'
+
+      # Ruff formatter (replaces black)
+      - id: ruff-format
+        types_or: [python, pyi]
+        exclude: '^external/'
+
+  # Mypy - Static type checking (strict mode configured in pyproject.toml)
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [pandas-stubs==2.3.2.250926]
+        args: ['--config-file=pyproject.toml']
+        files: '^scripts/.*\.py$'
+        pass_filenames: true
+
+  # Local hooks - Custom validators for financial software
+  - repo: local
+    hooks:
+      # Test coverage enforcement - TDD mandatory
+      # Phase 1 (bootstrap): 90%+ coverage for infrastructure scripts
+      # Phase 2+ (production): Will increase to 95%+ for financial calculation scripts
+      - id: pytest-coverage
+        name: Pytest with 90% coverage requirement (Phase 1 bootstrap)
+        entry: poetry run pytest --cov-fail-under=90
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
+        verbose: true
+
+      # Financial precision validator - Rejects float() in financial code
+      # Excludes: scripts/utils/ (data generators use float for pandas Excel writing)
+      #           scripts/hooks/ (validator script itself contains float in docs)
+      - id: validate-no-floats
+        name: Reject float() in financial calculations
+        entry: python scripts/hooks/validate_no_floats.py
+        language: system
+        types: [python]
+        files: '^scripts/(core|integrations|workflows)/.*\.py$'
+        pass_filenames: true
+        stages: [commit]
+
+# Global settings
+default_stages: [commit]
+fail_fast: false  # Run all hooks even if one fails (show all issues at once)

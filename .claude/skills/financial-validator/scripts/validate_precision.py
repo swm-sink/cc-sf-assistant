@@ -7,7 +7,7 @@ Part of financial-validator skill for Claude Code.
 """
 
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, List, Tuple
+from typing import Any, Tuple
 import sys
 
 
@@ -37,20 +37,18 @@ def test_float_precision() -> bool:
     """
     # This SHOULD fail to demonstrate the problem
     float_result = 0.1 + 0.2
-    float_passes = (float_result == 0.3)  # False - precision error
+    float_passes = float_result == 0.3  # False - precision error
 
     # This SHOULD pass
-    decimal_result = Decimal('0.1') + Decimal('0.2')
-    decimal_passes = (decimal_result == Decimal('0.3'))  # True
+    decimal_result = Decimal("0.1") + Decimal("0.2")
+    decimal_passes = decimal_result == Decimal("0.3")  # True
 
     # Test passes if float fails and decimal succeeds
     return (not float_passes) and decimal_passes
 
 
 def validate_variance_calculation(
-    actual: Decimal,
-    budget: Decimal,
-    account_type: str
+    actual: Decimal, budget: Decimal, account_type: str
 ) -> Tuple[Decimal, Decimal | None, str]:
     """
     Calculate variance with proper edge case handling.
@@ -77,7 +75,7 @@ def validate_variance_calculation(
         raise TypeError(msg)
 
     # Validate account type
-    valid_types = {'revenue', 'expense', 'asset', 'liability'}
+    valid_types = {"revenue", "expense", "asset", "liability"}
     if account_type not in valid_types:
         raise ValueError(f"account_type must be one of {valid_types}")
 
@@ -85,17 +83,17 @@ def validate_variance_calculation(
     absolute_variance = actual - budget
 
     # Calculate percentage variance (handle division by zero)
-    if budget == Decimal('0'):
+    if budget == Decimal("0"):
         percentage_variance = None  # Cannot calculate percentage
     else:
-        percentage_variance = ((actual - budget) / budget) * Decimal('100')
+        percentage_variance = ((actual - budget) / budget) * Decimal("100")
         # Round to 2 decimal places
-        percentage_variance = percentage_variance.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        percentage_variance = percentage_variance.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     # Determine status
-    if budget == Decimal('0') and actual == Decimal('0'):
+    if budget == Decimal("0") and actual == Decimal("0"):
         status = "No Activity"
-    elif budget == Decimal('0'):
+    elif budget == Decimal("0"):
         status = "Flag for review - zero budget"
     else:
         status = "Normal"
@@ -123,29 +121,27 @@ def run_validation_tests() -> bool:
     # Test 2: Normal variance calculation
     print("Test 2: Normal variance calculation")
     abs_var, pct_var, status = validate_variance_calculation(
-        Decimal('115000'), Decimal('100000'), 'revenue'
+        Decimal("115000"), Decimal("100000"), "revenue"
     )
-    assert abs_var == Decimal('15000'), f"Expected 15000, got {abs_var}"
-    assert pct_var == Decimal('15.00'), f"Expected 15.00%, got {pct_var}"
+    assert abs_var == Decimal("15000"), f"Expected 15000, got {abs_var}"
+    assert pct_var == Decimal("15.00"), f"Expected 15.00%, got {pct_var}"
     assert status == "Normal"
     print("✓ PASS: Variance = $15,000, 15.00%, Normal\n")
 
     # Test 3: Zero division handling
     print("Test 3: Zero division handling")
     abs_var, pct_var, status = validate_variance_calculation(
-        Decimal('50000'), Decimal('0'), 'expense'
+        Decimal("50000"), Decimal("0"), "expense"
     )
-    assert abs_var == Decimal('50000')
+    assert abs_var == Decimal("50000")
     assert pct_var is None
     assert status == "Flag for review - zero budget"
     print("✓ PASS: Zero budget handled correctly (% = None)\n")
 
     # Test 4: Both zero
     print("Test 4: Both zero")
-    abs_var, pct_var, status = validate_variance_calculation(
-        Decimal('0'), Decimal('0'), 'revenue'
-    )
-    assert abs_var == Decimal('0')
+    abs_var, pct_var, status = validate_variance_calculation(Decimal("0"), Decimal("0"), "revenue")
+    assert abs_var == Decimal("0")
     assert pct_var is None
     assert status == "No Activity"
     print("✓ PASS: Both zero handled correctly\n")
@@ -153,10 +149,10 @@ def run_validation_tests() -> bool:
     # Test 5: Negative values
     print("Test 5: Negative values")
     abs_var, pct_var, status = validate_variance_calculation(
-        Decimal('-12000'), Decimal('-10000'), 'liability'
+        Decimal("-12000"), Decimal("-10000"), "liability"
     )
-    assert abs_var == Decimal('-2000')
-    assert pct_var == Decimal('20.00')
+    assert abs_var == Decimal("-2000")
+    assert pct_var == Decimal("20.00")
     print("✓ PASS: Negative values handled correctly\n")
 
     # Test 6: Type checking
@@ -164,17 +160,17 @@ def run_validation_tests() -> bool:
     try:
         validate_variance_calculation(
             115000.00,  # float instead of Decimal
-            Decimal('100000'),
-            'revenue'
+            Decimal("100000"),
+            "revenue",
         )
         print("✗ FAIL: Should have rejected float type\n")
         return False
     except TypeError as e:
         print(f"✓ PASS: Correctly rejected float - {e}\n")
 
-    print("="*50)
+    print("=" * 50)
     print("ALL VALIDATION TESTS PASSED")
-    print("="*50)
+    print("=" * 50)
     return True
 
 
