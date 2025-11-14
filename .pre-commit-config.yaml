@@ -47,14 +47,14 @@ repos:
         verbose: true
 
       # File length enforcer - Max 100 lines per file
-      # Exceptions: data-heavy files (generate_sample_data.py), .claude/skills/ (meta-validation)
+      # Exceptions: data-heavy files (generate_sample_data.py + tests), .claude/skills/
       - id: check-file-length
         name: Enforce 100-line file limit
         entry: python scripts/hooks/check_file_length.py
         language: system
         types: [python]
-        files: '^scripts/.*\.py$'
-        exclude: 'scripts/utils/generate_sample_data\.py'
+        files: '^(scripts|tests)/.*\.py$'
+        exclude: 'scripts/utils/generate_sample_data\.py|tests/utils/test_generate_sample_data\.py'
         pass_filenames: true
         stages: [commit]
 
