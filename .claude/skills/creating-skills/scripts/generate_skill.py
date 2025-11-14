@@ -17,14 +17,13 @@ Usage:
   python generate_skill.py --skill-name creating-commands --skill-type technique
 """
 
-import sys
 import json
-import subprocess
-import tempfile
 import shutil
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-
+from typing import Any, Dict, List, Optional, Tuple
 
 # Template paths relative to this script
 SCRIPT_DIR = Path(__file__).parent

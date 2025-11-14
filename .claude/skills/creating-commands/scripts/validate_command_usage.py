@@ -13,11 +13,11 @@ Checks:
   - Positional args documented ($1, $2, $3 if used)
 """
 
-import sys
 import json
 import re
+import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 def extract_yaml_frontmatter(content: str) -> Optional[Dict[str, str]]:

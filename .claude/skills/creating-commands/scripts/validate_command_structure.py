@@ -19,12 +19,11 @@ Template Types and Section Counts:
   - Reporting: 7 sections
 """
 
-import sys
 import json
 import re
+import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
-
+from typing import Any, Dict, Optional
 
 # Template structure definitions
 TEMPLATE_STRUCTURES = {

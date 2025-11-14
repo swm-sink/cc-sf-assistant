@@ -8,6 +8,7 @@ Purpose:
 
 from decimal import Decimal
 from pathlib import Path
+
 import pandas as pd
 
 

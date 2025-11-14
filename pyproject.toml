@@ -50,6 +50,14 @@ target-version = ['py311']
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+extend-exclude = [".claude/skills"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]  # Allow long lines (enforced by file length checker instead)
+
+[tool.ruff.lint.pylint]
+max-statements = 50  # Limit complexity
 
 [tool.mypy]
 python_version = "3.11"

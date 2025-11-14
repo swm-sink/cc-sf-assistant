@@ -17,11 +17,11 @@ Exit codes:
 Output: JSON with validation results + human-readable summary
 """
 
-import sys
 import json
 import re
+import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def is_discipline_skill(content: str) -> bool:

@@ -12,11 +12,11 @@ Checks:
   - Environment: File in dev/, prod/, or shared/ subdir
 """
 
-import sys
 import json
 import re
+import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def validate_command_naming(file_path: Path) -> Dict[str, Any]:

@@ -19,12 +19,11 @@ Exit codes:
 Output: JSON with validation results + human-readable summary
 """
 
-import sys
 import json
 import re
+import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
-
+from typing import Any, Dict, Optional
 
 # CSO Keyword Categories (4 pillars)
 TRIGGER_PHRASES = [

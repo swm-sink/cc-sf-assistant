@@ -6,9 +6,9 @@ Validates that financial calculations use Decimal type and maintain precision.
 Part of financial-validator skill for Claude Code.
 """
 
-from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Tuple
 import sys
+from decimal import ROUND_HALF_UP, Decimal
+from typing import Any, Tuple
 
 
 def validate_currency_type(value: Any, variable_name: str) -> Tuple[bool, str]:

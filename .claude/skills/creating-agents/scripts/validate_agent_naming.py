@@ -9,11 +9,11 @@ Exit codes:
 Output: JSON with validation results + human-readable summary
 """
 
-import sys
 import json
 import re
+import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 def extract_agent_name_from_yaml(content: str) -> Optional[str]:

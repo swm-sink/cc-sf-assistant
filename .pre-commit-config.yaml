@@ -35,17 +35,28 @@ repos:
   - repo: local
     hooks:
       # Test coverage enforcement - TDD mandatory
-      # Phase 1 (bootstrap): 90%+ coverage for infrastructure scripts
-      # Phase 2+ (production): Will increase to 95%+ for financial calculation scripts
+      # Phase 2: 95%+ coverage for all code
       - id: pytest-coverage
-        name: Pytest with 90% coverage requirement (Phase 1 bootstrap)
-        entry: poetry run pytest --cov-fail-under=90
+        name: Pytest with 95% coverage requirement
+        entry: poetry run pytest --cov-fail-under=95
         language: system
         types: [python]
         pass_filenames: false
         always_run: true
         stages: [commit]
         verbose: true
+
+      # File length enforcer - Max 100 lines per file
+      # Exceptions: data-heavy files (generate_sample_data.py), .claude/skills/ (meta-validation)
+      - id: check-file-length
+        name: Enforce 100-line file limit
+        entry: python scripts/hooks/check_file_length.py
+        language: system
+        types: [python]
+        files: '^scripts/.*\.py$'
+        exclude: 'scripts/utils/generate_sample_data\.py'
+        pass_filenames: true
+        stages: [commit]
 
       # Financial precision validator - Rejects float() in financial code
       # Excludes: scripts/utils/ (data generators use float for pandas Excel writing)
