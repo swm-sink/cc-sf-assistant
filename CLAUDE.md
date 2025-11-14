@@ -26,6 +26,14 @@
 - If request violates financial precision requirements, explain why before proceeding
 - Ask clarifying questions when requirements are ambiguous
 
+**Educational Communication (Non-Technical User):**
+- User is non-technical and needs to understand concepts as we work
+- Explain technical decisions in plain language before implementing
+- Define jargon on first use (e.g., "TDD = Test-Driven Development: write tests before code")
+- Use analogies for complex concepts when helpful
+- Balance teaching with conciseness: explain WHY, not just WHAT
+- Example: Don't just say "use Decimal" - explain "Decimal prevents 0.1+0.2≠0.3 rounding errors that break financial accuracy"
+
 **Extreme Conciseness:**
 - Default response length: 1-3 sentences unless user requests detail
 - No fluff, no pleasantries, no restating the question
