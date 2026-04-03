@@ -1,0 +1,187 @@
+# Chart of Accounts - FP&A Automation Assistant
+# 50 accounts across Revenue, COGS, and OpEx categories
+
+accounts:
+  # Revenue (4xxx) - 5 accounts
+  - code: "4000"
+    name: "Product Revenue"
+    type: revenue
+    department: Sales
+  - code: "4010"
+    name: "Service Revenue"
+    type: revenue
+    department: Sales
+  - code: "4020"
+    name: "Subscription Revenue"
+    type: revenue
+    department: Sales
+  - code: "4030"
+    name: "Licensing Revenue"
+    type: revenue
+    department: Sales
+  - code: "4090"
+    name: "Other Revenue"
+    type: revenue
+    department: Sales
+
+  # COGS (5xxx) - 5 accounts
+  - code: "5000"
+    name: "Direct Materials"
+    type: cogs
+    department: Engineering
+  - code: "5010"
+    name: "Direct Labor"
+    type: cogs
+    department: Engineering
+  - code: "5020"
+    name: "Manufacturing Overhead"
+    type: cogs
+    department: Engineering
+  - code: "5030"
+    name: "Hosting & Infrastructure"
+    type: cogs
+    department: Engineering
+  - code: "5070"
+    name: "Other COGS"
+    type: cogs
+    department: Engineering
+
+  # Engineering OpEx (6xxx) - 10 accounts
+  - code: "6000"
+    name: "Engineering Salaries"
+    type: expense
+    department: Engineering
+  - code: "6010"
+    name: "Engineering Benefits"
+    type: expense
+    department: Engineering
+  - code: "6020"
+    name: "Software Licenses"
+    type: expense
+    department: Engineering
+  - code: "6030"
+    name: "Cloud Computing"
+    type: expense
+    department: Engineering
+  - code: "6040"
+    name: "Development Tools"
+    type: expense
+    department: Engineering
+  - code: "6050"
+    name: "R&D Prototype Costs"
+    type: expense
+    department: R&D
+  - code: "6060"
+    name: "Technical Training"
+    type: expense
+    department: Engineering
+  - code: "6070"
+    name: "QA & Testing"
+    type: expense
+    department: Engineering
+
+  # Sales & Marketing OpEx (7xxx) - 12 accounts
+  - code: "7000"
+    name: "Sales Salaries"
+    type: expense
+    department: Sales
+  - code: "7010"
+    name: "Sales Commissions"
+    type: expense
+    department: Sales
+  - code: "7020"
+    name: "Sales Benefits"
+    type: expense
+    department: Sales
+  - code: "7030"
+    name: "Travel & Entertainment"
+    type: expense
+    department: Sales
+  - code: "7040"
+    name: "Marketing Salaries"
+    type: expense
+    department: Marketing
+  - code: "7050"
+    name: "Digital Advertising"
+    type: expense
+    department: Marketing
+  - code: "7060"
+    name: "Content Marketing"
+    type: expense
+    department: Marketing
+  - code: "7070"
+    name: "Events & Conferences"
+    type: expense
+    department: Marketing
+  - code: "7080"
+    name: "PR & Communications"
+    type: expense
+    department: Marketing
+  - code: "7090"
+    name: "Marketing Tools"
+    type: expense
+    department: Marketing
+  - code: "7100"
+    name: "Brand & Design"
+    type: expense
+    department: Marketing
+  - code: "7110"
+    name: "Lead Generation"
+    type: expense
+    department: Marketing
+
+  # G&A OpEx (8xxx) - 12 accounts
+  - code: "8000"
+    name: "Executive Salaries"
+    type: expense
+    department: G&A
+  - code: "8010"
+    name: "Admin Salaries"
+    type: expense
+    department: G&A
+  - code: "8020"
+    name: "G&A Benefits"
+    type: expense
+    department: G&A
+  - code: "8030"
+    name: "Office Rent"
+    type: expense
+    department: G&A
+  - code: "8040"
+    name: "Utilities"
+    type: expense
+    department: G&A
+  - code: "8050"
+    name: "Insurance"
+    type: expense
+    department: G&A
+  - code: "8060"
+    name: "Legal Fees"
+    type: expense
+    department: G&A
+  - code: "8070"
+    name: "Accounting & Audit"
+    type: expense
+    department: G&A
+  - code: "8080"
+    name: "HR & Recruiting"
+    type: expense
+    department: G&A
+  - code: "8090"
+    name: "Office Supplies"
+    type: expense
+    department: G&A
+  - code: "8100"
+    name: "Depreciation"
+    type: expense
+    department: G&A
+  - code: "8110"
+    name: "Miscellaneous G&A"
+    type: expense
+    department: G&A
+
+  # R&D (additional)
+  - code: "6080"
+    name: "Research Partnerships"
+    type: expense
+    department: R&D
