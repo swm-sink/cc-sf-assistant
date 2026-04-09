@@ -1,0 +1,41 @@
+# FP&A Automation Assistant - Configuration
+# All monetary thresholds use string representation for Decimal precision
+
+materiality:
+  default:
+    pct_threshold: "10"
+    abs_threshold: "50000"
+  by_category:
+    revenue:
+      pct_threshold: "5"
+      abs_threshold: "50000"
+
+account_type_prefixes:
+  "4": revenue
+  "5": cogs
+  "6": expense
+  "7": expense
+  "8": expense
+
+departments:
+  - Engineering
+  - Sales
+  - Marketing
+  - G&A
+  - R&D
+
+roles:
+  analyst:
+    materiality_filter: false
+    description: "Full account-level detail with sortable/filterable tables"
+  senior_analyst:
+    materiality_filter: false
+    description: "Department summaries, variance trends, review queue"
+  manager:
+    materiality_filter: true
+    description: "Executive KPIs, material variances only, approval queue"
+
+output:
+  currency_format: "$#,##0.00"
+  pct_format: "0.00%"
+  default_output_dir: "output/"

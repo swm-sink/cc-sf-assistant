@@ -55,19 +55,31 @@ To execute variance analysis, use the slash command:
 **Agents:**
 - `code-reviewer` - Independent verification of calculations
 
-**Python Scripts:** (To be implemented in Phase 3-4)
+**Python Scripts (Implemented):**
 - `scripts/core/variance.py` - Core variance calculation logic
 - `scripts/core/favorability.py` - Favorability assessment by account type
-- `scripts/integrations/excel_reader.py` - Excel file reading
-- `scripts/integrations/excel_writer.py` - Excel output generation
+- `scripts/core/materiality.py` - Materiality threshold flagging
+- `scripts/core/metrics.py` - KPI scorecard generation
+- `scripts/integrations/excel_reader.py` - Excel file reading with Decimal precision
+- `scripts/integrations/excel_writer.py` - Multi-sheet Excel output with conditional formatting
+- `scripts/integrations/html_dashboard.py` - Role-based HTML dashboards with Chart.js
+- `scripts/integrations/html_presentation.py` - HTML slide-deck presentations
+- `scripts/workflows/variance_workflow.py` - End-to-end pipeline orchestrator
+
+**Related Skills:**
+- `running-variance-analysis` - Execute the full pipeline
+- `generating-dashboards` - Create custom HTML dashboard views
+- `generating-presentations` - Create custom HTML slide decks
 
 ## Testing
 
-**Unit tests required:**
-- `tests/unit/test_variance.py` - Variance calculation edge cases
-- `tests/unit/test_favorability.py` - All account type favorability logic
-
-**Coverage requirement:** 95%+
+**Unit tests (74 passing):**
+- `tests/unit/test_variance.py` - 15 tests: normal, zero budget, both zero, negative, precision
+- `tests/unit/test_favorability.py` - 15 tests: all account types, zero variance, invalid type
+- `tests/unit/test_materiality.py` - 14 tests: thresholds, boundaries, ranking
+- `tests/unit/test_consolidation.py` - 7 tests: multi-dept, duplicates, reconciliation
+- `tests/unit/test_metrics.py` - 9 tests: margins, utilization, scorecard
+- `tests/unit/test_validator.py` - 14 tests: structure, nulls, decimal conversion
 
 ## Example Output
 

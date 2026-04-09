@@ -43,6 +43,10 @@ config/credentials/*
 !config/credentials/.gitkeep
 !config/credentials/README.md
 
+# Generated output and logs
+logs/
+output/
+
 # Audit logs (contain sensitive data)
 config/audit.log
 config/audit-*.log
